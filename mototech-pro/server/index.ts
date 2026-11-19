@@ -3,7 +3,15 @@ import { existsSync } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 
-import { lerOficinaData, salvarFerramentasPossuidas } from './storage.js';
+import {
+  atualizarOrdemServico,
+  criarOrdemServico,
+  lerOficinaData,
+  listarOrdensServico,
+  removerOrdemServico,
+  salvarFerramentasPossuidas,
+  validarPayloadOrdemServico,
+} from './storage.js';
 
 const PORT = Number(process.env.PORT ?? 3001);
 const IS_PROD = process.env.NODE_ENV === 'production';
@@ -237,6 +245,53 @@ api.put('/ferramentas', async (req, res) => {
 
   const ferramentasPossuidas = await salvarFerramentasPossuidas(lista);
   res.json({ ferramentasPossuidas });
+});
+
+// ---------------------------------------------------------------------------
+// Ordens de Serviço (persistidas em /app/data/oficina.json)
+// ---------------------------------------------------------------------------
+api.get('/os', async (_req, res) => {
+  const ordensServico = await listarOrdensServico();
+  res.json({ ordensServico });
+});
+
+api.post('/os', async (req, res) => {
+  const validacao = validarPayloadOrdemServico(req.body);
+  if (!validacao.ok) {
+    res.status(400).json({ error: validacao.erro });
+    return;
+  }
+
+  const novaOs = await criarOrdemServico(validacao.payload);
+  res.status(201).json(novaOs);
+});
+
+api.put('/os/:id', async (req, res) => {
+  const id = typeof req.params.id === 'string' ? req.params.id.trim() : '';
+  const validacao = validarPayloadOrdemServico(req.body);
+  if (!validacao.ok) {
+    res.status(400).json({ error: validacao.erro });
+    return;
+  }
+
+  const atualizada = await atualizarOrdemServico(id, validacao.payload);
+  if (!atualizada) {
+    res.status(404).json({ error: 'Ordem de Serviço não encontrada.' });
+    return;
+  }
+
+  res.json(atualizada);
+});
+
+api.delete('/os/:id', async (req, res) => {
+  const id = typeof req.params.id === 'string' ? req.params.id.trim() : '';
+  const removida = await removerOrdemServico(id);
+  if (!removida) {
+    res.status(404).json({ error: 'Ordem de Serviço não encontrada.' });
+    return;
+  }
+
+  res.json({ ok: true, id });
 });
 
 // 404 para rotas de API inexistentes (Express 5: wildcard nomeado)

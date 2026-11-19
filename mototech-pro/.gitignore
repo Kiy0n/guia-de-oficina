@@ -24,6 +24,7 @@ Thumbs.db
 
 # Dados locais gerados em runtime (a pasta é mantida via .gitkeep)
 data/*
+data/oficina.json
 !data/.gitkeep
 
 # Manuais PDF locais (mantém apenas o README.md da biblioteca)

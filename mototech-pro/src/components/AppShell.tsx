@@ -12,12 +12,14 @@ import { useMoto, useMotoSelecionada } from '@/context/MotoContext';
 import { BRAND_THEME } from '@/lib/brands';
 import { SECTIONS, type SectionId } from '@/lib/sections';
 import { cn } from '@/lib/utils';
+import { DiagnosticoCorretivoPage } from '@/pages/DiagnosticoCorretivoPage';
+import { EletricaInjecaoPage } from '@/pages/EletricaInjecaoPage';
 import { FichaTecnicaPage } from '@/pages/FichaTecnicaPage';
 import { KitFerramentasPage } from '@/pages/KitFerramentasPage';
 import { ManuaisPage } from '@/pages/ManuaisPage';
 import { ManualRevisoesPage } from '@/pages/ManualRevisoesPage';
 import { ProcedimentosPage } from '@/pages/ProcedimentosPage';
-import { SectionPlaceholderPage } from '@/pages/SectionPlaceholderPage';
+import { TorquesCalculadorasOSPage } from '@/pages/TorquesCalculadorasOSPage';
 
 const SECTION_TRANSITION = {
   duration: 0.28,
@@ -30,8 +32,10 @@ function SectionContent({ id }: { id: SectionId }) {
   if (id === 'manuais-pdf') return <ManuaisPage />;
   if (id === 'procedimentos') return <ProcedimentosPage />;
   if (id === 'ferramentas') return <KitFerramentasPage />;
-  const def = SECTIONS.find((s) => s.id === id);
-  return def ? <SectionPlaceholderPage section={def} /> : null;
+  if (id === 'eletrica') return <EletricaInjecaoPage />;
+  if (id === 'diagnostico') return <DiagnosticoCorretivoPage />;
+  if (id === 'torques-os') return <TorquesCalculadorasOSPage />;
+  return null;
 }
 
 export function AppShell() {

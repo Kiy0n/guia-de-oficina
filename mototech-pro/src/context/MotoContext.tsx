@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import { DEFAULT_SECTION, isSectionId, type SectionId } from '@/lib/sections';
 import type { Marca, MotoSelecionada } from '@/types/moto';
+import type { RascunhoOrdemServico } from '@/types/oficina';
 import { resolverSelecao } from '@/utils/catalog';
 
 const STORAGE_KEY = 'mototech-pro:moto:v1';
@@ -25,10 +26,14 @@ interface MotoContextValue {
   moto: MotoSelecionada | null;
   section: SectionId;
   view: View;
+  rascunhoOS: RascunhoOrdemServico | null;
   selecionarMoto: (modeloId: string, geracaoId: string) => void;
   /** Troca apenas o ano/geração do modelo atual com 1 clique, mantendo a aba ativa. */
   selecionarGeracao: (geracaoId: string) => void;
   setSection: (section: SectionId) => void;
+  /** Envia dados de diagnóstico/revisão direto para o formulário de Ordem de Serviço. */
+  enviarParaOrdemServico: (rascunho: RascunhoOrdemServico) => void;
+  limparRascunhoOS: () => void;
   /** Abre o wizard; `'ano'` começa no passo 3 com o modelo atual. */
   trocarMoto: (inicio?: 'fabricante' | 'ano') => void;
   /** Volta ao workspace sem alterar a moto (se houver uma selecionada). */
@@ -56,6 +61,7 @@ export function MotoProvider({ children }: { children: ReactNode }) {
   const [initial] = useState(lerStorage);
   const [moto, setMoto] = useState<MotoSelecionada | null>(initial.moto);
   const [section, setSection] = useState<SectionId>(initial.section);
+  const [rascunhoOS, setRascunhoOS] = useState<RascunhoOrdemServico | null>(null);
   const [view, setView] = useState<View>(
     initial.moto ? { tipo: 'workspace' } : { tipo: 'wizard', start: { step: 1 } },
   );
@@ -107,18 +113,42 @@ export function MotoProvider({ children }: { children: ReactNode }) {
     if (moto) setView({ tipo: 'workspace' });
   }, [moto]);
 
+  const enviarParaOrdemServico = useCallback((rascunho: RascunhoOrdemServico) => {
+    setRascunhoOS(rascunho);
+    setSection('torques-os');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const limparRascunhoOS = useCallback(() => {
+    setRascunhoOS(null);
+  }, []);
+
   const value = useMemo<MotoContextValue>(
     () => ({
       moto,
       section,
       view,
+      rascunhoOS,
       selecionarMoto,
       selecionarGeracao,
       setSection,
+      enviarParaOrdemServico,
+      limparRascunhoOS,
       trocarMoto,
       cancelarTroca,
     }),
-    [moto, section, view, selecionarMoto, selecionarGeracao, trocarMoto, cancelarTroca],
+    [
+      moto,
+      section,
+      view,
+      rascunhoOS,
+      selecionarMoto,
+      selecionarGeracao,
+      enviarParaOrdemServico,
+      limparRascunhoOS,
+      trocarMoto,
+      cancelarTroca,
+    ],
   );
 
   return <MotoContext.Provider value={value}>{children}</MotoContext.Provider>;
