@@ -386,22 +386,30 @@ export function TorquesCalculadorasOSPage() {
     void carregarOrdens();
   }, [carregarOrdens]);
 
-  // Recebe rascunho vindo do Diagnóstico Corretivo
+  // Recebe rascunho vindo do Diagnóstico Corretivo ou do Relatório de Revisão
   useEffect(() => {
     if (!rascunhoOS) return;
     setAbaAtiva('os');
     if (rascunhoOS.tipo) setTipoOs(rascunhoOS.tipo);
+    if (rascunhoOS.kmAtual !== undefined && rascunhoOS.kmAtual >= 0) {
+      setKmAtual(String(rascunhoOS.kmAtual));
+    }
+    if (rascunhoOS.proximaTrocaOleoKm !== undefined && rascunhoOS.proximaTrocaOleoKm > 0) {
+      setProximaTrocaOleoKm(String(rascunhoOS.proximaTrocaOleoKm));
+    }
+    if (rascunhoOS.apelidoOuPlaca) {
+      setApelidoOuPlaca(rascunhoOS.apelidoOuPlaca);
+    }
     if (rascunhoOS.servicosRealizados && rascunhoOS.servicosRealizados.length > 0) {
-      setServicosRealizados((prev) =>
-        Array.from(new Set([...prev, ...rascunhoOS.servicosRealizados!])),
-      );
+      setServicosRealizados(rascunhoOS.servicosRealizados);
+    }
+    if (rascunhoOS.pecas && rascunhoOS.pecas.length > 0) {
+      setPecas(rascunhoOS.pecas);
     }
     if (rascunhoOS.observacoes) {
-      setObservacoes((prev) =>
-        prev ? `${prev}\n${rascunhoOS.observacoes}` : rascunhoOS.observacoes!,
-      );
+      setObservacoes(rascunhoOS.observacoes);
     }
-    setFeedbackMensagem('Resumo do Diagnóstico Corretivo importado para a Ordem de Serviço!');
+    setFeedbackMensagem('Dados da revisão/diagnóstico importados para a Ordem de Serviço! Revise os valores e clique em Salvar.');
     limparRascunhoOS();
   }, [rascunhoOS, limparRascunhoOS]);
 

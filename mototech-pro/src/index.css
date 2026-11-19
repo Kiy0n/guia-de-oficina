@@ -135,3 +135,40 @@
     @apply min-h-screen bg-background font-sans text-foreground antialiased;
   }
 }
+
+/* -------------------------------------------------------------------------
+ * Regras de impressão (@media print) para o Relatório Final de Revisão
+ * ------------------------------------------------------------------------- */
+@media print {
+  html {
+    color-scheme: light !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  header,
+  .no-print {
+    display: none !important;
+  }
+
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .print-report {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border-color: #d1d5db !important;
+    box-shadow: none !important;
+  }
+
+  .print-report * {
+    color: #111827 !important;
+    border-color: #d1d5db !important;
+  }
+}

@@ -29,9 +29,13 @@ export interface OrdemServico {
 
 export type OrdemServicoPayload = Omit<OrdemServico, 'id' | 'criadaEm'>;
 
-/** Dados pré-preenchidos vindos de outra aba (ex.: Diagnóstico Corretivo -> OS). */
+/** Dados pré-preenchidos vindos de outra aba (ex.: Diagnóstico Corretivo ou Iniciar Revisão -> OS). */
 export interface RascunhoOrdemServico {
   tipo?: TipoOrdemServico;
+  kmAtual?: number;
+  proximaTrocaOleoKm?: number;
+  apelidoOuPlaca?: string;
   servicosRealizados?: string[];
+  pecas?: PecaOrdemServico[];
   observacoes?: string;
 }

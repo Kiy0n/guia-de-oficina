@@ -4,6 +4,7 @@ import {
   Calculator,
   ClipboardList,
   Clapperboard,
+  PlayCircle,
   Stethoscope,
   Wrench,
   Zap,
@@ -12,6 +13,7 @@ import {
 
 export type SectionId =
   | 'ficha-tecnica'
+  | 'iniciar-revisao'
   | 'manual-revisoes'
   | 'manuais-pdf'
   | 'procedimentos'
@@ -36,6 +38,13 @@ export const SECTIONS: readonly SectionDef[] = [
     descricao: 'Especificações de motor, fluidos, folgas, elétrica e pneus.',
     icon: ClipboardList,
     previsto: ['Fluidos e capacidades', 'Folgas de válvulas e cabos', 'Vela, bateria e fusíveis', 'Pneus e pressões'],
+  },
+  {
+    id: 'iniciar-revisao',
+    titulo: 'Iniciar Revisão',
+    descricao: 'Modo guiado passo a passo com mapa visual HUD, critérios e relatório final.',
+    icon: PlayCircle,
+    previsto: ['Roteiro dinâmico por geração', 'Blueprint visual interativo', 'Relatório final e envio para OS'],
   },
   {
     id: 'manual-revisoes',

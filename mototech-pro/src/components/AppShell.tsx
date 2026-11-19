@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { DiagnosticoCorretivoPage } from '@/pages/DiagnosticoCorretivoPage';
 import { EletricaInjecaoPage } from '@/pages/EletricaInjecaoPage';
 import { FichaTecnicaPage } from '@/pages/FichaTecnicaPage';
+import { IniciarRevisaoPage } from '@/pages/IniciarRevisaoPage';
 import { KitFerramentasPage } from '@/pages/KitFerramentasPage';
 import { ManuaisPage } from '@/pages/ManuaisPage';
 import { ManualRevisoesPage } from '@/pages/ManualRevisoesPage';
@@ -28,6 +29,7 @@ const SECTION_TRANSITION = {
 
 function SectionContent({ id }: { id: SectionId }) {
   if (id === 'ficha-tecnica') return <FichaTecnicaPage />;
+  if (id === 'iniciar-revisao') return <IniciarRevisaoPage />;
   if (id === 'manual-revisoes') return <ManualRevisoesPage />;
   if (id === 'manuais-pdf') return <ManuaisPage />;
   if (id === 'procedimentos') return <ProcedimentosPage />;
