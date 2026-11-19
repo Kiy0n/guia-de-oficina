@@ -94,7 +94,7 @@ export function ManuaisPage() {
               className="gap-1.5 border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
             >
               <BookOpen className="size-3.5" />
-              Leitor PDF Integrado
+              Leitor PDF + Busca Instantânea & Modo Leitura
             </Badge>
           </div>
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
@@ -104,7 +104,7 @@ export function ManuaisPage() {
             </span>
           </h1>
           <p className="text-sm text-muted-foreground">
-            Consulte o manual oficial diretamente na bancada sem sair do MotoTech Pro.
+            Pesquise por palavra-chave, use atalhos de 1 clique, salte direto para a página do diagrama ou alterne para o Modo Leitura (Texto).
           </p>
         </div>
 

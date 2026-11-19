@@ -12,6 +12,87 @@ export interface ManualPdfItem {
   url: string;
 }
 
+export interface IndiceManualApi {
+  manualId: string;
+  totalPaginas: number;
+  temTextoPesquisavel: boolean;
+  extraidoEm: string;
+}
+
+export interface ResultadoBuscaPagina {
+  pagina: number;
+  ocorrencias: number;
+  snippets: string[];
+}
+
+export interface RespostaBuscaManualApi {
+  manualId: string;
+  query: string;
+  temTextoPesquisavel: boolean;
+  totalPaginas: number;
+  totalOcorrencias: number;
+  resultados: ResultadoBuscaPagina[];
+}
+
+export interface PaginaTextoManualApi {
+  manualId: string;
+  pagina: number;
+  totalPaginas: number;
+  temTextoPesquisavel: boolean;
+  texto: string;
+}
+
+export async function consultarIndiceManual(
+  manualId: string,
+  signal?: AbortSignal,
+): Promise<IndiceManualApi> {
+  const res = await fetch(`/api/manuais/${encodeURIComponent(manualId)}/indice`, {
+    headers: { Accept: 'application/json' },
+    signal,
+  });
+  if (!res.ok) {
+    throw new Error(`Falha ao indexar manual PDF (HTTP ${res.status})`);
+  }
+  return (await res.json()) as IndiceManualApi;
+}
+
+export async function buscarTextoManual(
+  manualId: string,
+  query: string,
+  signal?: AbortSignal,
+): Promise<RespostaBuscaManualApi> {
+  const params = new URLSearchParams({ q: query.trim() });
+  const res = await fetch(
+    `/api/manuais/${encodeURIComponent(manualId)}/buscar?${params.toString()}`,
+    {
+      headers: { Accept: 'application/json' },
+      signal,
+    },
+  );
+  if (!res.ok) {
+    throw new Error(`Falha ao buscar no manual PDF (HTTP ${res.status})`);
+  }
+  return (await res.json()) as RespostaBuscaManualApi;
+}
+
+export async function lerPaginaTextoManual(
+  manualId: string,
+  numeroPagina: number,
+  signal?: AbortSignal,
+): Promise<PaginaTextoManualApi> {
+  const res = await fetch(
+    `/api/manuais/${encodeURIComponent(manualId)}/pagina/${numeroPagina}`,
+    {
+      headers: { Accept: 'application/json' },
+      signal,
+    },
+  );
+  if (!res.ok) {
+    throw new Error(`Falha ao carregar texto da página ${numeroPagina} (HTTP ${res.status})`);
+  }
+  return (await res.json()) as PaginaTextoManualApi;
+}
+
 interface RespostaManuaisApi {
   total: number;
   totalBiblioteca: number;

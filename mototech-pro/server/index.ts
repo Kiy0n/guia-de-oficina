@@ -4,6 +4,11 @@ import { readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 
 import {
+  buscarNoIndiceManual,
+  gerarNomeArquivoCache,
+  obterOuCriarIndiceManual,
+} from './manualsIndex.js';
+import {
   atualizarOrdemServico,
   criarOrdemServico,
   lerOficinaData,
@@ -177,6 +182,42 @@ function anosCasam(anoOuFaixa: string | null, anoInicioQuery?: number, anoFimQue
   return pdfInicio <= qFim && pdfFim >= qInicio;
 }
 
+function normalizarIdManualParam(rawParam: unknown): string {
+  if (Array.isArray(rawParam)) {
+    return rawParam.map((p) => String(p)).join('/').trim();
+  }
+  if (typeof rawParam === 'string') {
+    try {
+      return decodeURIComponent(rawParam).trim();
+    } catch {
+      return rawParam.trim();
+    }
+  }
+  return '';
+}
+
+async function localizarManualPorId(
+  idParam: string,
+): Promise<{ manual: ManualPdfItem; caminhoAbsoluto: string } | null> {
+  if (!idParam) return null;
+
+  const todos = await listarPdfsRecursivo(MANUALS_DIR, MANUALS_DIR);
+  const idLower = idParam.replace(/\\/g, '/').toLowerCase();
+  const slugParam = gerarNomeArquivoCache(idParam);
+
+  const encontrado =
+    todos.find((m) => m.id === idParam) ??
+    todos.find((m) => m.id.toLowerCase() === idLower) ??
+    todos.find((m) => gerarNomeArquivoCache(m.id) === slugParam);
+
+  if (!encontrado) return null;
+
+  const caminhoAbsoluto = path.join(MANUALS_DIR, ...encontrado.id.split('/'));
+  if (!existsSync(caminhoAbsoluto)) return null;
+
+  return { manual: encontrado, caminhoAbsoluto };
+}
+
 // ---------------------------------------------------------------------------
 // API
 // ---------------------------------------------------------------------------
@@ -224,6 +265,118 @@ api.get('/manuais', async (req, res) => {
     manuais: filtrados,
   });
 });
+
+// ---------------------------------------------------------------------------
+// Índice, Busca Instantânea e Modo Leitura de Manuais PDF
+// ---------------------------------------------------------------------------
+const handleManualIndice = async (req: Request, res: Response) => {
+  const idParam = normalizarIdManualParam(req.params.id);
+  const localizado = await localizarManualPorId(idParam);
+
+  if (!localizado) {
+    res.status(404).json({ error: 'Manual PDF não encontrado.' });
+    return;
+  }
+
+  const indice = await obterOuCriarIndiceManual(
+    localizado.manual.id,
+    localizado.caminhoAbsoluto,
+  );
+
+  res.json({
+    manualId: indice.manualId,
+    totalPaginas: indice.totalPaginas,
+    temTextoPesquisavel: indice.temTextoPesquisavel,
+    extraidoEm: indice.extraidoEm,
+  });
+};
+
+const handleManualBuscar = async (req: Request, res: Response) => {
+  const idParam = normalizarIdManualParam(req.params.id);
+  const queryRaw = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+
+  if (queryRaw.length < 2) {
+    res.status(400).json({
+      error: 'O parâmetro de busca "q" deve ter pelo menos 2 caracteres.',
+    });
+    return;
+  }
+
+  const localizado = await localizarManualPorId(idParam);
+  if (!localizado) {
+    res.status(404).json({ error: 'Manual PDF não encontrado.' });
+    return;
+  }
+
+  const indice = await obterOuCriarIndiceManual(
+    localizado.manual.id,
+    localizado.caminhoAbsoluto,
+  );
+
+  if (!indice.temTextoPesquisavel) {
+    res.json({
+      manualId: indice.manualId,
+      query: queryRaw,
+      temTextoPesquisavel: false,
+      totalPaginas: indice.totalPaginas,
+      totalOcorrencias: 0,
+      resultados: [],
+    });
+    return;
+  }
+
+  const resultado = buscarNoIndiceManual(indice, queryRaw);
+  res.json(resultado);
+};
+
+const handleManualPagina = async (req: Request, res: Response) => {
+  const idParam = normalizarIdManualParam(req.params.id);
+  const numeroRaw = typeof req.params.numero === 'string' ? Number(req.params.numero) : Number.NaN;
+
+  if (!Number.isInteger(numeroRaw) || numeroRaw < 1) {
+    res.status(400).json({
+      error: 'Número de página inválido.',
+    });
+    return;
+  }
+
+  const localizado = await localizarManualPorId(idParam);
+  if (!localizado) {
+    res.status(404).json({ error: 'Manual PDF não encontrado.' });
+    return;
+  }
+
+  const indice = await obterOuCriarIndiceManual(
+    localizado.manual.id,
+    localizado.caminhoAbsoluto,
+  );
+
+  if (numeroRaw > indice.totalPaginas) {
+    res.status(400).json({
+      error: `A página solicitada (${numeroRaw}) excede o total de páginas do manual (${indice.totalPaginas}).`,
+    });
+    return;
+  }
+
+  const paginaEncontrada = indice.paginas[numeroRaw - 1];
+
+  res.json({
+    manualId: indice.manualId,
+    pagina: numeroRaw,
+    totalPaginas: indice.totalPaginas,
+    temTextoPesquisavel: indice.temTextoPesquisavel,
+    texto: paginaEncontrada?.texto ?? '',
+  });
+};
+
+api.get('/manuais/:id/indice', handleManualIndice);
+api.get('/manuais/{*id}/indice', handleManualIndice);
+
+api.get('/manuais/:id/buscar', handleManualBuscar);
+api.get('/manuais/{*id}/buscar', handleManualBuscar);
+
+api.get('/manuais/:id/pagina/:numero', handleManualPagina);
+api.get('/manuais/{*id}/pagina/:numero', handleManualPagina);
 
 // ---------------------------------------------------------------------------
 // Inventário de Ferramentas (persistido em /app/data/oficina.json)
