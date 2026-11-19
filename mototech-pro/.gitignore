@@ -1,0 +1,27 @@
+# Dependências
+node_modules/
+
+# Builds
+dist/
+dist-server/
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+*.log
+
+# Ambiente
+.env
+.env.*
+!.env.example
+
+# Editor / SO
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Dados locais gerados em runtime (a pasta é mantida via .gitkeep)
+data/*
+!data/.gitkeep
