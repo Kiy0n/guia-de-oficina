@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   Clapperboard,
   ClipboardCheck,
-  ClipboardPlus,
   Clock,
   Copy,
   ExternalLink,
@@ -42,7 +41,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { useFerramentas } from '@/context/FerramentasContext';
-import { useMoto, useMotoSelecionada } from '@/context/MotoContext';
+import { useMotoSelecionada } from '@/context/MotoContext';
 import { useToast } from '@/context/ToastContext';
 import { PROCEDIMENTOS_OFICINA } from '@/data/procedimentos';
 import {
@@ -59,7 +58,6 @@ import {
 } from '@/data/roteiroRevisao';
 import { SECTIONS } from '@/lib/sections';
 import { cn } from '@/lib/utils';
-import type { PecaOrdemServico } from '@/types/oficina';
 
 type EtapaTelaRevisao = 'preparar' | 'executar' | 'relatorio';
 
@@ -122,7 +120,6 @@ const ORDEM_STATUS_BOTOES: readonly StatusFeedbackPasso[] = [
 
 export function IniciarRevisaoPage() {
   const moto = useMotoSelecionada();
-  const { enviarParaOrdemServico } = useMoto();
   const { possuiFerramenta, marcarFerramentaPossuida } = useFerramentas();
   const { mostrarToast } = useToast();
 
@@ -406,61 +403,6 @@ export function IniciarRevisaoPage() {
       duracaoMs: 2400,
     });
     window.setTimeout(() => setCopiadoRelatorio(false), 2400);
-  };
-
-  const enviarRelatorioParaOS = () => {
-    const kmNum = Math.max(0, Math.round(Number(kmAtual) || 0));
-    const servicos: string[] = [];
-    const pecas: PecaOrdemServico[] = [];
-    const obsLinhas: string[] = [];
-
-    for (const { passo, reg } of resumoRelatorio.substituido) {
-      const pecaNome = reg.pecaUsada?.trim() || passo.titulo;
-      servicos.push(`Substituído: ${passo.titulo}`);
-      pecas.push({ nome: pecaNome, quantidade: 1, valorUnitario: 0 });
-      if (reg.observacao?.trim()) obsLinhas.push(`• ${passo.titulo}: ${reg.observacao.trim()}`);
-    }
-
-    for (const { passo, reg } of resumoRelatorio.limpo_lubrificado) {
-      servicos.push(`Limpeza/Lubrificação: ${passo.titulo}`);
-      if (reg.observacao?.trim()) obsLinhas.push(`• ${passo.titulo}: ${reg.observacao.trim()}`);
-    }
-
-    for (const { passo, reg } of resumoRelatorio.regulado) {
-      servicos.push(`Regulagem: ${passo.titulo}`);
-      if (reg.observacao?.trim()) obsLinhas.push(`• ${passo.titulo}: ${reg.observacao.trim()}`);
-    }
-
-    if (resumoRelatorio.checado_ok.length > 0) {
-      servicos.push(
-        `Inspeção geral aprovada (${resumoRelatorio.checado_ok.length} itens checados OK)`,
-      );
-    }
-
-    if (resumoRelatorio.trocar_em_breve.length > 0) {
-      obsLinhas.push(`⚠️ PENDÊNCIAS / TROCAR EM BREVE:`);
-      for (const { passo, reg } of resumoRelatorio.trocar_em_breve) {
-        obsLinhas.push(
-          `• ${passo.titulo}${reg.observacao?.trim() ? ` — ${reg.observacao.trim()}` : ''}`,
-        );
-      }
-    }
-
-    if (comentarioGeral.trim()) {
-      obsLinhas.push(`Parecer final: ${comentarioGeral.trim()}`);
-    }
-
-    // Limpa rascunho concluído e abre a aba de OS já preenchida
-    descartarRascunho();
-    enviarParaOrdemServico({
-      tipo: tipoRevisao === 'completa' ? 'revisao' : 'preventiva',
-      kmAtual: kmNum,
-      proximaTrocaOleoKm: kmNum > 0 ? kmNum + 3000 : undefined,
-      apelidoOuPlaca: apelidoOuPlaca.trim() || undefined,
-      servicosRealizados: servicos,
-      pecas,
-      observacoes: obsLinhas.join('\n'),
-    });
   };
 
   if (!def) return null;
@@ -886,7 +828,7 @@ export function IniciarRevisaoPage() {
                         {registros[passoAtual.id]?.status === 'substituido' && (
                           <div className="space-y-1.5 rounded-xl border border-purple-500/40 bg-purple-500/10 p-3.5">
                             <label className="text-xs font-bold text-purple-300">
-                              Peça / Marca utilizada (vai direto para o Relatório e Ordem de Serviço):
+                              Peça / Marca utilizada (vai direto para o Relatório Final):
                             </label>
                             <Input
                               value={registros[passoAtual.id]?.pecaUsada ?? ''}
@@ -1207,28 +1149,17 @@ export function IniciarRevisaoPage() {
 
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant="default"
                   size="sm"
                   onClick={() => void copiarRelatorioWhatsApp()}
-                  className="gap-1.5"
+                  className="gap-1.5 shadow-md"
                 >
                   {copiadoRelatorio ? (
-                    <Check className="size-4 text-emerald-400" />
+                    <Check className="size-4" />
                   ) : (
                     <Copy className="size-4" />
                   )}
                   {copiadoRelatorio ? 'Relatório Copiado!' : 'Copiar Relatório (WhatsApp)'}
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="default"
-                  size="sm"
-                  onClick={enviarRelatorioParaOS}
-                  className="gap-1.5 shadow-md"
-                >
-                  <ClipboardPlus className="size-4" />
-                  Enviar para Ordem de Serviço (OS)
                 </Button>
               </div>
             </div>

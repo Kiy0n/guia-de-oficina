@@ -20,7 +20,7 @@ export type SectionId =
   | 'ferramentas'
   | 'eletrica'
   | 'diagnostico'
-  | 'torques-os';
+  | 'torques-calculadoras';
 
 export interface SectionDef {
   id: SectionId;
@@ -44,7 +44,7 @@ export const SECTIONS: readonly SectionDef[] = [
     titulo: 'Iniciar Revisão',
     descricao: 'Modo guiado passo a passo com mapa visual HUD, critérios e relatório final.',
     icon: PlayCircle,
-    previsto: ['Roteiro dinâmico por geração', 'Blueprint visual interativo', 'Relatório final e envio para OS'],
+    previsto: ['Roteiro dinâmico por geração', 'Blueprint visual interativo', 'Relatório final para WhatsApp e impressão'],
   },
   {
     id: 'manual-revisoes',
@@ -89,11 +89,11 @@ export const SECTIONS: readonly SectionDef[] = [
     previsto: ['Não pega / falha em marcha lenta', 'Ruídos de motor e transmissão', 'Problemas de carga da bateria'],
   },
   {
-    id: 'torques-os',
-    titulo: 'Torques, Calculadoras & OS',
-    descricao: 'Tabela de torques, calculadoras de oficina e ordem de serviço.',
+    id: 'torques-calculadoras',
+    titulo: 'Torques & Calculadoras',
+    descricao: 'Tabela de torques específicos e universais e calculadoras de bancada.',
     icon: Calculator,
-    previsto: ['Tabela de torques', 'Calculadora de relação (coroa/pinhão)', 'Ordem de serviço imprimível'],
+    previsto: ['Tabela de torques', 'Conversor de torque e calculadora 12V', 'Simulador de relação (coroa/pinhão)'],
   },
 ];
 

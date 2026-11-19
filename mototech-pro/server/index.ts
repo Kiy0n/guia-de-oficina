@@ -9,14 +9,9 @@ import {
   obterOuCriarIndiceManual,
 } from './manualsIndex.js';
 import {
-  atualizarOrdemServico,
-  criarOrdemServico,
   lerOficinaData,
-  listarOrdensServico,
-  removerOrdemServico,
   restaurarOficinaBackup,
   salvarFerramentasPossuidas,
-  validarPayloadOrdemServico,
 } from './storage.js';
 
 const PORT = Number(process.env.PORT ?? 3001);
@@ -402,53 +397,6 @@ api.put('/ferramentas', async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// Ordens de Serviço (persistidas em /app/data/oficina.json)
-// ---------------------------------------------------------------------------
-api.get('/os', async (_req, res) => {
-  const ordensServico = await listarOrdensServico();
-  res.json({ ordensServico });
-});
-
-api.post('/os', async (req, res) => {
-  const validacao = validarPayloadOrdemServico(req.body);
-  if (!validacao.ok) {
-    res.status(400).json({ error: validacao.erro });
-    return;
-  }
-
-  const novaOs = await criarOrdemServico(validacao.payload);
-  res.status(201).json(novaOs);
-});
-
-api.put('/os/:id', async (req, res) => {
-  const id = typeof req.params.id === 'string' ? req.params.id.trim() : '';
-  const validacao = validarPayloadOrdemServico(req.body);
-  if (!validacao.ok) {
-    res.status(400).json({ error: validacao.erro });
-    return;
-  }
-
-  const atualizada = await atualizarOrdemServico(id, validacao.payload);
-  if (!atualizada) {
-    res.status(404).json({ error: 'Ordem de Serviço não encontrada.' });
-    return;
-  }
-
-  res.json(atualizada);
-});
-
-api.delete('/os/:id', async (req, res) => {
-  const id = typeof req.params.id === 'string' ? req.params.id.trim() : '';
-  const removida = await removerOrdemServico(id);
-  if (!removida) {
-    res.status(404).json({ error: 'Ordem de Serviço não encontrada.' });
-    return;
-  }
-
-  res.json({ ok: true, id });
-});
-
-// ---------------------------------------------------------------------------
 // Backup & Restauração em 1 Clique (/app/data/oficina.json)
 // ---------------------------------------------------------------------------
 api.get('/backup', async (_req, res) => {
@@ -463,7 +411,6 @@ api.get('/backup', async (_req, res) => {
     app: 'MotoTech Pro',
     exportadoEm: new Date().toISOString(),
     ferramentasPossuidas: dados.ferramentasPossuidas,
-    ordensServico: dados.ordensServico,
   });
 });
 
@@ -477,7 +424,6 @@ api.post('/backup/restaurar', async (req, res) => {
   res.json({
     ok: true,
     totalFerramentas: resultado.totalFerramentas,
-    totalOS: resultado.totalOS,
   });
 });
 

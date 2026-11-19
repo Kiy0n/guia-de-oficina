@@ -41,7 +41,7 @@ import { KitFerramentasPage } from '@/pages/KitFerramentasPage';
 import { ManuaisPage } from '@/pages/ManuaisPage';
 import { ManualRevisoesPage } from '@/pages/ManualRevisoesPage';
 import { ProcedimentosPage } from '@/pages/ProcedimentosPage';
-import { TorquesCalculadorasOSPage } from '@/pages/TorquesCalculadorasOSPage';
+import { TorquesCalculadorasPage } from '@/pages/TorquesCalculadorasPage';
 
 const SECTION_TRANSITION = {
   duration: 0.28,
@@ -57,7 +57,7 @@ function SectionContent({ id }: { id: SectionId }) {
   if (id === 'ferramentas') return <KitFerramentasPage />;
   if (id === 'eletrica') return <EletricaInjecaoPage />;
   if (id === 'diagnostico') return <DiagnosticoCorretivoPage />;
-  if (id === 'torques-os') return <TorquesCalculadorasOSPage />;
+  if (id === 'torques-calculadoras') return <TorquesCalculadorasPage />;
   return null;
 }
 
@@ -138,7 +138,7 @@ export function AppShell() {
     if (!arquivo) return;
 
     const confirmado = window.confirm(
-      `Deseja restaurar o backup "${arquivo.name}"?\n\nIsso substituirá seu inventário de ferramentas e histórico de Ordens de Serviço em data/oficina.json.`,
+      `Deseja restaurar o backup "${arquivo.name}"?\n\nIsso substituirá seu inventário do Kit de Ferramentas em data/oficina.json.`,
     );
     if (!confirmado) return;
 
@@ -159,7 +159,6 @@ export function AppShell() {
       const data = (await res.json()) as {
         ok?: boolean;
         totalFerramentas?: number;
-        totalOS?: number;
         error?: string;
       };
 
@@ -168,12 +167,11 @@ export function AppShell() {
       }
 
       await recarregarFerramentas();
-      window.dispatchEvent(new CustomEvent('mototech:backup-restaurado'));
 
       mostrarToast({
         dedupeKey: 'backup-oficina',
         titulo: 'Backup restaurado com sucesso!',
-        descricao: `${data.totalFerramentas ?? 0} ferramentas e ${data.totalOS ?? 0} Ordens de Serviço carregadas.`,
+        descricao: `${data.totalFerramentas ?? 0} ferramentas do Kit de Ferramentas carregadas.`,
         variante: 'sucesso',
         duracaoMs: 4500,
       });

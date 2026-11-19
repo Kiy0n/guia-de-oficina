@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react';
 import {
   AlertTriangle,
   ArrowRight,
+  Check,
   CheckCircle2,
-  ClipboardPlus,
+  Copy,
   RotateCcw,
   Search,
   Sparkles,
@@ -18,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useMoto, useMotoSelecionada } from '@/context/MotoContext';
+import { useToast } from '@/context/ToastContext';
 import {
   CENARIOS_DIAGNOSTICO,
   SISTEMAS_DIAGNOSTICO,
@@ -33,7 +35,8 @@ type StatusEtapa = 'pendente' | 'ok' | 'falha';
 
 export function DiagnosticoCorretivoPage() {
   const moto = useMotoSelecionada();
-  const { setSection, enviarParaOrdemServico } = useMoto();
+  const { setSection } = useMoto();
+  const { mostrarToast } = useToast();
 
   const [busca, setBusca] = useState<string>('');
   const [sistemaFiltro, setSistemaFiltro] = useState<SistemaDiagnostico | 'todos'>('todos');
@@ -41,6 +44,7 @@ export function DiagnosticoCorretivoPage() {
     CENARIOS_DIAGNOSTICO[0]?.id ?? 'motor-gira-nao-pega',
   );
   const [statusEtapas, setStatusEtapas] = useState<Record<string, StatusEtapa>>({});
+  const [copiadoResumo, setCopiadoResumo] = useState<boolean>(false);
 
   const def = SECTIONS.find((s) => s.id === 'diagnostico') ?? SECTIONS[0];
   const f = moto.geracao.fichaTecnica;
@@ -91,35 +95,57 @@ export function DiagnosticoCorretivoPage() {
     });
   };
 
-  const handleEnviarParaOS = (cenario: CenarioDiagnosticoCorretivo) => {
+  const handleCopiarResumoDiagnostico = async (cenario: CenarioDiagnosticoCorretivo) => {
     const falhas = cenario.etapas.filter((e) => statusEtapas[e.id] === 'falha');
     const verificadosOk = cenario.etapas.filter((e) => statusEtapas[e.id] === 'ok');
 
-    const servicosRealizados =
-      falhas.length > 0
-        ? falhas.map((e) => `${e.solucaoSugerida} (${e.titulo})`)
-        : [`Diagnóstico Corretivo: ${cenario.sintoma}`];
-
-    const linhasObs: string[] = [
-      `Sintoma relatado: ${cenario.sintoma}`,
+    const linhas: string[] = [
+      `🩺 *MOTOTECH PRO — RESUMO DE DIAGNÓSTICO*`,
+      `🏍️ *Moto:* ${moto.marca} ${moto.modelo.nome} (${moto.geracao.anosLabel})`,
+      `⚠️ *Sintoma:* ${cenario.sintoma}`,
+      `----------------------------------------`,
     ];
 
     if (falhas.length > 0) {
-      linhasObs.push(
-        `Causa(s) identificada(s): ${falhas.map((e) => e.causaProvavelSeFalhar).join(' | ')}`,
-      );
-    }
-    if (verificadosOk.length > 0) {
-      linhasObs.push(
-        `Itens testados e aprovados: ${verificadosOk.map((e) => e.titulo).join('; ')}`,
-      );
+      linhas.push(`❌ *Defeito(s) Identificado(s) (${falhas.length}):*`);
+      for (const e of falhas) {
+        linhas.push(`• ${e.titulo}`);
+        linhas.push(`   ↳ Causa: ${e.causaProvavelSeFalhar}`);
+        linhas.push(`   ↳ Solução: ${e.solucaoSugerida}`);
+      }
     }
 
-    enviarParaOrdemServico({
-      tipo: 'corretiva',
-      servicosRealizados,
-      observacoes: linhasObs.join('\n'),
+    if (verificadosOk.length > 0) {
+      linhas.push(`✅ *Testes Aprovados (${verificadosOk.length}):*`);
+      for (const e of verificadosOk) {
+        linhas.push(`• ${e.titulo}`);
+      }
+    }
+
+    if (falhas.length === 0 && verificadosOk.length === 0) {
+      linhas.push(`📋 *Roteiro de verificação:* ${cenario.resumo}`);
+    }
+
+    const texto = linhas.join('\n');
+    try {
+      await navigator.clipboard.writeText(texto);
+    } catch {
+      const area = document.createElement('textarea');
+      area.value = texto;
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand('copy');
+      document.body.removeChild(area);
+    }
+
+    setCopiadoResumo(true);
+    mostrarToast({
+      dedupeKey: 'copiar-resumo-diagnostico',
+      titulo: 'Resumo do diagnóstico copiado para WhatsApp!',
+      variante: 'sucesso',
+      duracaoMs: 2400,
     });
+    window.setTimeout(() => setCopiadoResumo(false), 2400);
   };
 
   return (
@@ -271,11 +297,15 @@ export function DiagnosticoCorretivoPage() {
                       type="button"
                       variant="default"
                       size="sm"
-                      onClick={() => handleEnviarParaOS(cenarioAtivo)}
+                      onClick={() => void handleCopiarResumoDiagnostico(cenarioAtivo)}
                       className="h-8 gap-1.5 text-xs"
                     >
-                      <ClipboardPlus className="size-3.5" />
-                      Enviar Resumo para OS
+                      {copiadoResumo ? (
+                        <Check className="size-3.5" />
+                      ) : (
+                        <Copy className="size-3.5" />
+                      )}
+                      {copiadoResumo ? 'Resumo Copiado!' : 'Copiar Resumo (WhatsApp)'}
                     </Button>
                   </div>
                 </div>
