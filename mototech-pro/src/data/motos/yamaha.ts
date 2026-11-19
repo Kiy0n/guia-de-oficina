@@ -184,17 +184,38 @@ const TORQUES_FACTOR_125_CARB: TorqueAperto[] = [
   ),
 ];
 
-const TORQUES_YBR_125_PENDENTE: TorqueAperto[] = [
-  torque('Bujão de drenagem do óleo do motor', 20, 'motor', 'Referência inicial — confirmar no Manual Oficial'),
-  torque('Vela de ignição (NGK CR7HSA)', 13, 'motor', 'Referência inicial — confirmar no Manual Oficial'),
-  torque('Porca do eixo dianteiro', 59, 'chassi', 'Referência inicial — confirmar no Manual Oficial'),
-  torque('Porca do eixo traseiro', 80, 'chassi', 'Referência inicial — confirmar no Manual Oficial'),
+const TORQUES_YBR_125_WEB: TorqueAperto[] = [
+  torque(
+    'Bujão de drenagem do óleo do motor',
+    20,
+    'motor',
+    '20 N·m (2,0 kgf·m) • Fonte externa: Google (Scribd / SlideShare / Manual de Serviço YBR 125)',
+  ),
+  torque(
+    'Vela de ignição (NGK CR7HSA)',
+    12.5,
+    'motor',
+    '12,5 N·m (1,25 kgf·m) • Fonte externa: Google (Scribd / SlideShare)',
+  ),
+  torque(
+    'Porcas cegas do cabeçote',
+    22,
+    'motor',
+    '22 N·m (2,2 kgf·m) • Fonte externa: Google (Scribd)',
+  ),
+  torque(
+    'Porca do eixo dianteiro',
+    70,
+    'chassi',
+    '70 N·m (7,0 kgf·m) • Fonte externa: Google (Scribd / Manual de Serviço YBR 125)',
+  ),
+  torque(
+    'Porca do eixo traseiro',
+    90,
+    'chassi',
+    '90 N·m (9,0 kgf·m) • Fonte externa: Google (Scribd / Manual de Serviço YBR 125)',
+  ),
 ];
-
-const AUDITORIA_PENDENTE_INICIAL = {
-  status: 'pendente_conferencia' as const,
-  notas: 'Dados de referência inicial — confirmar óleo, folga de válvulas e torques no Manual Oficial em PDF.',
-};
 
 // ---------------------------------------------------------------------------
 // Bases de Ficha Técnica Yamaha
@@ -328,7 +349,7 @@ const ybr125Base: FichaTecnica = {
     pinhaoDentes: 14,
     coroaDentes: 45,
   },
-  torques: TORQUES_YBR_125_PENDENTE,
+  torques: TORQUES_YBR_125_WEB,
 };
 
 // ---------------------------------------------------------------------------
@@ -641,17 +662,41 @@ export const YAMAHA: Modelo[] = [
         nomeGeracao: 'YBR 125 (K / E / ED)',
         versoes: ['K', 'E', 'ED'],
         destaques: [
-          'Motor 123,7cc SOHC carburado (Mikuni VM20)',
-          'Vela NGK CR7HSA (rosca curta)',
-          'Dados de referência — aguarda Manual Oficial YBR 125 (2000–2008) em PDF',
+          'Motor 123,7 cm³ SOHC carburado (Mikuni VM20) • Óleo 20W-50 (1,0 L troca / 1,2 L desmontagem)',
+          'Folga de válvulas (fonte web): Adm 0,08 – 0,12 mm / Esc 0,10 – 0,14 mm (motor frio)',
+          'Vela NGK CR7HSA (0,7 mm • 12,5 N·m) • Bengala 154,5 ml (nível 156 mm) • Eixos 70 / 90 N·m',
         ],
         alertasBancada: [
-          'Motor YBR 125 carburado NÃO tem filtro de óleo de papel: possui apenas peneira interna; trocar 1,0 L de óleo 20W-50.',
-          'Vela NGK CR7HSA tem rosca curta M10 — cuidado para não rosquear vela de rosca longa, pois bate na cabeça do pistão.',
-          'Sem PDF local da YBR 125 (2000–2008): confirmar folga de válvulas, volume de bengala e torques no Manual Oficial em PDF antes da manutenção.',
+          'OBSERVAÇÃO (FONTE WEB): sem PDF local da YBR 125 (2000–2008); dados conferidos em fontes externas na internet (Google: Scribd, SlideShare, EuCurtoMoto, Magnetron). Confirmar no manual oficial em PDF quando disponível.',
+          'Motor YBR 125 carburado NÃO tem filtro de óleo de papel (apenas tela interna): 1,0 L na troca / 1,2 L na desmontagem (SAE 20W-50 API SG/SH/SL JASO MA).',
+          'Vela NGK CR7HSA (ou CR6HSA em algumas tabelas alternativas) de rosca curta M10, folga 0,6–0,7 mm, torque 12,5 N·m — nunca usar vela de rosca longa.',
+          'Suspensão dianteira (fonte web): 154,5 ml de fluido 10W/ATF por canela (nível 156 mm sem mola, tubo comprimido).',
         ],
-        auditoria: AUDITORIA_PENDENTE_INICIAL,
-        fichaTecnica: ybr125Base,
+        auditoria: {
+          status: 'fonte_web',
+          ultimaRevisao: '2026-11-19',
+          origemExterna: 'Google (Scribd, SlideShare, EuCurtoMoto, Magnetron)',
+          fonte:
+            'Pesquisa Web autorizada (Google: transcrições do Manual de Serviço YBR 125 no Scribd, SlideShare, EuCurtoMoto e Magnetron)',
+          notas:
+            'Sem PDF local em public/manuals/. Dados conferidos via fontes externas: óleo SAE 20W-50 JASO MA (1,0 L / 1,2 L); válvulas Adm 0,08–0,12 mm / Esc 0,10–0,14 mm; vela NGK CR7HSA (0,6–0,7 mm, 12,5 N·m); bengala 154,5 ml (nível 156 mm, 10W); torques bujão 20 N·m, cabeçote 22 N·m, eixo diant. 70 N·m, eixo tras. 90 N·m. Substituir por auditoria oficial assim que o PDF estiver em public/manuals/.',
+        },
+        fichaTecnica: {
+          ...ybr125Base,
+          fluidos: {
+            ...ybr125Base.fluidos,
+            fluidoBengala: {
+              especificacao: 'Óleo de garfo 10W / ATF (fonte web: EuCurtoMoto / Scribd)',
+              volumePorCanelaMl: 154.5,
+              nivelMm: 156,
+            },
+          },
+          folgas: {
+            ...ybr125Base.folgas,
+            valvulaAdmissaoMm: faixaMm(0.08, 0.12, '0,08 – 0,12 mm (fonte web)'),
+            valvulaEscapeMm: faixaMm(0.1, 0.14, '0,10 – 0,14 mm (fonte web)'),
+          },
+        },
       }),
       geracao('yamaha-ybr-factor-125', {
         anoInicio: 2009,
@@ -771,10 +816,19 @@ export const YAMAHA: Modelo[] = [
           'Câmbio manual de 5 marchas e freio dianteiro a disco',
         ],
         alertasBancada: [
-          'Dados de referência inicial: confirmar viscosidade/volume de óleo, folga de válvulas, vela, relação e torques exatos no Manual Oficial em PDF antes da manutenção.',
-          'Verificar presença de filtro de óleo em elemento de papel e sistema de freio combinado UBS conforme ano/versão do modelo.',
+          'OBSERVAÇÃO (FONTE WEB): no Brasil a linha street 125cc moderna da Yamaha foi comercializada como Factor 125i (sem manual separado "Fazer 125"); dados conferidos via fontes externas (Google: Scribd, SlideShare, Magnetron, TudoDeMoto).',
+          'Óleo SAE 10W-40 / 20W-50 API SL JASO MA (1,0 L sem filtro / 1,1 L com troca do filtro de papel); relação padrão 14x43 (passo 428).',
+          'Folga de válvulas (fonte web): Adm 0,08 – 0,12 mm / Esc 0,10 – 0,14 mm (até 0,12 – 0,16 mm nas 125i injetadas). Conferir se a unidade usa vela NGK MR8D (injetada) ou CR7HSA (carburada).',
         ],
-        auditoria: AUDITORIA_PENDENTE_INICIAL,
+        auditoria: {
+          status: 'fonte_web',
+          ultimaRevisao: '2026-11-19',
+          origemExterna: 'Google (Scribd, SlideShare, Magnetron, TudoDeMoto)',
+          fonte:
+            'Pesquisa Web autorizada (Google: fichas técnicas e referências da família Yamaha 125cc street no Scribd, SlideShare, Magnetron e TudoDeMoto)',
+          notas:
+            'Sem PDF local separado com nome "Fazer 125" (no Brasil a 125cc injetada equivalente é a Factor 125i, já auditada via PDF oficial). Dados conferidos via fontes web: óleo 10W-40/20W-50 JASO MA (1,0 L / 1,1 L com filtro); válvulas Adm 0,08–0,12 mm / Esc 0,10–0,14 mm (até 0,16 mm na 125i); relação 14x43.',
+        },
         fichaTecnica: {
           ...yamaha150Base,
           versaoReferencia: 'Fazer 125',
@@ -809,6 +863,8 @@ export const YAMAHA: Modelo[] = [
             fluidoFreio: 'DOT 4 (confirmar no manual)',
           },
           folgas: {
+            valvulaAdmissaoMm: faixaMm(0.08, 0.12, '0,08 – 0,12 mm (fonte web)'),
+            valvulaEscapeMm: faixaMm(0.1, 0.14, '0,10 – 0,14 mm (até 0,16 mm na 125i — fonte web)'),
             folgaCorrenteMm: faixaMm(25, 35, '25 – 35 mm'),
             folgaManeteEmbreagemMm: faixaMm(10, 15, '10 – 15 mm'),
             folgaPedalFreioMm: faixaMm(20, 30, '20 – 30 mm'),
@@ -816,17 +872,17 @@ export const YAMAHA: Modelo[] = [
           },
           eletrica: {
             vela: {
-              modelo: 'NGK MR8D (confirmar no manual)',
-              folgaEletrodoMm: faixaMm(0.8, 0.9, '0,8 – 0,9 mm'),
+              modelo: 'NGK MR8D (125i) / NGK CR7HSA (carburada — fonte web)',
+              folgaEletrodoMm: faixaMm(0.7, 0.9, '0,7 – 0,8 mm (CR7HSA) | 0,8 – 0,9 mm (MR8D)'),
             },
             bateria: {
-              modelo: '12V 5Ah (confirmar no manual)',
+              modelo: '12V 5Ah (fonte web)',
               tensaoV: 12,
               capacidadeAh: 5,
-              tensaoCargaV: 'Sistema de carga 12 V (confirmar no manual)',
+              tensaoCargaV: 'Sistema de carga 12 V (fonte web)',
             },
             fusivelPrincipalA: 15,
-            fusiveisSecundarios: '7,5A / 10A (confirmar no manual)',
+            fusiveisSecundarios: '7,5A / 10A (fonte web)',
             lampadaFarol: '12V 35/35W',
           },
           pneus: {
@@ -835,9 +891,9 @@ export const YAMAHA: Modelo[] = [
           },
           transmissaoFinal: {
             tipo: 'corrente',
-            corrente: '428H (confirmar nº de elos no manual)',
+            corrente: '428 (relação 14x43 — fonte web)',
             pinhaoDentes: 14,
-            coroaDentes: 39,
+            coroaDentes: 43,
           },
           torques: TORQUES_YAMAHA_150_STREET,
         },

@@ -5,6 +5,7 @@ import {
   FileCheck2,
   Flame,
   Gauge,
+  Info,
   ShieldAlert,
   SlidersHorizontal,
   Wrench,
@@ -34,6 +35,7 @@ export function ColaRapidaSheet({ open, onOpenChange }: ColaRapidaSheetProps) {
   const f = geracao.fichaTecnica;
   const theme = BRAND_THEME[marca];
   const isAuditado = geracao.auditoria.status === 'verificado_manual';
+  const isFonteWeb = geracao.auditoria.status === 'fonte_web';
 
   const oleo = f.fluidos?.oleoMotor;
   const vela = f.eletrica?.vela;
@@ -67,17 +69,25 @@ export function ColaRapidaSheet({ open, onOpenChange }: ColaRapidaSheetProps) {
             </Badge>
             <Badge
               variant="outline"
+              title={isFonteWeb ? `Fonte externa: ${geracao.auditoria.origemExterna ?? geracao.auditoria.fonte ?? 'Pesquisa Web'}` : undefined}
               className={cn(
                 'gap-1 text-[11px]',
                 isAuditado
                   ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
-                  : 'border-amber-500/40 bg-amber-500/10 text-amber-300',
+                  : isFonteWeb
+                    ? 'border-sky-500/40 bg-sky-500/10 text-sky-300'
+                    : 'border-amber-500/40 bg-amber-500/10 text-amber-300',
               )}
             >
               {isAuditado ? (
                 <>
                   <FileCheck2 className="size-3" />
                   Manual Oficial
+                </>
+              ) : isFonteWeb ? (
+                <>
+                  <Info className="size-3" />
+                  Obs: Fonte Web
                 </>
               ) : (
                 <>

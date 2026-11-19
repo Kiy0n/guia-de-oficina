@@ -8,17 +8,30 @@ const MOTOR_SOHC_2V = 'Monocilíndrico 4T SOHC 2 válvulas';
 // ---------------------------------------------------------------------------
 
 const TORQUES_SUZUKI_125: TorqueAperto[] = [
-  torque('Bujão de drenagem do óleo do motor', 21, 'motor', 'Cuidado redobrado: carcaça de alumínio Suzuki espana se passar de 23 N·m'),
-  torque('Porcas da tampa do filtro de óleo (3x M6)', 9, 'motor', 'Conferir posição da mola e o O-ring interno do filtro'),
-  torque('Parafusos da tampa inferior da peneira de óleo', 10, 'motor'),
-  torque('Vela de ignição (NGK CR8E)', 11, 'motor', 'Rosca M10 longa — torque moderado (11 N·m)'),
-  torque('Parafusos da tampa de inspeção de válvulas', 10, 'motor'),
-  torque('Contratuerca do regulador de válvula', 10, 'motor'),
-  torque('Porca do eixo dianteiro', 44, 'chassi'),
-  torque('Porca do eixo traseiro', 65, 'chassi'),
-  torque('Porcas da coroa traseira', 25, 'chassi', 'Dobrar chapas trava de segurança'),
-  torque('Parafusos da pinça de freio dianteira', 25, 'freios'),
-  torque('Porca da coluna de direção (mesa superior)', 65, 'suspensao'),
+  torque(
+    'Bujão de drenagem do óleo do motor',
+    18,
+    'motor',
+    '15 – 20 N·m (1,5 – 2,0 kgf·m) • Fonte externa: Google (Scribd / EuCurtoMoto / YouTube) — cuidado com rosca do cárter de alumínio',
+  ),
+  torque(
+    'Vela de ignição (NGK CR8E / CR7E)',
+    13,
+    'motor',
+    '11 – 15 N·m (1,1 – 1,5 kgf·m) • Fonte externa: Google (Scribd / EuCurtoMoto)',
+  ),
+  torque(
+    'Porca do eixo dianteiro',
+    45,
+    'chassi',
+    '35 – 55 N·m (3,5 – 5,5 kgf·m) • Fonte externa: Google (Scribd / EuCurtoMoto)',
+  ),
+  torque(
+    'Porca do eixo traseiro',
+    55,
+    'chassi',
+    '50 – 60 N·m (Intruder) / 50 – 80 N·m (Yes) • Fonte externa: Google (Scribd / EuCurtoMoto)',
+  ),
 ];
 
 // ---------------------------------------------------------------------------
@@ -64,8 +77,8 @@ const suzuki125Base: FichaTecnica = {
     },
   },
   folgas: {
-    valvulaAdmissaoMm: faixaMm(0.04, 0.07, '0,04 – 0,07 mm'),
-    valvulaEscapeMm: faixaMm(0.08, 0.13, '0,08 – 0,13 mm'),
+    valvulaAdmissaoMm: faixaMm(0.05, 0.1, '0,05 – 0,10 mm (fonte web)'),
+    valvulaEscapeMm: faixaMm(0.05, 0.1, '0,05 – 0,10 mm (fonte web; até 0,12 mm em algumas referências)'),
     folgaCorrenteMm: faixaMm(15, 25, '15 – 25 mm'),
     folgaManeteEmbreagemMm: faixaMm(10, 15, '10 – 15 mm'),
     folgaPedalFreioMm: faixaMm(20, 30, '20 – 30 mm'),
@@ -122,11 +135,20 @@ export const SUZUKI: Modelo[] = [
           'Folga de válvulas justa: Adm 0,04–0,07 mm / Esc 0,08–0,13 mm',
         ],
         alertasBancada: [
-          'ATENÇÃO AO FILTRO DE ÓLEO: atrás do filtro de papel existe um pequeno anel O-ring interno que encaixa no duto do bloco e uma mola na tampa — se o O-ring sair junto com o filtro velho e for jogado fora, a pressão de óleo cai e funde o comando de válvulas!',
-          'Folga de admissão da Intruder/Yes é de apenas 0,04 a 0,07 mm (usar lâmina de 0,05 mm) e escape 0,08 a 0,13 mm (lâmina de 0,10 mm).',
-          'Carburador Mikuni VM22 (2002–2007) tem resposta imediata mas costuma vazar pela agulha da boia se a moto ficar parada com a torneira aberta.',
-          'Bujão de óleo no cárter de alumínio Suzuki é famoso por espanar se apertado demais: respeitar 21 N·m e usar arruela de esmagamento nova.',
+          'OBSERVAÇÃO (FONTE WEB): o portal Suzuki Brasil não hospeda o PDF da Intruder 125; dados conferidos em fontes externas (Google: Scribd, EuCurtoMoto, Docsity, blogs técnicos).',
+          'ATENÇÃO AO FILTRO DE ÓLEO: atrás do filtro de papel existe um pequeno anel O-ring interno no duto do bloco e uma mola na tampa — se o O-ring for descartado com o filtro velho, a pressão de óleo cai e funde o comando!',
+          'Óleo SAE 20W-50 (ou 10W-40) API SF/SG/SL JASO MA: ~850 ml sem filtro / ~950 a 1.000 ml com troca do filtro (sempre conferir o nível final no visor de vidro).',
+          'Folga de válvulas (fonte web): 0,05 – 0,10 mm (Adm e Esc; algumas referências citam até 0,08–0,12 mm no escape) • Vela NGK CR8E (0,7–0,8 mm) • Bengala 174 ml por canela • Bujão de óleo 15–20 N·m.',
         ],
+        auditoria: {
+          status: 'fonte_web',
+          ultimaRevisao: '2026-11-19',
+          origemExterna: 'Google (Scribd, EuCurtoMoto, Docsity, Blogs técnicos)',
+          fonte:
+            'Pesquisa Web autorizada (Google: transcrições do Manual de Serviço Suzuki Intruder 125 no Scribd, EuCurtoMoto, Docsity e blogs técnicos)',
+          notas:
+            'Sem PDF local em public/manuals/. Dados conferidos via fontes web: óleo SAE 20W-50/10W-40 JASO MA (850 ml sem filtro / 950–1.000 ml com filtro); válvulas 0,05–0,10 mm (motor frio); vela NGK CR8E (0,7–0,8 mm); bengala 174 ml por canela; torques bujão 15–20 N·m, eixo diant. 35–55 N·m, eixo tras. 50–60 N·m.',
+        },
         fichaTecnica: {
           ...suzuki125Base,
           partida: 'eletrica',
@@ -149,10 +171,20 @@ export const SUZUKI: Modelo[] = [
           'Rodas de liga leve estrela e roda traseira aro 16',
         ],
         alertasBancada: [
+          'OBSERVAÇÃO (FONTE WEB): o portal Suzuki Brasil não hospeda o PDF da Intruder 125; dados conferidos em fontes externas (Google: Scribd, EuCurtoMoto, Docsity, blogs técnicos).',
           'Carburador Mikuni BS26 a vácuo é muito sensível a rasgos no diafragma do pistonete e ressecamento do coletor de admissão.',
-          'Em 2011–2016 o giclê de baixa original (#12,5) é muito magro para a gasolina brasileira atual com 27% de etanol: se falhar fria, abrir parafuso de mistura para 2,5 a 3 voltas ou subir giclê de baixa para #15.',
-          'Nunca esquecer de conferir o O-ring interno do alojamento do filtro de óleo e a mola da tampa (0,95 L de óleo 10W-40 ou 20W-50 com filtro).',
+          'Nunca esquecer de conferir o O-ring interno do alojamento do filtro de óleo e a mola da tampa (~850 ml sem filtro / ~950 a 1.000 ml com filtro — conferir nível final no visor de vidro).',
+          'Folga de válvulas (fonte web): 0,05 – 0,10 mm (motor frio) • Vela NGK CR8E (0,7–0,8 mm) • Bengala 174 ml por canela • Bujão de óleo 15–20 N·m.',
         ],
+        auditoria: {
+          status: 'fonte_web',
+          ultimaRevisao: '2026-11-19',
+          origemExterna: 'Google (Scribd, EuCurtoMoto, Docsity, Blogs técnicos)',
+          fonte:
+            'Pesquisa Web autorizada (Google: transcrições do Manual de Serviço Suzuki Intruder 125 no Scribd, EuCurtoMoto, Docsity e blogs técnicos)',
+          notas:
+            'Sem PDF local em public/manuals/. Dados conferidos via fontes web: óleo SAE 20W-50/10W-40 JASO MA (850 ml sem filtro / 950–1.000 ml com filtro); válvulas 0,05–0,10 mm (motor frio); vela NGK CR8E (0,7–0,8 mm); bengala 174 ml por canela; torques bujão 15–20 N·m, eixo diant. 35–55 N·m, eixo tras. 50–60 N·m.',
+        },
         fichaTecnica: {
           ...suzuki125Base,
           motorDetalhes: {
@@ -184,11 +216,20 @@ export const SUZUKI: Modelo[] = [
           'Rodas de liga leve aro 18 com pneus sem câmara e painel com indicador de marcha',
         ],
         alertasBancada: [
-          'Compartilha motor completo com a Intruder 125: folga de válvulas Adm 0,04–0,07 mm (lâmina 0,05) e Esc 0,08–0,13 mm (lâmina 0,10).',
-          'Cuidado com o anel O-ring do fundo do filtro de óleo (HF131) e a mola da tampa: erro de montagem bloqueia ou desvia a lubrificação do cabeçote.',
-          'Diferente da Intruder (coroa 43 dentes e aro 16), a Yes 125 usa relação 14x45 (corrente 428H x 118L) e rodas aro 18.',
-          'Bengala dianteira da Yes 125 leva 148 ml de fluido Fork Oil 10W por canela.',
+          'OBSERVAÇÃO (FONTE WEB): o portal Suzuki Brasil não hospeda o PDF da Yes 125 / EN125; dados conferidos em fontes externas (Google: MotosBlog, YouTube, Scribd, EuCurtoMoto, OnlyCars).',
+          'ATENÇÃO AO VOLUME DE ÓLEO: fontes web divergem entre 850/950 ml (bloco GN125) e 1,1 L sem filtro / 1,2 L com filtro (Manual EN125 Yes citado em MotosBlog/YouTube) — SEMPRE abastecer aos poucos e conferir o nível exato no visor de vidro com a moto nivelada!',
+          'Folga de válvulas (fonte web): 0,05 – 0,10 mm (várias referências recomendam 0,10 mm em admissão e escape com motor frio para evitar válvulas presas) • Vela NGK CR7E (ou CR8E) com folga 0,7 – 0,8 mm.',
+          'Bengala dianteira (fonte web): ~153 – 155 ml de óleo 10W por canela • Relação 14x45 (corrente 428H x 118L) • Rodas aro 18.',
         ],
+        auditoria: {
+          status: 'fonte_web',
+          ultimaRevisao: '2026-11-19',
+          origemExterna: 'Google (MotosBlog, YouTube, Scribd, EuCurtoMoto)',
+          fonte:
+            'Pesquisa Web autorizada (Google: transcrições do Manual de Serviço Suzuki EN125 Yes no Scribd, EuCurtoMoto, MotosBlog e YouTube)',
+          notas:
+            'Sem PDF local em public/manuals/. Dados conferidos via fontes web: óleo 10W-40/20W-50 API SF–SL JASO MA (1,1 L troca / 1,2 L com filtro / 1,4 L desmontagem segundo fontes web da EN125 — conferir sempre no visor de vidro); válvulas 0,05–0,10 mm (0,10 mm recomendado); vela NGK CR7E / DENSO U22ESR-N (0,7–0,8 mm); bengala 153–155 ml; torques bujão 10–20 N·m, vela 11–15 N·m, eixo diant. 35–55 N·m, eixo tras. 50–80 N·m.',
+        },
         fichaTecnica: {
           ...suzuki125Base,
           versaoReferencia: 'Yes SE',
@@ -196,16 +237,31 @@ export const SUZUKI: Modelo[] = [
           motorDetalhes: {
             ...suzuki125Base.motorDetalhes,
             alimentacaoDetalhe:
-              'Carburador Mikuni BS26 a vácuo • Giclê alta #110 / baixa #12,5 (#15 recomendado) • Parafuso mistura: 2,5 voltas',
+              'Carburador Mikuni BS26 a vácuo • Giclagem e ajustes internos: fonte web (confirmar no Manual de Serviço)',
           },
           fluidos: {
             ...suzuki125Base.fluidos,
+            oleoMotor: {
+              especificacao: 'SAE 10W-40 ou 20W-50 (API SF/SG/SH/SJ/SL / JASO MA)',
+              capacidadeTrocaL: 1.1,
+              capacidadeTrocaComFiltroL: 1.2,
+              capacidadeTotalL: 1.4,
+              observacao:
+                'Fonte web (MotosBlog/YouTube/Scribd): 1,1 L troca / 1,2 L com filtro / 1,4 L desmontagem — conferir nível final no visor de vidro',
+            },
             tanqueL: 14.0,
             reservaL: 2.0,
             fluidoBengala: {
-              especificacao: 'Fork Oil 10W / ATF',
-              volumePorCanelaMl: 148,
-              nivelMm: 152,
+              especificacao: 'Óleo para garfo 10W (fonte web: EuCurtoMoto / Scribd)',
+              volumePorCanelaMl: 154,
+              observacao: '153 – 155 ml por canela (fonte web)',
+            },
+          },
+          eletrica: {
+            ...suzuki125Base.eletrica,
+            vela: {
+              modelo: 'NGK CR7E (ou DENSO U22ESR-N / NGK CR8E)',
+              folgaEletrodoMm: faixaMm(0.7, 0.8, '0,7 – 0,8 mm (fonte web)'),
             },
           },
           pneus: {

@@ -18,6 +18,8 @@ import {
   FolderOpen,
   Fuel,
   Gauge,
+  Globe,
+  Info,
   RefreshCw,
   Search,
   Settings2,
@@ -169,6 +171,7 @@ export function FichaTecnicaPage() {
   const ficha = geracao.fichaTecnica;
   const auditoria = geracao.auditoria;
   const isVerificadoManual = auditoria.status === 'verificado_manual';
+  const isFonteWeb = auditoria.status === 'fonte_web';
 
   const torquesFiltrados = useMemo(() => {
     const lista = ficha.torques ?? [];
@@ -278,7 +281,9 @@ export function FichaTecnicaPage() {
           'rounded-xl border p-3.5 transition-colors',
           isVerificadoManual
             ? 'border-emerald-500/35 bg-emerald-500/8'
-            : 'border-amber-500/35 bg-amber-500/8',
+            : isFonteWeb
+              ? 'border-sky-500/35 bg-sky-500/8'
+              : 'border-amber-500/35 bg-amber-500/8',
         )}
       >
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
@@ -288,11 +293,15 @@ export function FichaTecnicaPage() {
                 'mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border',
                 isVerificadoManual
                   ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-400'
-                  : 'border-amber-500/40 bg-amber-500/15 text-amber-400',
+                  : isFonteWeb
+                    ? 'border-sky-500/40 bg-sky-500/15 text-sky-400'
+                    : 'border-amber-500/40 bg-amber-500/15 text-amber-400',
               )}
             >
               {isVerificadoManual ? (
                 <ShieldCheck className="size-5" />
+              ) : isFonteWeb ? (
+                <Info className="size-5" />
               ) : (
                 <ShieldAlert className="size-5" />
               )}
@@ -306,13 +315,20 @@ export function FichaTecnicaPage() {
                     'gap-1.5 font-semibold',
                     isVerificadoManual
                       ? 'border-emerald-500/50 bg-emerald-500/15 text-emerald-300'
-                      : 'border-amber-500/50 bg-amber-500/15 text-amber-300',
+                      : isFonteWeb
+                        ? 'border-sky-500/50 bg-sky-500/15 text-sky-300'
+                        : 'border-amber-500/50 bg-amber-500/15 text-amber-300',
                   )}
                 >
                   {isVerificadoManual ? (
                     <>
                       <FileCheck2 className="size-3.5" />
                       Dados Auditados via Manual Oficial
+                    </>
+                  ) : isFonteWeb ? (
+                    <>
+                      <Globe className="size-3.5" />
+                      Observação: Conferido via Fonte Externa (Web)
                     </>
                   ) : (
                     <>
@@ -321,6 +337,16 @@ export function FichaTecnicaPage() {
                     </>
                   )}
                 </Badge>
+
+                {isFonteWeb && auditoria.origemExterna && (
+                  <Badge
+                    variant="secondary"
+                    className="gap-1 border border-sky-500/30 bg-sky-500/10 text-[11px] font-medium text-sky-200"
+                  >
+                    <Info className="size-3 text-sky-400" />
+                    Fonte: {auditoria.origemExterna}
+                  </Badge>
+                )}
 
                 {auditoria.ultimaRevisao && (
                   <span className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground">

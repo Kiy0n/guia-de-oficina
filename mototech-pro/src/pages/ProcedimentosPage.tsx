@@ -9,6 +9,7 @@ import {
   Clock,
   ExternalLink,
   Filter,
+  Info,
   Lightbulb,
   Package,
   Play,
@@ -367,6 +368,7 @@ export function ProcedimentosPage() {
         : 0;
     const videoAtual = proc.videos[videoAtivoIndex] ?? proc.videos[0];
     const isAuditado = moto.geracao.auditoria.status === 'verificado_manual';
+    const isFonteWeb = moto.geracao.auditoria.status === 'fonte_web';
 
     return (
       <motion.div
@@ -444,17 +446,25 @@ export function ProcedimentosPage() {
 
               <Badge
                 variant="outline"
+                title={isFonteWeb ? `Fonte externa: ${moto.geracao.auditoria.origemExterna ?? moto.geracao.auditoria.fonte ?? 'Pesquisa Web'}` : undefined}
                 className={cn(
                   'gap-1.5 text-xs',
                   isAuditado
                     ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300'
-                    : 'border-amber-500/40 bg-amber-500/15 text-amber-300',
+                    : isFonteWeb
+                      ? 'border-sky-500/40 bg-sky-500/15 text-sky-300'
+                      : 'border-amber-500/40 bg-amber-500/15 text-amber-300',
                 )}
               >
                 {isAuditado ? (
                   <>
                     <ShieldCheck className="size-3.5" />
                     Auditado via Manual Oficial
+                  </>
+                ) : isFonteWeb ? (
+                  <>
+                    <Info className="size-3.5" />
+                    Obs: Fonte Web ({moto.geracao.auditoria.origemExterna ?? 'Internet'})
                   </>
                 ) : (
                   <>

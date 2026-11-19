@@ -225,13 +225,15 @@ export interface Diagnostico {
 // Auditoria Técnica (Selo de Confiabilidade de Manual)
 // ---------------------------------------------------------------------------
 
-export type StatusAuditoria = 'verificado_manual' | 'pendente_conferencia';
+export type StatusAuditoria = 'verificado_manual' | 'fonte_web' | 'pendente_conferencia';
 
 export interface AuditoriaTecnica {
   status: StatusAuditoria;
   ultimaRevisao?: string;
   /** Fonte documental exata (ex.: "Manual do Proprietário Honda CG 150 2004, pág. 62–65 / 102–105"). */
   fonte?: string;
+  /** Quando `status === 'fonte_web'`, identifica as fontes externas consultadas (ex.: "Google, YouTube, Reddit, fóruns técnicos"). */
+  origemExterna?: string;
   notas?: string;
 }
 
