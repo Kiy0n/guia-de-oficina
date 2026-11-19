@@ -69,8 +69,8 @@ export const SECTIONS: readonly SectionDef[] = [
   },
   {
     id: 'ferramentas',
-    titulo: 'Kit de Ferramentas',
-    descricao: 'Ferramentas necessárias e especiais para este modelo.',
+    titulo: 'Ferramentas',
+    descricao: 'Lista de chaves, medidas e ferramentas necessárias para manutenção na bancada.',
     icon: Wrench,
     previsto: ['Chaves e soquetes por medida', 'Ferramentas especiais (sacadores, calibradores)', 'Consumíveis'],
   },

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeftRight,
@@ -6,7 +6,6 @@ import {
   ChevronRight,
   Clapperboard,
   ClipboardList,
-  Download,
   Gauge,
   Lightbulb,
   Menu,
@@ -16,7 +15,6 @@ import {
   PlayCircle,
   Star,
   Sun,
-  Upload,
   Wrench,
 } from 'lucide-react';
 
@@ -28,18 +26,16 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { useFerramentas } from '@/context/FerramentasContext';
 import { useMoto, useMotoSelecionada } from '@/context/MotoContext';
 import { usePreferencias } from '@/context/PreferenciasContext';
-import { useToast } from '@/context/ToastContext';
 import { BRAND_THEME } from '@/lib/brands';
 import { SECTIONS, type SectionId } from '@/lib/sections';
 import { cn } from '@/lib/utils';
 import { DiagnosticoCorretivoPage } from '@/pages/DiagnosticoCorretivoPage';
 import { EletricaInjecaoPage } from '@/pages/EletricaInjecaoPage';
+import { FerramentasPage } from '@/pages/FerramentasPage';
 import { FichaTecnicaPage } from '@/pages/FichaTecnicaPage';
 import { IniciarRevisaoPage } from '@/pages/IniciarRevisaoPage';
-import { KitFerramentasPage } from '@/pages/KitFerramentasPage';
 import { ManuaisPage } from '@/pages/ManuaisPage';
 import { ManualRevisoesPage } from '@/pages/ManualRevisoesPage';
 import { ProcedimentosPage } from '@/pages/ProcedimentosPage';
@@ -56,7 +52,7 @@ function SectionContent({ id }: { id: SectionId }) {
   if (id === 'manual-revisoes') return <ManualRevisoesPage />;
   if (id === 'manuais-pdf') return <ManuaisPage />;
   if (id === 'procedimentos') return <ProcedimentosPage />;
-  if (id === 'ferramentas') return <KitFerramentasPage />;
+  if (id === 'ferramentas') return <FerramentasPage />;
   if (id === 'eletrica') return <EletricaInjecaoPage />;
   if (id === 'diagnostico') return <DiagnosticoCorretivoPage />;
   if (id === 'torques-calculadoras') return <TorquesCalculadorasPage />;
@@ -66,8 +62,6 @@ function SectionContent({ id }: { id: SectionId }) {
 export function AppShell() {
   const { section, setSection, trocarMoto } = useMoto();
   const moto = useMotoSelecionada();
-  const { recarregarFerramentas } = useFerramentas();
-  const { mostrarToast } = useToast();
   const {
     tema,
     modoBancada,
@@ -86,8 +80,6 @@ export function AppShell() {
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
   const [colaAberta, setColaAberta] = useState(false);
   const [glossarioAberto, setGlossarioAberto] = useState(false);
-  const [restaurandoBackup, setRestaurandoBackup] = useState(false);
-  const inputBackupRef = useRef<HTMLInputElement | null>(null);
 
   const theme = BRAND_THEME[moto.marca];
   const motoFavorita = isFavorita(moto.modelo.id, moto.geracao.id);
@@ -101,95 +93,6 @@ export function AppShell() {
   const trocar = (inicio: 'fabricante' | 'ano') => {
     setMenuMobileAberto(false);
     trocarMoto(inicio);
-  };
-
-  const baixarBackup = async () => {
-    try {
-      const res = await fetch('/api/backup');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const blob = await res.blob();
-      const hoje = new Date().toISOString().slice(0, 10);
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `mototech-pro-backup-${hoje}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      mostrarToast({
-        dedupeKey: 'backup-oficina',
-        titulo: 'Backup baixado com sucesso!',
-        descricao: `Arquivo mototech-pro-backup-${hoje}.json salvo no seu dispositivo.`,
-        variante: 'sucesso',
-      });
-    } catch {
-      mostrarToast({
-        dedupeKey: 'backup-oficina',
-        titulo: 'Não foi possível baixar o backup',
-        descricao: 'Verifique se o servidor Express local está ativo.',
-        variante: 'erro',
-      });
-    }
-  };
-
-  const handleSelecionarArquivoBackup = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const arquivo = e.target.files?.[0];
-    e.target.value = '';
-    if (!arquivo) return;
-
-    const confirmado = window.confirm(
-      `Deseja restaurar o backup "${arquivo.name}"?\n\nIsso substituirá seu inventário do Kit de Ferramentas em data/oficina.json.`,
-    );
-    if (!confirmado) return;
-
-    setRestaurandoBackup(true);
-    try {
-      const texto = await arquivo.text();
-      const json: unknown = JSON.parse(texto);
-
-      const res = await fetch('/api/backup/restaurar', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify(json),
-      });
-
-      const data = (await res.json()) as {
-        ok?: boolean;
-        totalFerramentas?: number;
-        error?: string;
-      };
-
-      if (!res.ok) {
-        throw new Error(data.error ?? `Erro HTTP ${res.status}`);
-      }
-
-      await recarregarFerramentas();
-
-      mostrarToast({
-        dedupeKey: 'backup-oficina',
-        titulo: 'Backup restaurado com sucesso!',
-        descricao: `${data.totalFerramentas ?? 0} ferramentas do Kit de Ferramentas carregadas.`,
-        variante: 'sucesso',
-        duracaoMs: 4500,
-      });
-    } catch (err) {
-      mostrarToast({
-        dedupeKey: 'backup-oficina',
-        titulo: 'Falha ao restaurar backup',
-        descricao:
-          err instanceof Error ? err.message : 'Verifique se o arquivo JSON é um backup válido.',
-        variante: 'erro',
-      });
-    } finally {
-      setRestaurandoBackup(false);
-    }
   };
 
   const renderSidebarConteudo = (origem: 'desktop' | 'mobile') => (
@@ -292,7 +195,7 @@ export function AppShell() {
 
       <Separator />
 
-      {/* Rodapé do Menu Lateral: Glossário de Siglas + Backup/Restauração */}
+      {/* Rodapé do Menu Lateral: Glossário de Siglas */}
       <div className="space-y-2.5 p-3.5">
         <Button
           type="button"
@@ -308,37 +211,6 @@ export function AppShell() {
           <BookMarked className="size-3.5 text-primary" />
           Glossário de Siglas (PMS, TBI, CBS...)
         </Button>
-
-        <div className="rounded-xl border bg-background/60 p-2.5">
-          <p className="mb-1.5 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
-            Dados Locais (oficina.json)
-          </p>
-          <div className="grid grid-cols-2 gap-1.5">
-            <Button
-              type="button"
-              data-compact="true"
-              variant="secondary"
-              size="sm"
-              onClick={() => void baixarBackup()}
-              className="h-8 gap-1 px-2 text-[11px]"
-            >
-              <Download className="size-3.5" />
-              Baixar Backup
-            </Button>
-            <Button
-              type="button"
-              data-compact="true"
-              variant="outline"
-              size="sm"
-              disabled={restaurandoBackup}
-              onClick={() => inputBackupRef.current?.click()}
-              className="h-8 gap-1 px-2 text-[11px]"
-            >
-              <Upload className="size-3.5" />
-              {restaurandoBackup ? 'Restaurando...' : 'Restaurar'}
-            </Button>
-          </div>
-        </div>
 
         <div className="flex items-center justify-between pt-0.5 text-[11px] text-muted-foreground">
           <span>MotoTech Pro · local</span>
@@ -507,15 +379,6 @@ export function AppShell() {
           </div>
         </div>
       </header>
-
-      {/* Input único oculto para restauração de backup */}
-      <input
-        ref={inputBackupRef}
-        type="file"
-        accept="application/json,.json"
-        onChange={(e) => void handleSelecionarArquivoBackup(e)}
-        className="hidden"
-      />
 
       {/* ------------------------------------------------------------------ */}
       {/* Menu lateral Mobile (Sheet)                                        */}

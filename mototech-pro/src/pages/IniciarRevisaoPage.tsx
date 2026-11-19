@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
   Check,
-  CheckCircle2,
   Clapperboard,
   ClipboardCheck,
   Clock,
@@ -40,7 +38,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { useFerramentas } from '@/context/FerramentasContext';
 import { useMotoSelecionada } from '@/context/MotoContext';
 import { useToast } from '@/context/ToastContext';
 import { PROCEDIMENTOS_OFICINA } from '@/data/procedimentos';
@@ -120,7 +117,6 @@ const ORDEM_STATUS_BOTOES: readonly StatusFeedbackPasso[] = [
 
 export function IniciarRevisaoPage() {
   const moto = useMotoSelecionada();
-  const { possuiFerramenta, marcarFerramentaPossuida } = useFerramentas();
   const { mostrarToast } = useToast();
 
   const draftKey = getDraftKey(moto.modelo.id, moto.geracao.id);
@@ -1185,49 +1181,35 @@ export function IniciarRevisaoPage() {
                 <SheetDescription>{procedimentoRelacionado.resumo}</SheetDescription>
               </SheetHeader>
 
-              {/* Ferramentas Exatas com status em tempo real */}
+              {/* Ferramentas Exatas Necessárias */}
               <div className="space-y-2">
                 <p className="flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase">
                   <Wrench className="size-3.5 text-primary" />
                   Ferramentas Exatas Necessárias
                 </p>
-                {procedimentoRelacionado.ferramentasExatas.map((ferr, idx) => {
-                  const possui = ferr.ferramentaId ? possuiFerramenta(ferr.ferramentaId) : false;
-                  return (
-                    <div
-                      key={idx}
-                      className={cn(
-                        'flex items-center justify-between gap-2 rounded-xl border p-2.5 text-xs',
-                        possui
-                          ? 'border-emerald-500/35 bg-emerald-500/8'
-                          : 'border-amber-500/35 bg-amber-500/8',
-                      )}
-                    >
-                      <div className="flex items-start gap-2">
-                        {possui ? (
-                          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-400" />
-                        ) : (
-                          <AlertCircle className="mt-0.5 size-4 shrink-0 text-amber-400" />
+                {procedimentoRelacionado.ferramentasExatas.map((ferr, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-start gap-2.5 rounded-xl border border-border/70 bg-background/55 p-2.5 text-xs"
+                  >
+                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/12 text-primary">
+                      <Wrench className="size-3.5" />
+                    </span>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <p className="font-bold text-foreground">{ferr.nome}</p>
+                        {!ferr.obrigatoria && (
+                          <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
+                            Opcional
+                          </Badge>
                         )}
-                        <div>
-                          <p className="font-bold text-foreground">{ferr.nome}</p>
-                          <p className="text-muted-foreground">{ferr.medidaOuDetalhe}</p>
-                        </div>
                       </div>
-                      {ferr.ferramentaId && !possui && (
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => marcarFerramentaPossuida(ferr.ferramentaId!)}
-                          className="h-7 shrink-0 text-[11px]"
-                        >
-                          Já tenho
-                        </Button>
-                      )}
+                      <p className="mt-0.5 font-mono text-muted-foreground">
+                        {ferr.medidaOuDetalhe}
+                      </p>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
 
               {/* Player YouTube Embed 16:9 */}

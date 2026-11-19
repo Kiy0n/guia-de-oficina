@@ -8,11 +8,6 @@ import {
   gerarNomeArquivoCache,
   obterOuCriarIndiceManual,
 } from './manualsIndex.js';
-import {
-  lerOficinaData,
-  restaurarOficinaBackup,
-  salvarFerramentasPossuidas,
-} from './storage.js';
 
 const PORT = Number(process.env.PORT ?? 3001);
 const IS_PROD = process.env.NODE_ENV === 'production';
@@ -393,60 +388,6 @@ api.get('/manuais/{*id}/buscar', handleManualBuscar);
 api.get('/manuais/:id/pagina/:numero', handleManualPagina);
 api.get('/manuais/{*id}/pagina/:numero', handleManualPagina);
 
-// ---------------------------------------------------------------------------
-// Inventário de Ferramentas (persistido em /app/data/oficina.json)
-// ---------------------------------------------------------------------------
-api.get('/ferramentas', async (_req, res) => {
-  const dados = await lerOficinaData();
-  res.json({ ferramentasPossuidas: dados.ferramentasPossuidas });
-});
-
-api.put('/ferramentas', async (req, res) => {
-  const body = req.body as Record<string, unknown> | null | undefined;
-  const lista = body?.ferramentasPossuidas;
-
-  if (!Array.isArray(lista) || !lista.every((item) => typeof item === 'string')) {
-    res.status(400).json({
-      error: 'O campo "ferramentasPossuidas" deve ser um array de strings.',
-    });
-    return;
-  }
-
-  const ferramentasPossuidas = await salvarFerramentasPossuidas(lista);
-  res.json({ ferramentasPossuidas });
-});
-
-// ---------------------------------------------------------------------------
-// Backup & Restauração em 1 Clique (/app/data/oficina.json)
-// ---------------------------------------------------------------------------
-api.get('/backup', async (_req, res) => {
-  const dados = await lerOficinaData();
-  const hoje = new Date().toISOString().slice(0, 10);
-  const nomeArquivo = `mototech-pro-backup-${hoje}.json`;
-
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="${nomeArquivo}"`);
-  res.json({
-    versao: 1,
-    app: 'MotoTech Pro',
-    exportadoEm: new Date().toISOString(),
-    ferramentasPossuidas: dados.ferramentasPossuidas,
-  });
-});
-
-api.post('/backup/restaurar', async (req, res) => {
-  const resultado = await restaurarOficinaBackup(req.body);
-  if (!resultado.ok) {
-    res.status(400).json({ error: resultado.erro });
-    return;
-  }
-
-  res.json({
-    ok: true,
-    totalFerramentas: resultado.totalFerramentas,
-  });
-});
-
 // 404 para rotas de API inexistentes (Express 5: wildcard nomeado)
 api.all('/{*splat}', (_req, res) => {
   res.status(404).json({ error: 'Rota de API não encontrada.' });
@@ -475,9 +416,6 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 const server = app.listen(PORT, '0.0.0.0', () => {
-  void lerOficinaData().catch((err) => {
-    console.error('[server] falha ao inicializar /app/data/oficina.json:', err);
-  });
   console.log(`[server] MotoTech Pro API ouvindo em http://0.0.0.0:${PORT} (${IS_PROD ? 'prod' : 'dev'})`);
 });
 

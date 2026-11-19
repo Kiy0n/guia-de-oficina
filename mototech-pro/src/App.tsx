@@ -3,7 +3,6 @@ import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 
 import { AppShell } from '@/components/AppShell';
 import { MotoSelectorWizard } from '@/components/MotoSelectorWizard';
-import { FerramentasProvider } from '@/context/FerramentasContext';
 import { MotoProvider, useMoto } from '@/context/MotoContext';
 import { PreferenciasProvider, usePreferencias } from '@/context/PreferenciasContext';
 import { ToastProvider } from '@/context/ToastContext';
@@ -58,9 +57,7 @@ export default function App() {
       <ToastProvider>
         <PreferenciasProvider>
           <MotoProvider>
-            <FerramentasProvider>
-              <Router />
-            </FerramentasProvider>
+            <Router />
           </MotoProvider>
         </PreferenciasProvider>
       </ToastProvider>

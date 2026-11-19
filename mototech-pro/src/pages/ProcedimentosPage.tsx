@@ -1,10 +1,8 @@
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  AlertCircle,
   AlertTriangle,
   ArrowLeft,
-  CheckCircle2,
   Clapperboard,
   Clock,
   ExternalLink,
@@ -29,7 +27,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { useFerramentas } from '@/context/FerramentasContext';
 import { useMoto, useMotoSelecionada } from '@/context/MotoContext';
 import {
   CATEGORIA_PROCEDIMENTO_LABEL,
@@ -263,7 +260,6 @@ function extrairDadosContextuaisMoto(
 export function ProcedimentosPage() {
   const moto = useMotoSelecionada();
   const { setSection } = useMoto();
-  const { possuiFerramenta, toggleFerramenta, marcarFerramentaPossuida } = useFerramentas();
 
   const [apenasCompativeis, setApenasCompativeis] = useState<boolean>(true);
   const [busca, setBusca] = useState<string>('');
@@ -276,27 +272,11 @@ export function ProcedimentosPage() {
   const def = SECTIONS.find((s) => s.id === 'procedimentos') ?? SECTIONS[0];
 
   const procedimentosEnriquecidos = useMemo(() => {
-    return PROCEDIMENTOS_OFICINA.map((proc) => {
-      const compat = verificarCompatibilidadeProcedimento(proc, moto);
-      const idsFerramentas = Array.from(
-        new Set(
-          proc.ferramentasExatas
-            .map((f) => f.ferramentaId)
-            .filter((id): id is string => Boolean(id)),
-        ),
-      );
-      const totalFerramentas = idsFerramentas.length;
-      const possuidasCount = idsFerramentas.filter((id) => possuiFerramenta(id)).length;
-
-      return {
-        proc,
-        compat,
-        totalFerramentas,
-        possuidasCount,
-        prontoParaExecutar: totalFerramentas > 0 && possuidasCount === totalFerramentas,
-      };
-    });
-  }, [moto, possuiFerramenta]);
+    return PROCEDIMENTOS_OFICINA.map((proc) => ({
+      proc,
+      compat: verificarCompatibilidadeProcedimento(proc, moto),
+    }));
+  }, [moto]);
 
   const totalCompativeisMoto = useMemo(
     () => procedimentosEnriquecidos.filter((p) => p.compat.compativel).length,
@@ -359,7 +339,7 @@ export function ProcedimentosPage() {
   // VISÃO DE DETALHE DO PROCEDIMENTO
   // =========================================================================
   if (itemDetalhe) {
-    const { proc, compat, totalFerramentas, possuidasCount, prontoParaExecutar } = itemDetalhe;
+    const { proc, compat } = itemDetalhe;
     const dadosMoto = extrairDadosContextuaisMoto(proc, moto);
     const concluidos = passosConcluidos[proc.id] ?? [];
     const progressoPassos =
@@ -397,18 +377,6 @@ export function ProcedimentosPage() {
             <Badge variant="secondary" className="gap-1 font-mono">
               <Clock className="size-3.5" />
               {proc.tempoEstimado}
-            </Badge>
-            <Badge
-              variant="outline"
-              className={cn(
-                'gap-1.5',
-                prontoParaExecutar
-                  ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300'
-                  : 'border-amber-500/40 bg-amber-500/15 text-amber-300',
-              )}
-            >
-              <Wrench className="size-3.5" />
-              Você tem {possuidasCount}/{totalFerramentas} ferramentas
             </Badge>
           </div>
         </div>
@@ -517,66 +485,37 @@ export function ProcedimentosPage() {
                   onClick={() => setSection('ferramentas')}
                   className="h-7 text-xs"
                 >
-                  Abrir Meu Kit ({possuidasCount}/{totalFerramentas})
+                  Ver Ferramentas
                 </Button>
               </div>
               <CardDescription>
-                Conferência em tempo real com seu inventário salvo em{' '}
-                <code className="font-mono text-xs">data/oficina.json</code>.
+                Chaves, medidas exatas e ferramentas especiais exigidas para este procedimento.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-2.5">
-              {proc.ferramentasExatas.map((ferr, idx) => {
-                const possui = ferr.ferramentaId ? possuiFerramenta(ferr.ferramentaId) : false;
-                return (
-                  <div
-                    key={idx}
-                    className={cn(
-                      'flex flex-col justify-between gap-2.5 rounded-xl border p-3 sm:flex-row sm:items-center',
-                      possui
-                        ? 'border-emerald-500/30 bg-emerald-500/8'
-                        : 'border-amber-500/30 bg-amber-500/6',
-                    )}
-                  >
-                    <div className="flex items-start gap-2.5">
-                      {possui ? (
-                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-400" />
-                      ) : (
-                        <AlertCircle className="mt-0.5 size-4 shrink-0 text-amber-400" />
+              {proc.ferramentasExatas.map((ferr, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-start gap-2.5 rounded-xl border border-border/70 bg-background/55 p-3"
+                >
+                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/12 text-primary">
+                    <Wrench className="size-3.5" />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <p className="text-sm font-semibold text-foreground">{ferr.nome}</p>
+                      {!ferr.obrigatoria && (
+                        <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
+                          Auxiliar / Opcional
+                        </Badge>
                       )}
-                      <div>
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <p className="text-sm font-semibold text-foreground">{ferr.nome}</p>
-                          {!ferr.obrigatoria && (
-                            <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
-                              Auxiliar / Opcional
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          {ferr.medidaOuDetalhe}
-                        </p>
-                      </div>
                     </div>
-
-                    {ferr.ferramentaId && (
-                      <Button
-                        type="button"
-                        variant={possui ? 'ghost' : 'secondary'}
-                        size="sm"
-                        onClick={() =>
-                          possui
-                            ? toggleFerramenta(ferr.ferramentaId!)
-                            : marcarFerramentaPossuida(ferr.ferramentaId!)
-                        }
-                        className="h-8 shrink-0 text-xs"
-                      >
-                        {possui ? 'Já tenho ✓' : 'Marcar que já tenho'}
-                      </Button>
-                    )}
+                    <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                      {ferr.medidaOuDetalhe}
+                    </p>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </CardContent>
           </Card>
 
@@ -906,8 +845,7 @@ export function ProcedimentosPage() {
           </Card>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {procedimentosFiltrados.map(
-              ({ proc, compat, totalFerramentas, possuidasCount, prontoParaExecutar }) => (
+            {procedimentosFiltrados.map(({ proc, compat }) => (
                 <SpotlightCard
                   key={proc.id}
                   marca={moto.marca}
@@ -937,7 +875,7 @@ export function ProcedimentosPage() {
                     </p>
                   </div>
 
-                  <div className="mt-4 space-y-3 border-t border-border/60 pt-3">
+                  <div className="mt-4 space-y-2 border-t border-border/60 pt-3">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span className="inline-flex items-center gap-1 font-mono">
                         <Clock className="size-3.5" />
@@ -947,28 +885,6 @@ export function ProcedimentosPage() {
                         <Clapperboard className="size-3.5 text-primary" />
                         {proc.videos.length}{' '}
                         {proc.videos.length === 1 ? 'vídeo' : 'vídeos'}
-                      </span>
-                    </div>
-
-                    {/* Indicador de prontidão de ferramentas */}
-                    <div
-                      className={cn(
-                        'flex items-center justify-between rounded-lg border px-2.5 py-1.5 text-xs font-medium',
-                        prontoParaExecutar
-                          ? 'border-emerald-500/35 bg-emerald-500/10 text-emerald-300'
-                          : 'border-amber-500/35 bg-amber-500/10 text-amber-300',
-                      )}
-                    >
-                      <span className="inline-flex items-center gap-1.5">
-                        {prontoParaExecutar ? (
-                          <CheckCircle2 className="size-3.5 text-emerald-400" />
-                        ) : (
-                          <Wrench className="size-3.5 text-amber-400" />
-                        )}
-                        Você tem {possuidasCount}/{totalFerramentas} ferramentas
-                      </span>
-                      <span className="font-mono text-[11px]">
-                        {prontoParaExecutar ? 'Pronto!' : 'Ver lista'}
                       </span>
                     </div>
 
