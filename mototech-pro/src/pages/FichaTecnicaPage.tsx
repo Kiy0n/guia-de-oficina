@@ -341,9 +341,9 @@ export function FichaTecnicaPage() {
                 {isFonteWeb && auditoria.origemExterna && (
                   <Badge
                     variant="secondary"
-                    className="gap-1 border border-sky-500/30 bg-sky-500/10 text-[11px] font-medium text-sky-200"
+                    className="gap-1 border border-sky-500/35 bg-sky-500/12 text-[11px] font-medium text-sky-700 dark:text-sky-300"
                   >
-                    <Info className="size-3 text-sky-400" />
+                    <Info className="size-3 text-sky-600 dark:text-sky-400" />
                     Fonte: {auditoria.origemExterna}
                   </Badge>
                 )}
@@ -531,7 +531,8 @@ export function FichaTecnicaPage() {
       {/* ------------------------------------------------------------------ */}
       <section aria-label="Leitura rápida de bancada">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+          <h2 className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-muted-foreground uppercase">
+            <Gauge className="size-3.5 text-primary" />
             Leitura Rápida de Bancada · Especificações Críticas
           </h2>
           <span className="font-mono text-xs text-muted-foreground">Motor frio (&lt; 35 °C)</span>
@@ -725,7 +726,11 @@ export function FichaTecnicaPage() {
               {geracao.versoes && (
                 <div className="ml-auto flex flex-wrap gap-1.5">
                   {geracao.versoes.map((v) => (
-                    <Badge key={v} variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-200">
+                    <Badge
+                      key={v}
+                      variant="outline"
+                      className="border-amber-600/40 bg-amber-500/12 text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
+                    >
                       {v}
                     </Badge>
                   ))}
@@ -776,8 +781,10 @@ export function FichaTecnicaPage() {
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Cog className="size-5 text-primary" />
+                <CardTitle className="flex items-center gap-2.5 text-lg">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                    <Cog className="size-4" />
+                  </span>
                   Motor, Comando & Alimentação
                 </CardTitle>
                 <CardDescription>
@@ -838,8 +845,10 @@ export function FichaTecnicaPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Droplets className="size-5 text-primary" />
+                <CardTitle className="flex items-center gap-2.5 text-lg">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                    <Droplets className="size-4" />
+                  </span>
                   Fluidos, Capacidades & Filtragem
                 </CardTitle>
                 <CardDescription>Volumes exatos de abastecimento na troca e desmontagem</CardDescription>
@@ -914,17 +923,20 @@ export function FichaTecnicaPage() {
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Cog className="size-5 text-primary" />
+                <CardTitle className="flex items-center gap-2.5 text-lg">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                    <Settings2 className="size-4" />
+                  </span>
                   Câmbio, Transmissão Final & Folgas de Cabos
                 </CardTitle>
                 <CardDescription>Relação coroa/pinhão ou correia CVT e ajustes de manetes/pedais</CardDescription>
               </CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-2">
-                <SpecRow label="Câmbio" valor={cambioLabel(ficha.cambio)} />
+                <SpecRow icon={Cog} label="Câmbio" valor={cambioLabel(ficha.cambio)} />
                 {isCvt ? (
                   <>
                     <SpecRow
+                      icon={RefreshCw}
                       label="Correia CVT"
                       valor={relacao?.cvtDetalhe?.correiaCodigo ?? 'V-Belt'}
                       detalhe={
@@ -935,6 +947,7 @@ export function FichaTecnicaPage() {
                       mono
                     />
                     <SpecRow
+                      icon={Settings2}
                       label="Roletes do Variador"
                       valor={relacao?.cvtDetalhe?.roletesMedidaPeso ?? '6 roletes centrífugos'}
                       detalhe="Substituir se apresentarem faces planas (calos)"
@@ -943,18 +956,21 @@ export function FichaTecnicaPage() {
                 ) : (
                   <>
                     <SpecRow
+                      icon={Cog}
                       label="Relação (Pinhão × Coroa)"
                       valor={`${relacao?.pinhaoDentes ?? '—'} dentes × ${relacao?.coroaDentes ?? '—'} dentes`}
                       detalhe={`Corrente: ${relacao?.corrente ?? '—'}`}
                       mono
                     />
                     <SpecRow
+                      icon={SlidersHorizontal}
                       label="Folga Livre da Corrente"
                       valor={formatFaixa(ficha.folgas?.folgaCorrenteMm)}
                       detalhe="Medir no ponto central inferior da balança"
                       mono
                     />
                     <SpecRow
+                      icon={SlidersHorizontal}
                       label="Folga do Manete de Embreagem"
                       valor={formatFaixa(ficha.folgas?.folgaManeteEmbreagemMm)}
                       detalhe={
@@ -967,6 +983,7 @@ export function FichaTecnicaPage() {
                   </>
                 )}
                 <SpecRow
+                  icon={Gauge}
                   label="Folga Livre do Acelerador"
                   valor={formatFaixa(ficha.folgas?.folgaAceleradorMm)}
                   detalhe="Conferir com guidão esterçado de batente a batente"
@@ -977,8 +994,10 @@ export function FichaTecnicaPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Disc3 className="size-5 text-primary" />
+                <CardTitle className="flex items-center gap-2.5 text-lg">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                    <Disc3 className="size-4" />
+                  </span>
                   Suspensão, Freios & Pneus
                 </CardTitle>
                 <CardDescription>Bengalas, fluido hidráulico e medidas/calibragem dos pneus</CardDescription>
@@ -1028,8 +1047,10 @@ export function FichaTecnicaPage() {
         <TabsContent value="ignicao-eletrica" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Zap className="size-5 text-primary" />
+              <CardTitle className="flex items-center gap-2.5 text-lg">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                  <Zap className="size-4" />
+                </span>
                 Ignição, Bateria, Carga & Iluminação
               </CardTitle>
               <CardDescription>Parâmetros para diagnóstico com multímetro e reposição elétrica</CardDescription>
@@ -1098,8 +1119,10 @@ export function FichaTecnicaPage() {
           <Card>
             <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Wrench className="size-5 text-primary" />
+                <CardTitle className="flex items-center gap-2.5 text-lg">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                    <Wrench className="size-4" />
+                  </span>
                   Tabela de Torques Críticos — {modelo.nome} ({geracao.anosLabel})
                 </CardTitle>
                 <CardDescription>
@@ -1160,16 +1183,21 @@ export function FichaTecnicaPage() {
                         key={t.item}
                         className="flex items-center justify-between gap-3 rounded-xl border bg-background/45 px-4 py-3"
                       >
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-foreground">{t.item}</p>
-                            {t.categoria && (
-                              <Badge variant="outline" className="text-[10px] uppercase">
-                                {t.categoria}
-                              </Badge>
-                            )}
+                        <div className="flex min-w-0 items-start gap-3">
+                          <span className="mt-0.5 shrink-0 rounded-lg bg-primary/12 p-1.5 text-primary">
+                            <Wrench className="size-4" />
+                          </span>
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="font-medium text-foreground">{t.item}</p>
+                              {t.categoria && (
+                                <Badge variant="outline" className="text-[10px] uppercase">
+                                  {t.categoria}
+                                </Badge>
+                              )}
+                            </div>
+                            {t.observacao && <p className="mt-0.5 text-xs text-muted-foreground">{t.observacao}</p>}
                           </div>
-                          {t.observacao && <p className="mt-0.5 text-xs text-muted-foreground">{t.observacao}</p>}
                         </div>
 
                         <div className="shrink-0 text-right font-mono">

@@ -64,12 +64,17 @@ export function SectionHeader({ section, children }: { section: SectionDef; chil
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-all',
                   ativa
-                    ? 'border-primary bg-primary text-primary-foreground font-semibold shadow-xs'
+                    ? 'border-orange-600/40 bg-orange-500/15 font-semibold text-orange-800 shadow-xs dark:border-orange-500/45 dark:bg-orange-500/15 dark:text-orange-400'
                     : 'border-border bg-background/70 text-foreground/85 hover:border-primary/50 hover:bg-accent',
                 )}
               >
                 <span className="font-mono font-bold">{g.anosLabel}</span>
-                <span className={cn('hidden md:inline', ativa ? 'text-primary-foreground/90' : 'text-muted-foreground')}>
+                <span
+                  className={cn(
+                    'hidden md:inline',
+                    ativa ? 'text-orange-700/90 dark:text-orange-300/90' : 'text-muted-foreground',
+                  )}
+                >
                   · {g.nomeGeracao}
                 </span>
               </button>

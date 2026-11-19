@@ -37,7 +37,7 @@ export const BRAND_THEME: Record<Marca, BrandTheme> = {
       'hover:border-honda hover:shadow-[0_14px_38px_-10px_rgba(204,0,0,0.55)] focus-visible:border-honda',
     topBarGlow: 'group-hover:shadow-[0_0_20px_3px_var(--honda)]',
     border: 'border-honda/60',
-    text: 'text-red-400',
+    text: 'text-red-700 dark:text-red-400',
     accent: 'bg-honda',
   },
   Yamaha: {
@@ -50,7 +50,7 @@ export const BRAND_THEME: Record<Marca, BrandTheme> = {
       'hover:border-yamaha hover:shadow-[0_14px_38px_-10px_rgba(0,85,165,0.65)] focus-visible:border-yamaha',
     topBarGlow: 'group-hover:shadow-[0_0_20px_3px_var(--yamaha)]',
     border: 'border-yamaha/60',
-    text: 'text-sky-400',
+    text: 'text-blue-700 dark:text-blue-400',
     accent: 'bg-yamaha',
   },
   Suzuki: {
@@ -63,7 +63,7 @@ export const BRAND_THEME: Record<Marca, BrandTheme> = {
       'hover:border-suzuki hover:shadow-[0_14px_38px_-10px_rgba(230,184,0,0.5)] focus-visible:border-suzuki',
     topBarGlow: 'group-hover:shadow-[0_0_20px_3px_var(--suzuki)]',
     border: 'border-suzuki/60',
-    text: 'text-suzuki',
+    text: 'text-amber-800 dark:text-yellow-300',
     accent: 'bg-suzuki',
   },
 };

@@ -11,6 +11,8 @@ import {
   Lightbulb,
   Menu,
   Moon,
+  PanelLeftClose,
+  PanelLeftOpen,
   PlayCircle,
   Star,
   Sun,
@@ -70,16 +72,18 @@ export function AppShell() {
     tema,
     modoBancada,
     manterTelaAcesa,
+    menuLateralAberto,
     wakeLockAtivo,
     wakeLockMotivoIndisponivel,
     alternarTema,
     alternarModoBancada,
     alternarTelaAcesa,
+    alternarMenuLateral,
     toggleFavorita,
     isFavorita,
   } = usePreferencias();
 
-  const [menuAberto, setMenuAberto] = useState(false);
+  const [menuMobileAberto, setMenuMobileAberto] = useState(false);
   const [colaAberta, setColaAberta] = useState(false);
   const [glossarioAberto, setGlossarioAberto] = useState(false);
   const [restaurandoBackup, setRestaurandoBackup] = useState(false);
@@ -90,12 +94,12 @@ export function AppShell() {
 
   const navegar = (id: SectionId) => {
     setSection(id);
-    setMenuAberto(false);
+    setMenuMobileAberto(false);
     window.scrollTo({ top: 0 });
   };
 
   const trocar = (inicio: 'fabricante' | 'ano') => {
-    setMenuAberto(false);
+    setMenuMobileAberto(false);
     trocarMoto(inicio);
   };
 
@@ -188,21 +192,196 @@ export function AppShell() {
     }
   };
 
+  const renderSidebarConteudo = (origem: 'desktop' | 'mobile') => (
+    <>
+      {/* Controles rápidos de bancada no topo do menu (ótimo no mobile!) */}
+      <div className={cn('grid grid-cols-3 gap-1.5 px-4 pb-3', origem === 'desktop' && 'pt-3')}>
+        <Button
+          type="button"
+          data-compact="true"
+          variant={manterTelaAcesa ? 'default' : 'outline'}
+          size="sm"
+          onClick={alternarTelaAcesa}
+          className="h-9 flex-col gap-0.5 px-1 text-[10px]"
+        >
+          <Lightbulb className={cn('size-3.5', manterTelaAcesa && 'fill-current')} />
+          <span>Tela Acesa</span>
+        </Button>
+        <Button
+          type="button"
+          data-compact="true"
+          variant={modoBancada ? 'default' : 'outline'}
+          size="sm"
+          onClick={alternarModoBancada}
+          className="h-9 flex-col gap-0.5 px-1 text-[10px]"
+        >
+          <span className="font-mono text-xs font-extrabold">A+</span>
+          <span>Bancada</span>
+        </Button>
+        <Button
+          type="button"
+          data-compact="true"
+          variant={tema === 'sol' ? 'default' : 'outline'}
+          size="sm"
+          onClick={alternarTema}
+          title={tema === 'oficina' ? 'Mudar para Tema Claro' : 'Mudar para Tema Escuro'}
+          className="h-9 flex-col gap-0.5 px-1 text-[10px]"
+        >
+          {tema === 'oficina' ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
+          <span className="whitespace-nowrap">
+            {tema === 'oficina' ? 'Tema Claro' : 'Tema Escuro'}
+          </span>
+        </Button>
+      </div>
+
+      <div className="px-4 pb-3">
+        <div className={cn('group relative overflow-hidden rounded-xl border-2 bg-card p-3.5', theme.border)}>
+          <div className="flex items-center gap-3">
+            <theme.Logo emblemOnly className="size-11 shrink-0" />
+            <div className="min-w-0">
+              <p className="truncate font-semibold">{moto.modelo.nome}</p>
+              <p className="font-mono text-xs text-muted-foreground">{moto.geracao.anosLabel}</p>
+              <p className="truncate text-xs text-muted-foreground">{moto.geracao.nomeGeracao}</p>
+            </div>
+          </div>
+          <Button variant="secondary" size="sm" className="mt-2.5 w-full" onClick={() => trocar('ano')}>
+            <ArrowLeftRight /> Trocar Moto / Ano
+          </Button>
+        </div>
+      </div>
+
+      <Separator />
+
+      <ScrollArea className="min-h-0 flex-1">
+        <nav aria-label="Seções" className="flex flex-col gap-1 p-3">
+          {SECTIONS.map(({ id, titulo, icon: Icon }, i) => {
+            const ativo = id === section;
+            return (
+              <button
+                key={id}
+                type="button"
+                data-compact="true"
+                onClick={() => navegar(id)}
+                aria-current={ativo ? 'page' : undefined}
+                className={cn(
+                  'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
+                  ativo ? 'font-semibold text-primary' : 'text-foreground/85 hover:bg-accent',
+                )}
+              >
+                {ativo && (
+                  <motion.span
+                    layoutId={`sidebar-active-section-${origem}`}
+                    className="pointer-events-none absolute inset-0 rounded-lg bg-primary/15"
+                    transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                  />
+                )}
+                <span className="relative z-10 w-4 font-mono text-xs text-muted-foreground">{i + 1}</span>
+                <Icon className="relative z-10 size-4 shrink-0" />
+                <span className="relative z-10 flex-1">{titulo}</span>
+                <ChevronRight
+                  className={cn(
+                    'relative z-10 size-4 opacity-0 transition-opacity group-hover:opacity-60',
+                    ativo && 'opacity-60',
+                  )}
+                />
+              </button>
+            );
+          })}
+        </nav>
+      </ScrollArea>
+
+      <Separator />
+
+      {/* Rodapé do Menu Lateral: Glossário de Siglas + Backup/Restauração */}
+      <div className="space-y-2.5 p-3.5">
+        <Button
+          type="button"
+          data-compact="true"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setMenuMobileAberto(false);
+            setGlossarioAberto(true);
+          }}
+          className="w-full justify-start gap-2 text-xs"
+        >
+          <BookMarked className="size-3.5 text-primary" />
+          Glossário de Siglas (PMS, TBI, CBS...)
+        </Button>
+
+        <div className="rounded-xl border bg-background/60 p-2.5">
+          <p className="mb-1.5 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+            Dados Locais (oficina.json)
+          </p>
+          <div className="grid grid-cols-2 gap-1.5">
+            <Button
+              type="button"
+              data-compact="true"
+              variant="secondary"
+              size="sm"
+              onClick={() => void baixarBackup()}
+              className="h-8 gap-1 px-2 text-[11px]"
+            >
+              <Download className="size-3.5" />
+              Baixar Backup
+            </Button>
+            <Button
+              type="button"
+              data-compact="true"
+              variant="outline"
+              size="sm"
+              disabled={restaurandoBackup}
+              onClick={() => inputBackupRef.current?.click()}
+              className="h-8 gap-1 px-2 text-[11px]"
+            >
+              <Upload className="size-3.5" />
+              {restaurandoBackup ? 'Restaurando...' : 'Restaurar'}
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-0.5 text-[11px] text-muted-foreground">
+          <span>MotoTech Pro · local</span>
+          <ApiStatusIndicator />
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <div className="min-h-screen">
       {/* ------------------------------------------------------------------ */}
       {/* Header fixo                                                        */}
       {/* ------------------------------------------------------------------ */}
       <header className="no-print sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-1.5 px-2.5 sm:gap-2.5 sm:px-6">
+        <div className="flex h-14 items-center gap-1.5 px-2.5 sm:gap-2.5 sm:px-5">
+          {/* Botão Mobile: abre gaveta (Sheet) */}
           <Button
             variant="ghost"
             size="icon"
             data-compact="true"
-            onClick={() => setMenuAberto(true)}
+            onClick={() => setMenuMobileAberto(true)}
             aria-label="Abrir menu"
+            className="md:hidden"
           >
             <Menu className="size-5" />
+          </Button>
+
+          {/* Botão Desktop: oculta / mostra menu lateral persistente */}
+          <Button
+            variant="ghost"
+            size="icon"
+            data-compact="true"
+            onClick={alternarMenuLateral}
+            aria-label={menuLateralAberto ? 'Ocultar menu lateral' : 'Mostrar menu lateral'}
+            title={menuLateralAberto ? 'Ocultar menu lateral' : 'Mostrar menu lateral'}
+            className="hidden md:inline-flex"
+          >
+            {menuLateralAberto ? (
+              <PanelLeftClose className="size-5" />
+            ) : (
+              <PanelLeftOpen className="size-5" />
+            )}
           </Button>
 
           <div className="hidden items-center gap-2 lg:flex">
@@ -295,7 +474,7 @@ export function AppShell() {
               A+
             </Button>
 
-            {/* Tema Oficina (Escuro) <-> Modo Sol (Claro) */}
+            {/* Alternador Tema Escuro <-> Tema Claro */}
             <Button
               type="button"
               data-compact="true"
@@ -304,10 +483,10 @@ export function AppShell() {
               onClick={alternarTema}
               title={
                 tema === 'oficina'
-                  ? 'Mudar para Modo Sol (Claro Alto Contraste)'
-                  : 'Voltar para Modo Oficina (Escuro)'
+                  ? 'Mudar para Tema Claro'
+                  : 'Mudar para Tema Escuro'
               }
-              aria-label="Alternar tema Oficina / Modo Sol"
+              aria-label={tema === 'oficina' ? 'Mudar para Tema Claro' : 'Mudar para Tema Escuro'}
               className="size-8"
             >
               {tema === 'oficina' ? <Sun className="size-4" /> : <Moon className="size-4" />}
@@ -329,11 +508,20 @@ export function AppShell() {
         </div>
       </header>
 
+      {/* Input único oculto para restauração de backup */}
+      <input
+        ref={inputBackupRef}
+        type="file"
+        accept="application/json,.json"
+        onChange={(e) => void handleSelecionarArquivoBackup(e)}
+        className="hidden"
+      />
+
       {/* ------------------------------------------------------------------ */}
-      {/* Menu lateral (Sheet)                                               */}
+      {/* Menu lateral Mobile (Sheet)                                        */}
       {/* ------------------------------------------------------------------ */}
-      <Sheet open={menuAberto} onOpenChange={setMenuAberto}>
-        <SheetContent side="left" className="w-80 gap-0 p-0 sm:max-w-80">
+      <Sheet open={menuMobileAberto} onOpenChange={setMenuMobileAberto}>
+        <SheetContent side="left" className="w-80 gap-0 p-0 sm:max-w-80 md:hidden">
           <SheetHeader className="pb-3">
             <SheetTitle className="flex items-center gap-2">
               <span className="rounded-lg bg-primary/15 p-1.5 text-primary">
@@ -343,181 +531,44 @@ export function AppShell() {
             </SheetTitle>
             <SheetDescription>Navegação e controles da bancada</SheetDescription>
           </SheetHeader>
-
-          {/* Controles rápidos de bancada no topo do menu (ótimo no mobile!) */}
-          <div className="grid grid-cols-3 gap-1.5 px-4 pb-3">
-            <Button
-              type="button"
-              data-compact="true"
-              variant={manterTelaAcesa ? 'default' : 'outline'}
-              size="sm"
-              onClick={alternarTelaAcesa}
-              className="h-9 flex-col gap-0.5 px-1 text-[10px]"
-            >
-              <Lightbulb className={cn('size-3.5', manterTelaAcesa && 'fill-current')} />
-              <span>Tela Acesa</span>
-            </Button>
-            <Button
-              type="button"
-              data-compact="true"
-              variant={modoBancada ? 'default' : 'outline'}
-              size="sm"
-              onClick={alternarModoBancada}
-              className="h-9 flex-col gap-0.5 px-1 text-[10px]"
-            >
-              <span className="font-mono text-xs font-extrabold">A+</span>
-              <span>Bancada</span>
-            </Button>
-            <Button
-              type="button"
-              data-compact="true"
-              variant={tema === 'sol' ? 'default' : 'outline'}
-              size="sm"
-              onClick={alternarTema}
-              className="h-9 flex-col gap-0.5 px-1 text-[10px]"
-            >
-              {tema === 'oficina' ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
-              <span>{tema === 'oficina' ? 'Modo Sol' : 'Oficina'}</span>
-            </Button>
-          </div>
-
-          <div className="px-4 pb-3">
-            <div className={cn('group relative overflow-hidden rounded-xl border-2 bg-card p-3.5', theme.border)}>
-              <div className="flex items-center gap-3">
-                <theme.Logo emblemOnly className="size-11 shrink-0" />
-                <div className="min-w-0">
-                  <p className="truncate font-semibold">{moto.modelo.nome}</p>
-                  <p className="font-mono text-xs text-muted-foreground">{moto.geracao.anosLabel}</p>
-                  <p className="truncate text-xs text-muted-foreground">{moto.geracao.nomeGeracao}</p>
-                </div>
-              </div>
-              <Button variant="secondary" size="sm" className="mt-2.5 w-full" onClick={() => trocar('ano')}>
-                <ArrowLeftRight /> Trocar Moto / Ano
-              </Button>
-            </div>
-          </div>
-
-          <Separator />
-
-          <ScrollArea className="min-h-0 flex-1">
-            <nav aria-label="Seções" className="flex flex-col gap-1 p-3">
-              {SECTIONS.map(({ id, titulo, icon: Icon }, i) => {
-                const ativo = id === section;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    data-compact="true"
-                    onClick={() => navegar(id)}
-                    aria-current={ativo ? 'page' : undefined}
-                    className={cn(
-                      'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
-                      ativo ? 'font-semibold text-primary' : 'text-foreground/85 hover:bg-accent',
-                    )}
-                  >
-                    {ativo && (
-                      <motion.span
-                        layoutId="sidebar-active-section"
-                        className="pointer-events-none absolute inset-0 rounded-lg bg-primary/15"
-                        transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-                      />
-                    )}
-                    <span className="relative z-10 w-4 font-mono text-xs text-muted-foreground">{i + 1}</span>
-                    <Icon className="relative z-10 size-4 shrink-0" />
-                    <span className="relative z-10 flex-1">{titulo}</span>
-                    <ChevronRight
-                      className={cn(
-                        'relative z-10 size-4 opacity-0 transition-opacity group-hover:opacity-60',
-                        ativo && 'opacity-60',
-                      )}
-                    />
-                  </button>
-                );
-              })}
-            </nav>
-          </ScrollArea>
-
-          <Separator />
-
-          {/* Rodapé do Menu Lateral: Glossário de Siglas + Backup/Restauração */}
-          <div className="space-y-2.5 p-3.5">
-            <Button
-              type="button"
-              data-compact="true"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setMenuAberto(false);
-                setGlossarioAberto(true);
-              }}
-              className="w-full justify-start gap-2 text-xs"
-            >
-              <BookMarked className="size-3.5 text-primary" />
-              Glossário de Siglas (PMS, TBI, CBS...)
-            </Button>
-
-            <div className="rounded-xl border bg-background/60 p-2.5">
-              <p className="mb-1.5 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
-                Dados Locais (oficina.json)
-              </p>
-              <div className="grid grid-cols-2 gap-1.5">
-                <Button
-                  type="button"
-                  data-compact="true"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => void baixarBackup()}
-                  className="h-8 gap-1 px-2 text-[11px]"
-                >
-                  <Download className="size-3.5" />
-                  Baixar Backup
-                </Button>
-                <Button
-                  type="button"
-                  data-compact="true"
-                  variant="outline"
-                  size="sm"
-                  disabled={restaurandoBackup}
-                  onClick={() => inputBackupRef.current?.click()}
-                  className="h-8 gap-1 px-2 text-[11px]"
-                >
-                  <Upload className="size-3.5" />
-                  {restaurandoBackup ? 'Restaurando...' : 'Restaurar'}
-                </Button>
-              </div>
-              <input
-                ref={inputBackupRef}
-                type="file"
-                accept="application/json,.json"
-                onChange={(e) => void handleSelecionarArquivoBackup(e)}
-                className="hidden"
-              />
-            </div>
-
-            <div className="flex items-center justify-between pt-0.5 text-[11px] text-muted-foreground">
-              <span>MotoTech Pro · local</span>
-              <ApiStatusIndicator />
-            </div>
-          </div>
+          {renderSidebarConteudo('mobile')}
         </SheetContent>
       </Sheet>
 
       {/* ------------------------------------------------------------------ */}
-      {/* Conteúdo Principal (com pb-24 no mobile para a Bottom Navigation)  */}
+      {/* Layout Desktop (Menu Lateral Persistente + Conteúdo Principal)     */}
       {/* ------------------------------------------------------------------ */}
-      <main className="mx-auto max-w-6xl px-4 py-6 pb-24 sm:px-6 md:py-8 md:pb-8">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`${moto.geracao.id}-${section}`}
-            initial={{ opacity: 0, y: 12, scale: 0.99 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.99 }}
-            transition={SECTION_TRANSITION}
-          >
-            <SectionContent id={section} />
-          </motion.div>
-        </AnimatePresence>
-      </main>
+      <div className="flex min-h-[calc(100vh-3.5rem)]">
+        <aside
+          aria-label="Menu lateral"
+          aria-hidden={!menuLateralAberto}
+          className={cn(
+            'no-print hidden shrink-0 overflow-hidden border-r bg-card/40 transition-[width,opacity] duration-300 ease-out md:sticky md:top-14 md:flex md:h-[calc(100vh-3.5rem)] md:flex-col',
+            menuLateralAberto
+              ? 'w-72 opacity-100'
+              : 'pointer-events-none w-0 border-r-0 opacity-0',
+          )}
+        >
+          <div className="flex h-full w-72 flex-col">{renderSidebarConteudo('desktop')}</div>
+        </aside>
+
+        {/* Conteúdo Principal (com pb-24 no mobile para a Bottom Navigation) */}
+        <main className="min-w-0 flex-1">
+          <div className="mx-auto max-w-6xl px-4 py-6 pb-24 sm:px-6 md:py-8 md:pb-8">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${moto.geracao.id}-${section}`}
+                initial={{ opacity: 0, y: 12, scale: 0.99 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.99 }}
+                transition={SECTION_TRANSITION}
+              >
+                <SectionContent id={section} />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </main>
+      </div>
 
       {/* ------------------------------------------------------------------ */}
       {/* Barra Inferior Fixa no Mobile (md:hidden)                          */}
@@ -555,7 +606,7 @@ export function AppShell() {
           <button
             type="button"
             data-compact="true"
-            onClick={() => setMenuAberto(true)}
+            onClick={() => setMenuMobileAberto(true)}
             className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1 text-[11px] font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <Menu className="size-5" />

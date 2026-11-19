@@ -342,7 +342,7 @@ export function ManualRevisoesPage() {
                     className={cn(
                       'inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors',
                       ativo
-                        ? 'border-primary bg-primary text-primary-foreground'
+                        ? 'border-orange-600/40 bg-orange-500/15 font-semibold text-orange-800 dark:border-orange-500/45 dark:bg-orange-500/15 dark:text-orange-400'
                         : 'border-border bg-background/60 text-muted-foreground hover:text-foreground',
                     )}
                   >

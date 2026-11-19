@@ -25,6 +25,7 @@ interface PreferenciasPersistidas {
   tema: TemaBancada;
   modoBancada: boolean;
   manterTelaAcesa: boolean;
+  menuLateralAberto: boolean;
   recentes: MotoAtalho[];
   favoritas: MotoAtalho[];
 }
@@ -33,6 +34,7 @@ interface PreferenciasContextValue {
   tema: TemaBancada;
   modoBancada: boolean;
   manterTelaAcesa: boolean;
+  menuLateralAberto: boolean;
   wakeLockAtivo: boolean;
   wakeLockSuportado: boolean;
   wakeLockMotivoIndisponivel: string | null;
@@ -41,6 +43,7 @@ interface PreferenciasContextValue {
   alternarTema: () => void;
   alternarModoBancada: () => void;
   alternarTelaAcesa: () => void;
+  alternarMenuLateral: () => void;
   registrarAcessoMoto: (modeloId: string, geracaoId: string) => void;
   toggleFavorita: (modeloId: string, geracaoId: string) => void;
   isFavorita: (modeloId: string, geracaoId: string) => boolean;
@@ -52,6 +55,7 @@ const DEFAULT_PREFS: PreferenciasPersistidas = {
   tema: 'oficina',
   modoBancada: false,
   manterTelaAcesa: false,
+  menuLateralAberto: true,
   recentes: [],
   favoritas: [],
 };
@@ -89,6 +93,8 @@ function lerPreferencias(): PreferenciasPersistidas {
       tema: parsed.tema === 'sol' ? 'sol' : 'oficina',
       modoBancada: Boolean(parsed.modoBancada),
       manterTelaAcesa: Boolean(parsed.manterTelaAcesa),
+      menuLateralAberto:
+        typeof parsed.menuLateralAberto === 'boolean' ? parsed.menuLateralAberto : true,
       recentes: normalizarListaAtalhos(parsed.recentes, 4),
       favoritas: normalizarListaAtalhos(parsed.favoritas, 8),
     };
@@ -150,12 +156,22 @@ export function PreferenciasProvider({ children }: { children: ReactNode }) {
       dedupeKey: 'tema',
       titulo:
         proximo === 'sol'
-          ? 'Modo Sol ativado (Alto Contraste)'
-          : 'Modo Oficina ativado (Tema Escuro)',
+          ? 'Tema Claro ativado'
+          : 'Tema Escuro ativado',
       variante: 'default',
       duracaoMs: 2200,
     });
   }, [mostrarToast]);
+
+  const alternarMenuLateral = useCallback(() => {
+    const atual = prefsRef.current;
+    const atualizado: PreferenciasPersistidas = {
+      ...atual,
+      menuLateralAberto: !atual.menuLateralAberto,
+    };
+    prefsRef.current = atualizado;
+    setPrefs(atualizado);
+  }, []);
 
   const alternarModoBancada = useCallback(() => {
     const atual = prefsRef.current;
@@ -267,6 +283,7 @@ export function PreferenciasProvider({ children }: { children: ReactNode }) {
       tema: prefs.tema,
       modoBancada: prefs.modoBancada,
       manterTelaAcesa: prefs.manterTelaAcesa,
+      menuLateralAberto: prefs.menuLateralAberto,
       wakeLockAtivo: ativoNoNavegador,
       wakeLockSuportado: suportado,
       wakeLockMotivoIndisponivel: motivoIndisponivel,
@@ -275,6 +292,7 @@ export function PreferenciasProvider({ children }: { children: ReactNode }) {
       alternarTema,
       alternarModoBancada,
       alternarTelaAcesa,
+      alternarMenuLateral,
       registrarAcessoMoto,
       toggleFavorita,
       isFavorita,
@@ -287,6 +305,7 @@ export function PreferenciasProvider({ children }: { children: ReactNode }) {
       alternarTema,
       alternarModoBancada,
       alternarTelaAcesa,
+      alternarMenuLateral,
       registrarAcessoMoto,
       toggleFavorita,
       isFavorita,

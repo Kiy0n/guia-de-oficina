@@ -137,7 +137,8 @@
 }
 
 /* -------------------------------------------------------------------------
- * Modo Sol (Claro de Altíssimo Contraste para garagem aberta / sol forte)
+ * Tema Claro (Alto Contraste para garagem aberta / sol forte)
+ * Mantém a classe interna .theme-sol para compatibilidade com preferências salvas
  * ------------------------------------------------------------------------- */
 .theme-sol {
   color-scheme: light;
@@ -166,6 +167,8 @@
   color: #047857 !important;
 }
 
+.theme-sol .text-amber-200,
+.theme-sol .text-amber-200\/80,
 .theme-sol .text-amber-200\/90,
 .theme-sol .text-amber-300,
 .theme-sol .text-amber-400 {
@@ -177,6 +180,7 @@
   color: #be123c !important;
 }
 
+.theme-sol .text-sky-200,
 .theme-sol .text-sky-300,
 .theme-sol .text-sky-400 {
   color: #0369a1 !important;
@@ -192,7 +196,7 @@
   color: #0e7490 !important;
 }
 
-/* Mantém o Blueprint HUD e containers de vídeo sempre escuros e nítidos no Modo Sol */
+/* Mantém o Blueprint HUD e containers de vídeo sempre escuros e nítidos no Tema Claro */
 .theme-sol .bg-zinc-950,
 .theme-sol .bg-zinc-900 {
   color: #f4f4f5;

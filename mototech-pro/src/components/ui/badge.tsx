@@ -9,14 +9,18 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90',
+        default:
+          'border-orange-600/40 bg-orange-500/15 text-orange-800 dark:border-orange-500/45 dark:bg-orange-500/15 dark:text-orange-400 [a&]:hover:bg-orange-500/25',
         secondary: 'border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90',
         destructive:
-          'border-transparent bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90',
+          'border-red-600/40 bg-red-500/15 text-red-700 focus-visible:ring-destructive/20 dark:border-red-500/35 dark:bg-red-500/15 dark:text-red-400 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-red-500/25',
         outline: 'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
-        honda: 'border-transparent bg-honda text-honda-foreground',
-        yamaha: 'border-transparent bg-yamaha text-yamaha-foreground',
-        suzuki: 'border-suzuki-secondary bg-suzuki text-suzuki-foreground',
+        honda:
+          'border-red-600/40 bg-red-500/12 font-semibold text-red-700 dark:border-red-500/35 dark:bg-red-500/15 dark:text-red-400',
+        yamaha:
+          'border-blue-600/40 bg-blue-500/12 font-semibold text-blue-700 dark:border-blue-500/35 dark:bg-blue-500/15 dark:text-blue-400',
+        suzuki:
+          'border-amber-600/40 bg-amber-500/15 font-semibold text-amber-800 dark:border-yellow-400/35 dark:bg-yellow-400/15 dark:text-yellow-300',
       },
     },
     defaultVariants: {

@@ -95,7 +95,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       const duracao = input.duracaoMs ?? (input.acaoDesfazer ? 5200 : 3400);
       const ativos = toastsRef.current;
 
-      // 1) Substituição por dedupeKey (evita empilhar toggles rápidos como Sol <-> Oficina)
+      // 1) Substituição por dedupeKey (evita empilhar toggles rápidos como Tema Claro <-> Tema Escuro)
       if (input.dedupeKey) {
         const existenteChave = ativos.find((t) => t.dedupeKey === input.dedupeKey);
         if (existenteChave) {
