@@ -3,6 +3,8 @@ import { existsSync } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 
+import { lerOficinaData, salvarFerramentasPossuidas } from './storage.js';
+
 const PORT = Number(process.env.PORT ?? 3001);
 const IS_PROD = process.env.NODE_ENV === 'production';
 const ROOT_DIR = process.cwd();
@@ -214,6 +216,29 @@ api.get('/manuais', async (req, res) => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Inventário de Ferramentas (persistido em /app/data/oficina.json)
+// ---------------------------------------------------------------------------
+api.get('/ferramentas', async (_req, res) => {
+  const dados = await lerOficinaData();
+  res.json({ ferramentasPossuidas: dados.ferramentasPossuidas });
+});
+
+api.put('/ferramentas', async (req, res) => {
+  const body = req.body as Record<string, unknown> | null | undefined;
+  const lista = body?.ferramentasPossuidas;
+
+  if (!Array.isArray(lista) || !lista.every((item) => typeof item === 'string')) {
+    res.status(400).json({
+      error: 'O campo "ferramentasPossuidas" deve ser um array de strings.',
+    });
+    return;
+  }
+
+  const ferramentasPossuidas = await salvarFerramentasPossuidas(lista);
+  res.json({ ferramentasPossuidas });
+});
+
 // 404 para rotas de API inexistentes (Express 5: wildcard nomeado)
 api.all('/{*splat}', (_req, res) => {
   res.status(404).json({ error: 'Rota de API não encontrada.' });
@@ -242,6 +267,9 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 const server = app.listen(PORT, '0.0.0.0', () => {
+  void lerOficinaData().catch((err) => {
+    console.error('[server] falha ao inicializar /app/data/oficina.json:', err);
+  });
   console.log(`[server] MotoTech Pro API ouvindo em http://0.0.0.0:${PORT} (${IS_PROD ? 'prod' : 'dev'})`);
 });
 
