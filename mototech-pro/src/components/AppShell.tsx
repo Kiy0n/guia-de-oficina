@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeftRight, ChevronRight, Menu, Wrench } from 'lucide-react';
 
 import { ApiStatusIndicator } from '@/components/ApiStatusIndicator';
@@ -13,6 +14,11 @@ import { SECTIONS, type SectionId } from '@/lib/sections';
 import { cn } from '@/lib/utils';
 import { FichaTecnicaPage } from '@/pages/FichaTecnicaPage';
 import { SectionPlaceholderPage } from '@/pages/SectionPlaceholderPage';
+
+const SECTION_TRANSITION = {
+  duration: 0.28,
+  ease: [0.22, 1, 0.36, 1] as const,
+};
 
 function SectionContent({ id }: { id: SectionId }) {
   if (id === 'ficha-tecnica') return <FichaTecnicaPage />;
@@ -61,7 +67,7 @@ export function AppShell() {
             type="button"
             onClick={() => trocar('ano')}
             title="Trocar ano / geração"
-            className="flex min-w-0 items-center gap-2 rounded-lg px-2 py-1 text-sm hover:bg-accent"
+            className="flex min-w-0 items-center gap-2 rounded-lg px-2 py-1 text-sm transition-colors hover:bg-accent"
           >
             <Badge variant={theme.badge}>{moto.marca}</Badge>
             <span className="truncate font-medium">{moto.modelo.nome}</span>
@@ -93,9 +99,9 @@ export function AppShell() {
           </SheetHeader>
 
           <div className="px-4 pb-4">
-            <div className={cn('relative overflow-hidden rounded-xl border-2 bg-card p-4', theme.border)}>
-              <div className="flex items-start gap-3">
-                <theme.Logo emblemOnly className="w-12 shrink-0" />
+            <div className={cn('group relative overflow-hidden rounded-xl border-2 bg-card p-4', theme.border)}>
+              <div className="flex items-center gap-3">
+                <theme.Logo emblemOnly className="size-12 shrink-0" />
                 <div className="min-w-0">
                   <p className="truncate font-semibold">{moto.modelo.nome}</p>
                   <p className="font-mono text-sm text-muted-foreground">{moto.geracao.anosLabel}</p>
@@ -121,14 +127,26 @@ export function AppShell() {
                     onClick={() => navegar(id)}
                     aria-current={ativo ? 'page' : undefined}
                     className={cn(
-                      'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
-                      ativo ? 'bg-primary/15 font-semibold text-primary' : 'text-foreground/85 hover:bg-accent',
+                      'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
+                      ativo ? 'font-semibold text-primary' : 'text-foreground/85 hover:bg-accent',
                     )}
                   >
-                    <span className="w-4 font-mono text-xs text-muted-foreground">{i + 1}</span>
-                    <Icon className="size-4 shrink-0" />
-                    <span className="flex-1">{titulo}</span>
-                    <ChevronRight className={cn('size-4 opacity-0 transition-opacity group-hover:opacity-60', ativo && 'opacity-60')} />
+                    {ativo && (
+                      <motion.span
+                        layoutId="sidebar-active-section"
+                        className="pointer-events-none absolute inset-0 rounded-lg bg-primary/15"
+                        transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                      />
+                    )}
+                    <span className="relative z-10 w-4 font-mono text-xs text-muted-foreground">{i + 1}</span>
+                    <Icon className="relative z-10 size-4 shrink-0" />
+                    <span className="relative z-10 flex-1">{titulo}</span>
+                    <ChevronRight
+                      className={cn(
+                        'relative z-10 size-4 opacity-0 transition-opacity group-hover:opacity-60',
+                        ativo && 'opacity-60',
+                      )}
+                    />
                   </button>
                 );
               })}
@@ -144,10 +162,20 @@ export function AppShell() {
       </Sheet>
 
       {/* ------------------------------------------------------------------ */}
-      {/* Conteúdo                                                           */}
+      {/* Conteúdo com transição suave entre as 7 abas                       */}
       {/* ------------------------------------------------------------------ */}
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-        <SectionContent id={section} />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${moto.geracao.id}-${section}`}
+            initial={{ opacity: 0, y: 12, scale: 0.99 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.99 }}
+            transition={SECTION_TRANSITION}
+          >
+            <SectionContent id={section} />
+          </motion.div>
+        </AnimatePresence>
       </main>
     </div>
   );

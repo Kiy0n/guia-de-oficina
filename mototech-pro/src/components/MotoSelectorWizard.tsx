@@ -1,6 +1,8 @@
-import { useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
+import { AnimatePresence, motion, type Variants } from 'framer-motion';
 import { ArrowLeft, Check, ChevronRight, CircleGauge, Search, Undo2, Wrench, X } from 'lucide-react';
 
+import { SpotlightCard } from '@/components/SpotlightCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +22,7 @@ import {
 import { ALIMENTACAO_LABEL, CATEGORIA_LABEL, SISTEMA_FREIO_LABEL } from '@/utils/format';
 
 type Step = 1 | 2 | 3;
+type Direction = 1 | -1;
 
 const STEPS: { step: Step; label: string }[] = [
   { step: 1, label: 'Fabricante' },
@@ -27,18 +30,48 @@ const STEPS: { step: Step; label: string }[] = [
   { step: 3, label: 'Ano / Geração' },
 ];
 
-/** Torna um elemento não-botão acionável por teclado (Enter / Espaço). */
-function onActivateKey(action: () => void) {
-  return (e: KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      action();
-    }
-  };
-}
+// Curva cubic-bezier cinematográfica estilo Canva
+const CANVA_EASE = [0.22, 1, 0.36, 1] as const;
+
+const STEP_SLIDE_VARIANTS: Variants = {
+  enter: (direction: Direction) => ({
+    x: direction > 0 ? 56 : -56,
+    opacity: 0,
+    scale: 0.98,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.38,
+      ease: CANVA_EASE,
+    },
+  },
+  exit: (direction: Direction) => ({
+    x: direction > 0 ? -56 : 56,
+    opacity: 0,
+    scale: 0.975,
+    transition: {
+      duration: 0.26,
+      ease: CANVA_EASE,
+    },
+  }),
+};
+
+const STAGGER_GRID_VARIANTS: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.06,
+      delayChildren: 0.04,
+    },
+  },
+};
 
 // ---------------------------------------------------------------------------
-// Stepper
+// Stepper com indicador ativo animado via layoutId
 // ---------------------------------------------------------------------------
 
 function Stepper({ current, onGoTo }: { current: Step; onGoTo: (step: Step) => void }) {
@@ -56,28 +89,49 @@ function Stepper({ current, onGoTo }: { current: Step; onGoTo: (step: Step) => v
                 onClick={() => onGoTo(step)}
                 aria-current={active ? 'step' : undefined}
                 className={cn(
-                  'flex min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors',
-                  done && 'cursor-pointer text-foreground hover:bg-accent',
+                  'relative flex min-w-0 items-center gap-2 rounded-xl px-2.5 py-1.5 text-sm transition-colors',
+                  done && 'cursor-pointer text-foreground hover:bg-accent/70',
                   active && 'font-semibold text-foreground',
                   !done && !active && 'text-muted-foreground',
                 )}
               >
+                {active && (
+                  <motion.span
+                    layoutId="wizard-stepper-active-pill"
+                    className="pointer-events-none absolute inset-0 rounded-xl bg-primary/10 ring-1 ring-primary/30"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
                 <span
                   className={cn(
-                    'flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-bold',
+                    'relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-bold transition-colors',
                     done && 'border-primary bg-primary text-primary-foreground',
-                    active && 'border-primary text-primary ring-4 ring-primary/20',
+                    active && 'border-primary text-primary',
                   )}
                 >
+                  {active && (
+                    <motion.span
+                      layoutId="wizard-stepper-active-ring"
+                      className="pointer-events-none absolute -inset-1 rounded-full ring-4 ring-primary/20"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
                   {done ? <Check className="size-4" /> : step}
                 </span>
-                <span className="truncate">
+                <span className="relative z-10 truncate">
                   <span className="hidden sm:inline">{step}. </span>
                   {label}
                 </span>
               </button>
               {i < STEPS.length - 1 && (
-                <span className={cn('h-px flex-1 bg-border', done && 'bg-primary/60')} aria-hidden />
+                <span className="relative h-px flex-1 overflow-hidden bg-border" aria-hidden>
+                  <motion.span
+                    initial={false}
+                    animate={{ scaleX: done ? 1 : 0 }}
+                    transition={{ duration: 0.35, ease: CANVA_EASE }}
+                    className="absolute inset-0 origin-left bg-primary/70"
+                  />
+                </span>
               )}
             </li>
           );
@@ -174,35 +228,41 @@ function StepFabricante({
 
   return (
     <div className="flex flex-col gap-8">
-      <StepHeader title="Qual moto está na bancada?" subtitle={`Escolha a fabricante — modelos até ${CILINDRADA_MAXIMA}cc.`} />
+      <StepHeader
+        title="Qual moto está na bancada?"
+        subtitle={`Escolha a fabricante — modelos até ${CILINDRADA_MAXIMA}cc.`}
+      />
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <motion.div
+        variants={STAGGER_GRID_VARIANTS}
+        initial="hidden"
+        animate="visible"
+        className="grid gap-5 md:grid-cols-3"
+      >
         {MARCAS.map((marca) => {
           const theme = BRAND_THEME[marca];
           const total = contarModelos(marca);
           return (
-            <button
+            <SpotlightCard
               key={marca}
-              type="button"
+              marca={marca}
+              intensity="featured"
+              ariaLabel={`Selecionar fabricante ${marca} (${total} modelos)`}
               onClick={() => onMarca(marca)}
-              className={cn(
-                'group relative flex flex-col items-center gap-5 overflow-hidden rounded-2xl border-2 border-border bg-card px-6 pt-10 pb-6 text-card-foreground transition-all duration-200 outline-none',
-                'hover:-translate-y-0.5 focus-visible:ring-[3px] focus-visible:ring-ring/50 active:translate-y-0',
-                theme.hoverCard,
-              )}
             >
-              <span className={cn('absolute inset-x-0 top-0 h-1 opacity-60 transition-opacity group-hover:opacity-100', theme.accent)} />
-              <theme.Logo className="w-28 transition-transform duration-200 group-hover:scale-105 sm:w-32" />
-              <div className="flex w-full items-center justify-between">
-                <span className="text-lg font-semibold">{marca}</span>
-                <Badge variant={theme.badge}>
-                  {total} {total === 1 ? 'modelo' : 'modelos'}
-                </Badge>
+              <div className="flex flex-col items-center gap-6 px-6 pt-10 pb-6">
+                <theme.Logo />
+                <div className="flex w-full items-center justify-between border-t border-border/60 pt-4">
+                  <span className="text-lg font-semibold tracking-tight">{marca}</span>
+                  <Badge variant={theme.badge}>
+                    {total} {total === 1 ? 'modelo' : 'modelos'}
+                  </Badge>
+                </div>
               </div>
-            </button>
+            </SpotlightCard>
           );
         })}
-      </div>
+      </motion.div>
 
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-3">
         <SearchField
@@ -213,39 +273,48 @@ function StepFabricante({
           placeholder="Ou digite direto o modelo/ano, ex: CG 160, Intruder, Factor 2019..."
         />
 
-        {busca.trim() && (
-          <Card className="gap-0 py-2">
-            {resultados.length === 0 ? (
-              <p className="px-4 py-3 text-sm text-muted-foreground">Nenhum modelo encontrado para “{busca}”.</p>
-            ) : (
-              <ul className="divide-y">
-                {resultados.map(({ modelo, geracoesNoAno }) => (
-                  <li key={modelo.id} className="flex flex-col gap-2 px-2 py-1 sm:flex-row sm:items-center">
-                    <button
-                      type="button"
-                      onClick={() => onModelo(modelo)}
-                      className="flex flex-1 items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-accent"
-                    >
-                      <Badge variant={BRAND_THEME[modelo.marca].badge}>{modelo.marca}</Badge>
-                      <span className="font-medium">{modelo.nome}</span>
-                      <span className="text-sm text-muted-foreground">{faixaAnosModelo(modelo)}</span>
-                      <ChevronRight className="ml-auto size-4 text-muted-foreground" />
-                    </button>
-                    {geracoesNoAno.length > 0 && (
-                      <div className="flex flex-wrap gap-2 px-2 pb-2 sm:pb-0">
-                        {geracoesNoAno.map((g) => (
-                          <Button key={g.id} size="sm" variant="secondary" onClick={() => onGeracao(modelo, g)}>
-                            {g.anosLabel}
-                          </Button>
-                        ))}
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
-        )}
+        <AnimatePresence>
+          {busca.trim() && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.18 }}
+            >
+              <Card className="gap-0 py-2">
+                {resultados.length === 0 ? (
+                  <p className="px-4 py-3 text-sm text-muted-foreground">Nenhum modelo encontrado para “{busca}”.</p>
+                ) : (
+                  <ul className="divide-y">
+                    {resultados.map(({ modelo, geracoesNoAno }) => (
+                      <li key={modelo.id} className="flex flex-col gap-2 px-2 py-1 sm:flex-row sm:items-center">
+                        <button
+                          type="button"
+                          onClick={() => onModelo(modelo)}
+                          className="flex flex-1 items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors hover:bg-accent"
+                        >
+                          <Badge variant={BRAND_THEME[modelo.marca].badge}>{modelo.marca}</Badge>
+                          <span className="font-medium">{modelo.nome}</span>
+                          <span className="text-sm text-muted-foreground">{faixaAnosModelo(modelo)}</span>
+                          <ChevronRight className="ml-auto size-4 text-muted-foreground" />
+                        </button>
+                        {geracoesNoAno.length > 0 && (
+                          <div className="flex flex-wrap gap-2 px-2 pb-2 sm:pb-0">
+                            {geracoesNoAno.map((g) => (
+                              <Button key={g.id} size="sm" variant="secondary" onClick={() => onGeracao(modelo, g)}>
+                                {g.anosLabel}
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -255,7 +324,15 @@ function StepFabricante({
 // Passo 2 — Modelo
 // ---------------------------------------------------------------------------
 
-function StepModelo({ marca, onVoltar, onModelo }: { marca: Marca; onVoltar: () => void; onModelo: (modelo: Modelo) => void }) {
+function StepModelo({
+  marca,
+  onVoltar,
+  onModelo,
+}: {
+  marca: Marca;
+  onVoltar: () => void;
+  onModelo: (modelo: Modelo) => void;
+}) {
   const [filtro, setFiltro] = useState('');
   const todos = useMemo(() => getModelosPorMarca(marca), [marca]);
   const modelos = useMemo(
@@ -294,35 +371,41 @@ function StepModelo({ marca, onVoltar, onModelo }: { marca: Marca; onVoltar: () 
       {modelos.length === 0 ? (
         <p className="py-10 text-center text-muted-foreground">Nenhum modelo {marca} corresponde a “{filtro}”.</p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <motion.div
+          key={filtro.trim() ? 'filtrado' : 'todos'}
+          variants={STAGGER_GRID_VARIANTS}
+          initial="hidden"
+          animate="visible"
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        >
           {modelos.map((modelo) => (
-            <Card
+            <SpotlightCard
               key={modelo.id}
-              role="button"
-              tabIndex={0}
+              marca={marca}
+              intensity="subtle"
               onClick={() => onModelo(modelo)}
-              onKeyDown={onActivateKey(() => onModelo(modelo))}
-              className={cn(
-                'cursor-pointer gap-4 border-2 transition-all duration-200 outline-none hover:-translate-y-0.5 focus-visible:ring-[3px] focus-visible:ring-ring/50',
-                theme.hoverCard,
-              )}
+              className="py-5"
             >
-              <CardHeader>
-                <CardTitle className="text-xl">{modelo.nome}</CardTitle>
-                <CardDescription>{faixaAnosModelo(modelo)}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-wrap items-center gap-2">
-                <Badge variant="secondary">
-                  <CircleGauge /> {cilindradaModelo(modelo)}
-                </Badge>
-                <Badge variant="outline">{CATEGORIA_LABEL[modelo.categoria]}</Badge>
-                <span className="ml-auto text-xs text-muted-foreground">
-                  {modelo.geracoes.length} {modelo.geracoes.length === 1 ? 'geração' : 'gerações'}
-                </span>
-              </CardContent>
-            </Card>
+              <div className="flex flex-1 flex-col gap-4">
+                <CardHeader className="pb-0">
+                  <CardTitle className="text-xl transition-colors group-hover:text-foreground">
+                    {modelo.nome}
+                  </CardTitle>
+                  <CardDescription>{faixaAnosModelo(modelo)}</CardDescription>
+                </CardHeader>
+                <CardContent className="mt-auto flex flex-wrap items-center gap-2">
+                  <Badge variant="secondary">
+                    <CircleGauge /> {cilindradaModelo(modelo)}
+                  </Badge>
+                  <Badge variant="outline">{CATEGORIA_LABEL[modelo.categoria]}</Badge>
+                  <span className="ml-auto text-xs text-muted-foreground">
+                    {modelo.geracoes.length} {modelo.geracoes.length === 1 ? 'geração' : 'gerações'}
+                  </span>
+                </CardContent>
+              </div>
+            </SpotlightCard>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );
@@ -370,49 +453,54 @@ function StepGeracao({
         subtitle="Cada geração tem diferenças mecânicas que mudam peças, torques e procedimentos."
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <motion.div
+        variants={STAGGER_GRID_VARIANTS}
+        initial="hidden"
+        animate="visible"
+        className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+      >
         {geracoes.map((g) => {
           const atual = g.id === geracaoAtualId;
           const ficha = g.fichaTecnica;
           return (
-            <Card
+            <SpotlightCard
               key={g.id}
-              role="button"
-              tabIndex={0}
+              marca={modelo.marca}
+              intensity="subtle"
+              active={atual}
               onClick={() => onGeracao(g)}
-              onKeyDown={onActivateKey(() => onGeracao(g))}
-              className={cn(
-                'cursor-pointer gap-4 border-2 transition-all duration-200 outline-none hover:-translate-y-0.5 focus-visible:ring-[3px] focus-visible:ring-ring/50',
-                theme.hoverCard,
-                atual && theme.border,
-              )}
+              className="py-5"
             >
-              <CardHeader>
-                <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="font-mono text-3xl tracking-tight">{g.anosLabel}</CardTitle>
-                  {atual && <Badge>Atual</Badge>}
-                </div>
-                <CardDescription className="text-base font-medium text-foreground/90">{g.nomeGeracao}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-1 flex-col gap-4">
-                <ul className="flex flex-col gap-1.5 text-sm">
-                  {g.destaques.map((d) => (
-                    <li key={d} className="flex gap-2">
-                      <Check className={cn('mt-0.5 size-4 shrink-0', theme.text)} />
-                      <span>{d}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-auto flex flex-wrap gap-2">
-                  <Badge variant="secondary">{ALIMENTACAO_LABEL[ficha.alimentacao]}</Badge>
-                  <Badge variant="secondary">Freio {SISTEMA_FREIO_LABEL[ficha.freios.sistema]}</Badge>
-                  {g.versoes && <Badge variant="outline">{g.versoes.join(' · ')}</Badge>}
-                </div>
-              </CardContent>
-            </Card>
+              <div className="flex flex-1 flex-col gap-4">
+                <CardHeader className="pb-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="font-mono text-3xl tracking-tight">{g.anosLabel}</CardTitle>
+                    {atual && <Badge>Atual</Badge>}
+                  </div>
+                  <CardDescription className="text-base font-medium text-foreground/90">
+                    {g.nomeGeracao}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-1 flex-col gap-4">
+                  <ul className="flex flex-col gap-1.5 text-sm">
+                    {g.destaques.map((d) => (
+                      <li key={d} className="flex gap-2">
+                        <Check className={cn('mt-0.5 size-4 shrink-0', theme.text)} />
+                        <span>{d}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-auto flex flex-wrap gap-2">
+                    <Badge variant="secondary">{ALIMENTACAO_LABEL[ficha.alimentacao]}</Badge>
+                    <Badge variant="secondary">Freio {SISTEMA_FREIO_LABEL[ficha.freios.sistema]}</Badge>
+                    {g.versoes && <Badge variant="outline">{g.versoes.join(' · ')}</Badge>}
+                  </div>
+                </CardContent>
+              </div>
+            </SpotlightCard>
           );
         })}
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -427,38 +515,46 @@ export function MotoSelectorWizard({ start }: { start: WizardStart }) {
   const startModelo = start.modeloId ? findModelo(start.modeloId) : undefined;
   const [marca, setMarca] = useState<Marca | null>(startModelo?.marca ?? start.marca ?? null);
   const [modeloId, setModeloId] = useState<string | null>(startModelo?.id ?? null);
-  const [step, setStep] = useState<Step>(() => {
-    if (startModelo) return start.step;
-    if (start.marca) return start.step === 1 ? 1 : 2;
-    return 1;
+  const [stepState, setStepState] = useState<{ step: Step; direction: Direction }>(() => {
+    if (startModelo) return { step: start.step, direction: 1 };
+    if (start.marca) return { step: start.step === 1 ? 1 : 2, direction: 1 };
+    return { step: 1, direction: 1 };
   });
 
+  const { step, direction } = stepState;
   const modelo = modeloId ? findModelo(modeloId) : undefined;
+
+  const transitionToStep = (nextStep: Step) => {
+    setStepState((prev) => ({
+      step: nextStep,
+      direction: nextStep >= prev.step ? 1 : -1,
+    }));
+  };
 
   const irPara = (s: Step) => {
     if (s === 1) {
-      setStep(1);
+      transitionToStep(1);
     } else if (s === 2 && marca) {
-      setStep(2);
+      transitionToStep(2);
     } else if (s === 3 && modelo) {
-      setStep(3);
+      transitionToStep(3);
     }
   };
 
   const escolherMarca = (m: Marca) => {
     if (m !== marca) setModeloId(null);
     setMarca(m);
-    setStep(2);
+    transitionToStep(2);
   };
 
   const escolherModelo = (m: Modelo) => {
     setMarca(m.marca);
     setModeloId(m.id);
-    setStep(3);
+    transitionToStep(3);
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
       <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
           <div className="flex items-center gap-2">
@@ -482,25 +578,56 @@ export function MotoSelectorWizard({ start }: { start: WizardStart }) {
       <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-10">
         <Stepper current={step} onGoTo={irPara} />
 
-        {step === 1 && (
-          <StepFabricante
-            onMarca={escolherMarca}
-            onModelo={escolherModelo}
-            onGeracao={(m, g) => selecionarMoto(m.id, g.id)}
-          />
-        )}
+        <AnimatePresence mode="wait" custom={direction}>
+          {step === 1 && (
+            <motion.div
+              key="step-1"
+              custom={direction}
+              variants={STEP_SLIDE_VARIANTS}
+              initial="enter"
+              animate="center"
+              exit="exit"
+            >
+              <StepFabricante
+                onMarca={escolherMarca}
+                onModelo={escolherModelo}
+                onGeracao={(m, g) => selecionarMoto(m.id, g.id)}
+              />
+            </motion.div>
+          )}
 
-        {step === 2 && marca && <StepModelo marca={marca} onVoltar={() => setStep(1)} onModelo={escolherModelo} />}
+          {step === 2 && marca && (
+            <motion.div
+              key={`step-2-${marca}`}
+              custom={direction}
+              variants={STEP_SLIDE_VARIANTS}
+              initial="enter"
+              animate="center"
+              exit="exit"
+            >
+              <StepModelo marca={marca} onVoltar={() => transitionToStep(1)} onModelo={escolherModelo} />
+            </motion.div>
+          )}
 
-        {step === 3 && modelo && (
-          <StepGeracao
-            modelo={modelo}
-            geracaoAtualId={moto?.modelo.id === modelo.id ? moto.geracao.id : undefined}
-            onMarca={() => setStep(1)}
-            onModelos={() => setStep(2)}
-            onGeracao={(g) => selecionarMoto(modelo.id, g.id)}
-          />
-        )}
+          {step === 3 && modelo && (
+            <motion.div
+              key={`step-3-${modelo.id}`}
+              custom={direction}
+              variants={STEP_SLIDE_VARIANTS}
+              initial="enter"
+              animate="center"
+              exit="exit"
+            >
+              <StepGeracao
+                modelo={modelo}
+                geracaoAtualId={moto?.modelo.id === modelo.id ? moto.geracao.id : undefined}
+                onMarca={() => transitionToStep(1)}
+                onModelos={() => transitionToStep(2)}
+                onGeracao={(g) => selecionarMoto(modelo.id, g.id)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );
