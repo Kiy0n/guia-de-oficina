@@ -40,6 +40,9 @@ export type TipoManutencao = 'preventiva' | 'corretiva';
 
 export type AcaoRevisao = 'inspecionar' | 'limpar' | 'ajustar' | 'lubrificar' | 'substituir';
 
+/** Categorias visuais de ação no Manual de Revisões (Fase 3). */
+export type CategoriaAcaoRevisao = 'TROCAR' | 'LIMPAR_LUBRIFICAR' | 'REGULAR' | 'CHECAR';
+
 export type NivelDificuldade = 'facil' | 'medio' | 'dificil';
 
 // ---------------------------------------------------------------------------
@@ -52,35 +55,50 @@ export interface Medida<U extends string = string> {
   unidade: U;
 }
 
-/** Faixa de valores com unidade, ex.: folga de válvula 0,08–0,12 mm. */
+/** Faixa de valores com unidade, ex.: folga de válvula 0,08–0,12 mm ou 0,08 ± 0,02 mm. */
 export interface Faixa<U extends string = string> {
   min: number;
   max: number;
   unidade: U;
+  /** Representação textual fiel ao manual quando expressa como nominal ± tolerância (ex.: "0,08 ± 0,02 mm"). */
+  label?: string;
 }
 
 // ---------------------------------------------------------------------------
-// Ficha técnica — blocos detalhados (preenchidos na Fase 3)
+// Ficha técnica — blocos detalhados (Fase 3)
 // ---------------------------------------------------------------------------
 
 export interface MotorDetalhes {
   diametroCursoMm?: { diametro: number; curso: number };
   taxaCompressao?: string; // ex.: "9,5:1"
-  potencia?: string; // ex.: "14,2 cv @ 8.250 rpm"
-  torque?: string;
+  potencia?: string; // ex.: "15,1 cv @ 8.000 rpm (etanol)"
+  torque?: string; // ex.: "1,54 kgf·m @ 7.000 rpm"
   marchaLentaRpm?: Faixa<'rpm'>;
+  /** Comando de válvulas / arquitetura (ex.: "OHV (varetas)" vs "OHC (corrente de comando)"). */
+  comando?: string;
+  /** Tipo de filtragem de óleo do motor. */
+  filtroOleo?: string;
+  /** Pressão da bomba de combustível (injetadas) ou giclagem/parafuso de mistura (carburadas). */
+  alimentacaoDetalhe?: string;
 }
 
 export interface Fluidos {
   oleoMotor?: {
-    especificacao: string; // ex.: "SAE 10W-30 API SL JASO MA"
+    especificacao: string; // ex.: "SAE 10W-30 Semissintético (API SL / JASO MA)"
     capacidadeTrocaL: number;
     capacidadeTrocaComFiltroL?: number;
     capacidadeTotalL?: number;
+    observacao?: string;
   };
   tanqueL?: number;
   reservaL?: number;
   fluidoFreio?: string; // ex.: "DOT 4"
+  fluidoBengala?: {
+    especificacao: string; // ex.: "Fluido ATF / Fork Oil 10W"
+    volumePorCanelaMl: number;
+    nivelMm?: number;
+    observacao?: string;
+  };
   liquidoArrefecimento?: { especificacao: string; capacidadeL: number };
   oleoTransmissaoCvt?: { especificacao: string; capacidadeL: number };
 }
@@ -96,15 +114,26 @@ export interface Folgas {
 }
 
 export interface Eletrica {
-  vela?: { modelo: string; alternativas?: string[]; folgaEletrodoMm?: Faixa<'mm'> };
-  bateria?: { modelo: string; tensaoV: number; capacidadeAh: number };
+  vela?: {
+    modelo: string;
+    iridiumAlternativa?: string;
+    alternativas?: string[];
+    folgaEletrodoMm?: Faixa<'mm'>;
+  };
+  bateria?: {
+    modelo: string;
+    tensaoV: number;
+    capacidadeAh: number;
+    tensaoCargaV?: string; // ex.: "13,5V – 14,8V @ 5.000 rpm"
+  };
   fusivelPrincipalA?: number;
+  fusiveisSecundarios?: string;
   lampadaFarol?: string;
 }
 
 export interface Pneus {
-  dianteiro: { medida: string; pressaoPsi?: number };
-  traseiro: { medida: string; pressaoPsi?: number; pressaoComGarupaPsi?: number };
+  dianteiro: { medida: string; pressaoPsi?: number; pressaoComGarupaPsi?: number; tipo?: string };
+  traseiro: { medida: string; pressaoPsi?: number; pressaoComGarupaPsi?: number; tipo?: string };
 }
 
 export interface TransmissaoFinal {
@@ -112,10 +141,16 @@ export interface TransmissaoFinal {
   corrente?: string; // ex.: "428H x 118L"
   pinhaoDentes?: number;
   coroaDentes?: number;
+  cvtDetalhe?: {
+    correiaCodigo?: string;
+    larguraLimiteMm?: number;
+    roletesMedidaPeso?: string;
+  };
 }
 
 export interface TorqueAperto {
   item: string; // ex.: "Bujão de drenagem do óleo"
+  categoria?: 'motor' | 'chassi' | 'freios' | 'suspensao';
   torque: Medida<'N·m'>;
   observacao?: string;
 }
@@ -128,7 +163,7 @@ export interface FichaTecnica {
   /** Versão usada como referência quando a geração tem várias (ex.: "Titan", "ED"). */
   versaoReferencia?: string;
 
-  // Dados básicos (obrigatórios desde a Fase 2)
+  // Dados básicos
   cilindradaCc: number;
   motor: string; // ex.: "Monocilíndrico 4T OHC 2V"
   alimentacao: Alimentacao;
@@ -138,7 +173,7 @@ export interface FichaTecnica {
   cambio: Cambio;
   freios: { dianteiro: TipoFreio; traseiro: TipoFreio; sistema: SistemaFreio };
 
-  // Dados detalhados (opcionais até a Fase 3)
+  // Dados detalhados de bancada (Fase 3)
   motorDetalhes?: MotorDetalhes;
   fluidos?: Fluidos;
   folgas?: Folgas;
@@ -198,6 +233,8 @@ export interface Geracao {
   nomeGeracao: string; // ex.: "Nova Geração ABS / Farol LED"
   /** Lista curta de mudanças técnicas que diferenciam a geração. */
   destaques: string[];
+  /** Alertas práticos de oficina específicos deste ano/geração ("Atenção neste Ano/Geração"). */
+  alertasBancada?: string[];
   versoes?: string[]; // ex.: ["Start", "Fan", "Titan"]
   fichaTecnica: FichaTecnica;
   planoManutencao?: ItemPlanoManutencao[];

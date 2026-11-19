@@ -26,6 +26,8 @@ interface MotoContextValue {
   section: SectionId;
   view: View;
   selecionarMoto: (modeloId: string, geracaoId: string) => void;
+  /** Troca apenas o ano/geração do modelo atual com 1 clique, mantendo a aba ativa. */
+  selecionarGeracao: (geracaoId: string) => void;
   setSection: (section: SectionId) => void;
   /** Abre o wizard; `'ano'` começa no passo 3 com o modelo atual. */
   trocarMoto: (inicio?: 'fabricante' | 'ano') => void;
@@ -79,6 +81,17 @@ export function MotoProvider({ children }: { children: ReactNode }) {
     setView({ tipo: 'workspace' });
   }, []);
 
+  const selecionarGeracao = useCallback(
+    (geracaoId: string) => {
+      if (!moto) return;
+      const selecao = resolverSelecao(moto.modelo.id, geracaoId);
+      if (!selecao) return;
+      setMoto(selecao);
+      setView({ tipo: 'workspace' });
+    },
+    [moto],
+  );
+
   const trocarMoto = useCallback(
     (inicio: 'fabricante' | 'ano' = 'fabricante') => {
       if (inicio === 'ano' && moto) {
@@ -95,8 +108,17 @@ export function MotoProvider({ children }: { children: ReactNode }) {
   }, [moto]);
 
   const value = useMemo<MotoContextValue>(
-    () => ({ moto, section, view, selecionarMoto, setSection, trocarMoto, cancelarTroca }),
-    [moto, section, view, selecionarMoto, trocarMoto, cancelarTroca],
+    () => ({
+      moto,
+      section,
+      view,
+      selecionarMoto,
+      selecionarGeracao,
+      setSection,
+      trocarMoto,
+      cancelarTroca,
+    }),
+    [moto, section, view, selecionarMoto, selecionarGeracao, trocarMoto, cancelarTroca],
   );
 
   return <MotoContext.Provider value={value}>{children}</MotoContext.Provider>;

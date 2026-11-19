@@ -13,6 +13,7 @@ import { BRAND_THEME } from '@/lib/brands';
 import { SECTIONS, type SectionId } from '@/lib/sections';
 import { cn } from '@/lib/utils';
 import { FichaTecnicaPage } from '@/pages/FichaTecnicaPage';
+import { ManualRevisoesPage } from '@/pages/ManualRevisoesPage';
 import { SectionPlaceholderPage } from '@/pages/SectionPlaceholderPage';
 
 const SECTION_TRANSITION = {
@@ -22,6 +23,7 @@ const SECTION_TRANSITION = {
 
 function SectionContent({ id }: { id: SectionId }) {
   if (id === 'ficha-tecnica') return <FichaTecnicaPage />;
+  if (id === 'manual-revisoes') return <ManualRevisoesPage />;
   const def = SECTIONS.find((s) => s.id === id);
   return def ? <SectionPlaceholderPage section={def} /> : null;
 }
