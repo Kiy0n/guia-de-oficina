@@ -52,6 +52,16 @@ export async function resolveApiUrl(path: string): Promise<string> {
   return prefixApiUrl(baseUrl, path);
 }
 
+/** Abre uma URL no navegador/leitor padrão do sistema quando em execução no Tauri v2. */
+export async function abrirUrlExternaTauri(url: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  const { invoke } = await import('@tauri-apps/api/core');
+  await invoke('abrir_url_externa', { url });
+}
+
 /** Hook React para componentes que precisam da URL base de forma reativa (ex.: `<iframe src>`). */
 export function useApiBaseUrl(): string {
   const [baseUrl, setBaseUrl] = useState<string>(() => cachedBaseUrl ?? '');

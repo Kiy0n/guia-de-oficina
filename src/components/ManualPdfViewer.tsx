@@ -36,7 +36,12 @@ import {
   type PaginaTextoManualApi,
   type RespostaBuscaManualApi,
 } from '@/hooks/useManuais';
-import { prefixApiUrl, useApiBaseUrl } from '@/lib/apiBase';
+import {
+  abrirUrlExternaTauri,
+  isTauriRuntime,
+  prefixApiUrl,
+  useApiBaseUrl,
+} from '@/lib/apiBase';
 import { cn } from '@/lib/utils';
 
 const ATALHOS_BANCADA = [
@@ -605,23 +610,37 @@ export function ManualPdfViewer({
               </Button>
             )}
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1.5 text-xs"
-              asChild
-            >
-              <a
-                href={`${resolvedPdfUrl}#page=${paginaAplicada}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Abrir PDF em nova aba do navegador"
+            {isTauriRuntime() ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 text-xs"
+                onClick={() => void abrirUrlExternaTauri(`${resolvedPdfUrl}#page=${paginaAplicada}`)}
+                title="Abrir no navegador / leitor externo"
               >
                 <ExternalLink className="size-3.5" />
-                <span className="hidden sm:inline">Abrir em nova aba</span>
-              </a>
-            </Button>
+                <span className="hidden sm:inline">Abrir no navegador / leitor externo</span>
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 text-xs"
+                asChild
+              >
+                <a
+                  href={`${resolvedPdfUrl}#page=${paginaAplicada}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Abrir PDF em nova aba do navegador"
+                >
+                  <ExternalLink className="size-3.5" />
+                  <span className="hidden sm:inline">Abrir em nova aba</span>
+                </a>
+              </Button>
+            )}
 
             <Button
               type="button"

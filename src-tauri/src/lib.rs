@@ -12,6 +12,48 @@ fn get_api_base_url(state: tauri::State<'_, ApiServerState>) -> String {
     state.base_url.clone()
 }
 
+#[tauri::command]
+fn abrir_url_externa(url: String) -> Result<(), String> {
+    let trimmed = url.trim();
+    if !(trimmed.starts_with("http://127.0.0.1:") || trimmed.starts_with("https://")) {
+        return Err("URL não permitida: apenas http://127.0.0.1: ou https:// são aceitas.".to_string());
+    }
+    if trimmed.contains('"') || trimmed.contains('\r') || trimmed.contains('\n') {
+        return Err("URL contém caracteres inválidos.".to_string());
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        let escaped = trimmed.replace('&', "^&");
+        std::process::Command::new("cmd")
+            .args(["/C", "start", "", &escaped])
+            .creation_flags(CREATE_NO_WINDOW)
+            .spawn()
+            .map_err(|e| format!("Falha ao abrir URL externa no Windows: {e}"))?;
+        return Ok(());
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg(trimmed)
+            .spawn()
+            .map_err(|e| format!("Falha ao abrir URL externa no macOS: {e}"))?;
+        return Ok(());
+    }
+
+    #[cfg(all(unix, not(target_os = "macos")))]
+    {
+        std::process::Command::new("xdg-open")
+            .arg(trimmed)
+            .spawn()
+            .map_err(|e| format!("Falha ao abrir URL externa no Linux: {e}"))?;
+        return Ok(());
+    }
+}
+
 fn resolve_resource_dirs(app: &tauri::App) -> (PathBuf, PathBuf) {
     if let Ok(res_dir) = app.path().resource_dir() {
         let manuals = res_dir.join("manuals");
@@ -44,7 +86,7 @@ pub fn run() {
             app.manage(ApiServerState { base_url });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_api_base_url])
+        .invoke_handler(tauri::generate_handler![get_api_base_url, abrir_url_externa])
         .run(tauri::generate_context!())
         .expect("erro ao iniciar aplicação Guia de Oficina");
 }
