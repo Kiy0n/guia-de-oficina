@@ -668,7 +668,7 @@ export function IniciarRevisaoPage() {
                 <Progress value={progressoPct} className="h-2" />
 
                 {/* Mini-navegador horizontal de passos (bolinhas/pills clicáveis) */}
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                <div className="-mx-2 flex items-center gap-2 overflow-x-auto px-2 py-2">
                   {passos.map((p, idx) => {
                     const ativo = idx === passoIndex;
                     const reg = registros[p.id];
