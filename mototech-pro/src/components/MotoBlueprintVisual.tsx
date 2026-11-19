@@ -2,17 +2,19 @@ import { motion } from 'framer-motion';
 import { AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
 
 import {
-  ZONA_VISUAL_INFO,
+  getZonaVisualInfo,
   type PassoRevisao,
   type RegistroFeedbackPasso,
   type ZonaVisualMoto,
 } from '@/data/roteiroRevisao';
 import { cn } from '@/lib/utils';
 import type { Marca } from '@/types/moto';
+import type { ArquiteturaMoto } from '@/utils/arquiteturaMoto';
 
 export interface MotoBlueprintVisualProps {
   marca: Marca;
   isScooter: boolean;
+  arquitetura?: ArquiteturaMoto;
   zonaAtiva: ZonaVisualMoto;
   passoAtual: PassoRevisao;
   passos: PassoRevisao[];
@@ -81,6 +83,7 @@ function resolverEstadoZona(
 export function MotoBlueprintVisual({
   marca,
   isScooter,
+  arquitetura,
   zonaAtiva,
   passoAtual,
   passos,
@@ -89,7 +92,7 @@ export function MotoBlueprintVisual({
 }: MotoBlueprintVisualProps) {
   const hotspots = isScooter ? HOTSPOTS_SCOOTER : HOTSPOTS_MOTO;
   const corMarca = COR_MARCA_HEX[marca];
-  const infoAtiva = ZONA_VISUAL_INFO[zonaAtiva];
+  const infoAtiva = getZonaVisualInfo(zonaAtiva, arquitetura);
   const hotspotAtivo = hotspots.find((h) => h.zona === zonaAtiva);
 
   return (
@@ -338,7 +341,7 @@ export function MotoBlueprintVisual({
                 className={cn(temPassos ? 'cursor-pointer' : 'opacity-35')}
               >
                 <title>
-                  {ZONA_VISUAL_INFO[spot.zona].callout}
+                  {getZonaVisualInfo(spot.zona, arquitetura).callout}
                   {temPassos ? ' (clique para ir a esta região)' : ''}
                 </title>
 

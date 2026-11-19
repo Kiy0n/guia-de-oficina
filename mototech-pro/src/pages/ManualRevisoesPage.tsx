@@ -23,13 +23,16 @@ import { useMotoSelecionada } from '@/context/MotoContext';
 import { useToast } from '@/context/ToastContext';
 import {
   CATEGORIA_ACAO_META,
-  DIRETRIZES_TEMPO_USO_SEVERO,
   gerarPlanoRevisoes,
+  getCicloKmGeracao,
+  getDescricaoCicloRevisao,
+  getDiretrizesTempoUsoSevero,
   type MarcoRevisaoKm,
 } from '@/data/revisoes';
 import { SECTIONS } from '@/lib/sections';
 import { cn } from '@/lib/utils';
 import type { CategoriaAcaoRevisao, Geracao, Modelo } from '@/types/moto';
+import { getArquiteturaMoto } from '@/utils/arquiteturaMoto';
 
 const CATEGORIAS_FILTRO: readonly ('TODAS' | CategoriaAcaoRevisao)[] = [
   'TODAS',
@@ -95,6 +98,19 @@ export function ManualRevisoesPage() {
   const def = SECTIONS.find((s) => s.id === 'manual-revisoes') ?? SECTIONS[1];
 
   const plano = useMemo(() => gerarPlanoRevisoes(modelo, geracao), [modelo, geracao]);
+  const arq = useMemo(() => getArquiteturaMoto(modelo, geracao), [modelo, geracao]);
+  const cicloKm = useMemo(
+    () => getCicloKmGeracao(marca, geracao.id),
+    [marca, geracao.id],
+  );
+  const descricaoCiclo = useMemo(
+    () => getDescricaoCicloRevisao(modelo, geracao),
+    [modelo, geracao],
+  );
+  const diretrizesSevero = useMemo(
+    () => getDiretrizesTempoUsoSevero(modelo, geracao),
+    [modelo, geracao],
+  );
 
   const [kmSelecionado, setKmSelecionado] = useState<number>(() => plano[0]?.km ?? 1000);
   const [filtroCategoria, setFiltroCategoria] = useState<'TODAS' | CategoriaAcaoRevisao>('TODAS');
@@ -210,13 +226,9 @@ export function ManualRevisoesPage() {
       <section aria-label="Intervalos de revisão por quilometragem" className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
-            Plano Oficial {marca} · Escolha a Quilometragem da Revisão
+            Plano Oficial {marca} {modelo.nome} ({geracao.anosLabel}) · Escolha a Quilometragem
           </h2>
-          <span className="text-xs text-muted-foreground">
-            {marca === 'Honda' && 'Ciclo Honda: 1.000 km e múltiplos de 6.000 km (centrífugo a cada 12.000 km)'}
-            {marca === 'Yamaha' && 'Ciclo Yamaha: 1.000 km e múltiplos de 5.000 km (filtro e link a cada 10.000 km)'}
-            {marca === 'Suzuki' && 'Ciclo Suzuki: 1.000 km e múltiplos de 3.000 km (válvulas e filtro em papel)'}
-          </span>
+          <span className="text-xs text-muted-foreground">{descricaoCiclo}</span>
         </div>
 
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
@@ -473,7 +485,7 @@ export function ManualRevisoesPage() {
           </div>
         </CardHeader>
         <CardContent className="grid gap-3.5 md:grid-cols-2">
-          {DIRETRIZES_TEMPO_USO_SEVERO.map((d) => (
+          {diretrizesSevero.map((d) => (
             <div key={d.id} className="flex flex-col gap-2 rounded-xl border bg-background/55 p-4">
               <div className="flex items-start justify-between gap-2">
                 <h4 className="font-semibold text-foreground">{d.titulo}</h4>
@@ -496,11 +508,13 @@ export function ManualRevisoesPage() {
             <div className="text-xs leading-relaxed text-foreground/90 sm:text-sm">
               <strong>Lembrete de Bancada para {modelo.marca} {modelo.nome} ({geracao.anosLabel}):</strong>{' '}
               {marca === 'Honda' &&
-                'Mesmo que o manual Honda indique revisões a cada 6.000 km após a 1ª revisão, no Brasil recomenda-se fortemente a troca intermediária do óleo SAE 10W-30 a cada 2.500–3.000 km devido ao alto percentual de etanol na gasolina e temperaturas elevadas.'}
+                `Mesmo com o ciclo oficial de ${cicloKm.toLocaleString('pt-BR')} km após a 1ª revisão, em uso urbano severo ou entregas no Brasil recomenda-se realizar troca intermediária do óleo (${geracao.fichaTecnica.fluidos?.oleoMotor?.especificacao ?? 'especificação do manual'}) na metade do intervalo e manter a limpeza do filtro centrífugo e tela a cada 12.000 km.`}
               {marca === 'Yamaha' &&
-                'No ciclo Yamaha (a cada 5.000 km), realizar troca intermediária de óleo aos 2.500 km se a moto operar em trânsito urbano severo e sempre substituir o elemento de papel do filtro de óleo.'}
+                (arq.tipoFiltroOleo === 'papel_externo'
+                  ? `No ciclo Yamaha de ${cicloKm.toLocaleString('pt-BR')} km, realize troca intermediária de óleo aos 2.500 km em trânsito urbano severo e substitua regularmente o elemento de papel do filtro de óleo.`
+                  : `No ciclo Yamaha de ${cicloKm.toLocaleString('pt-BR')} km desta geração, faça trocas rigorosas de óleo dentro do prazo e mantenha a tela metálica interna limpa (este motor não utiliza elemento de papel).`)}
               {marca === 'Suzuki' &&
-                'O motor Suzuki SOHC trabalha em rotação mais alta e o cárter comporta menos de 1 litro (0,85 a 0,95 L): respeitar rigorosamente o intervalo de 3.000 km e conferir o nível pelo visor de vidro no cavalete central.'}
+                'O motor Suzuki SOHC trabalha em rotação mais alta e o cárter comporta menos de 1 litro (0,85 a 0,95 L): respeitar rigorosamente o intervalo de 3.000 km, trocar o elemento de papel do filtro e conferir o nível pelo visor de vidro no cavalete central.'}
             </div>
           </div>
         </CardContent>

@@ -23,7 +23,91 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMoto, useMotoSelecionada } from '@/context/MotoContext';
 import { SECTIONS } from '@/lib/sections';
 import { cn } from '@/lib/utils';
+import type { TransmissaoFinal } from '@/types/moto';
 import { nmParaKgfm } from '@/utils/format';
+
+export const FATOR_KGFM_PARA_NM = 9.80665;
+export const FATOR_LBFFT_PARA_NM = 1.35582;
+
+export function parseDecimalBr(val: string): number | null {
+  const limpo = val.trim().replace(',', '.');
+  if (limpo === '' || limpo === '-' || limpo === '.') return null;
+  const n = Number(limpo);
+  return Number.isFinite(n) ? n : null;
+}
+
+export interface RelacaoOriginalResolvida {
+  pinhao: number;
+  coroa: number;
+  razaoOriginal: number;
+  origem: 'dentes_ficha' | 'fallback_razao' | 'fallback_padrao';
+  avisoFallback: string | null;
+}
+
+export function extrairRelacaoOriginal(
+  transmissaoFinal?: TransmissaoFinal,
+): RelacaoOriginalResolvida {
+  const p = transmissaoFinal?.pinhaoDentes;
+  const c = transmissaoFinal?.coroaDentes;
+  if (
+    typeof p === 'number' &&
+    typeof c === 'number' &&
+    Number.isFinite(p) &&
+    Number.isFinite(c) &&
+    p >= 10 &&
+    c >= 25
+  ) {
+    return {
+      pinhao: p,
+      coroa: c,
+      razaoOriginal: c / p,
+      origem: 'dentes_ficha',
+      avisoFallback: null,
+    };
+  }
+
+  const texto = transmissaoFinal?.corrente ?? '';
+
+  // Tenta extrair formato explícito "14x43" ou "14×43"
+  const matchDentes = texto.match(/\b(1[1-9]|20)\s*[x×]\s*([3-5]\d|60)\b/i);
+  if (matchDentes?.[1] && matchDentes[2]) {
+    const pinhao = Number(matchDentes[1]);
+    const coroa = Number(matchDentes[2]);
+    return {
+      pinhao,
+      coroa,
+      razaoOriginal: coroa / pinhao,
+      origem: 'dentes_ficha',
+      avisoFallback: null,
+    };
+  }
+
+  // Tenta extrair razão decimal (ex.: "3,142" ou "2,800")
+  const matchRazao = texto.match(/\b([2-4][.,]\d{2,3})\b/);
+  if (matchRazao?.[1]) {
+    const razao = Number(matchRazao[1].replace(',', '.'));
+    if (Number.isFinite(razao) && razao >= 1.5 && razao <= 5.0) {
+      const pinhaoRef = 15;
+      const coroaAprox = Math.max(30, Math.min(60, Math.round(pinhaoRef * razao)));
+      return {
+        pinhao: pinhaoRef,
+        coroa: coroaAprox,
+        razaoOriginal: razao,
+        origem: 'fallback_razao',
+        avisoFallback: `Manual informa apenas a razão decimal (${razao.toFixed(3)}): simulação inicial aproximada com ${pinhaoRef}Z × ${coroaAprox}Z.`,
+      };
+    }
+  }
+
+  return {
+    pinhao: 15,
+    coroa: 44,
+    razaoOriginal: 44 / 15,
+    origem: 'fallback_padrao',
+    avisoFallback:
+      'Número de dentes não informado na ficha: carregada referência padrão 15Z × 44Z para simulação.',
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Tabela de Torques Padrão por Rosca/Parafuso (Referência Universal de Oficina)
@@ -93,12 +177,12 @@ const TORQUES_PADRAO_ROSCA: readonly TorquePadraoRosca[] = [
   },
 ];
 
-function sugerirFusivelEBitola(correnteAmperes: number): {
+export function sugerirFusivelEBitola(correnteAmperes: number): {
   fusivelComercial: string;
   bitolaFio: string;
   observacao: string;
 } {
-  if (correnteAmperes <= 0) {
+  if (!Number.isFinite(correnteAmperes) || correnteAmperes <= 0) {
     return {
       fusivelComercial: '—',
       bitolaFio: '—',
@@ -109,7 +193,7 @@ function sugerirFusivelEBitola(correnteAmperes: number): {
   // Margem de segurança de ~35% sobre a corrente nominal contínua
   const correnteComMargem = correnteAmperes * 1.35;
   const fusiveisPadrao = [5, 7.5, 10, 15, 20, 25, 30];
-  const escolhido = fusiveisPadrao.find((f) => f >= correnteComMargem) ?? 30;
+  const escolhido = fusiveisPadrao.find((f) => f >= correnteComMargem);
 
   let bitola = '0,75 mm²';
   if (correnteAmperes > 18) bitola = '4,0 mm²';
@@ -118,10 +202,13 @@ function sugerirFusivelEBitola(correnteAmperes: number): {
   else if (correnteAmperes > 3.5) bitola = '1,0 mm²';
 
   return {
-    fusivelComercial: `${escolhido}A (Lâmina Mini/Padrão)`,
+    fusivelComercial: escolhido
+      ? `${escolhido}A (Lâmina Mini/Padrão)`
+      : '> 30A (Circuito de alta carga)',
     bitolaFio: `Cobre flexível ${bitola}`,
-    observacao:
-      correnteAmperes > 5
+    observacao: !escolhido
+      ? 'Corrente acima do limite padrão de 30A para acessórios de motocicleta: utilize circuito dedicado com cabo reforçado.'
+      : correnteAmperes > 5
         ? 'Acima de 5A: obrigatório instalar Relé Auxiliar 4 pinos puxando positivo direto da bateria (não ligar direto no pós-chave!).'
         : 'Consumo baixo: pode ser alimentado via linha pós-chave protegida pelo fusível indicado.',
   };
@@ -142,37 +229,52 @@ export function TorquesCalculadorasPage() {
   // -------------------------------------------------------------------------
   // Estado da Sub-Aba 2: Calculadoras de Bancada
   // -------------------------------------------------------------------------
-  // 2.1 Conversor de Torque
+  // 2.1 Conversor de Torque (suporta vírgula e ponto, sem NaN/Infinity)
   const [convNm, setConvNm] = useState<string>('30');
-  const [convKgfm, setConvKgfm] = useState<string>('3.06');
-  const [convLbfft, setConvLbfft] = useState<string>('22.13');
+  const [convKgfm, setConvKgfm] = useState<string>((30 / FATOR_KGFM_PARA_NM).toFixed(2));
+  const [convLbfft, setConvLbfft] = useState<string>((30 / FATOR_LBFFT_PARA_NM).toFixed(2));
 
   const atualizarDeNm = (val: string) => {
     setConvNm(val);
-    const n = Number(val);
-    if (!Number.isNaN(n) && val.trim() !== '') {
-      setConvKgfm((n / 9.80665).toFixed(2));
-      setConvLbfft((n * 0.737562).toFixed(2));
+    if (val.trim() === '') {
+      setConvKgfm('');
+      setConvLbfft('');
+      return;
+    }
+    const n = parseDecimalBr(val);
+    if (n !== null && n >= 0) {
+      setConvKgfm((n / FATOR_KGFM_PARA_NM).toFixed(2));
+      setConvLbfft((n / FATOR_LBFFT_PARA_NM).toFixed(2));
     }
   };
 
   const atualizarDeKgfm = (val: string) => {
     setConvKgfm(val);
-    const k = Number(val);
-    if (!Number.isNaN(k) && val.trim() !== '') {
-      const nm = k * 9.80665;
+    if (val.trim() === '') {
+      setConvNm('');
+      setConvLbfft('');
+      return;
+    }
+    const k = parseDecimalBr(val);
+    if (k !== null && k >= 0) {
+      const nm = k * FATOR_KGFM_PARA_NM;
       setConvNm(nm.toFixed(1));
-      setConvLbfft((nm * 0.737562).toFixed(2));
+      setConvLbfft((nm / FATOR_LBFFT_PARA_NM).toFixed(2));
     }
   };
 
   const atualizarDeLbfft = (val: string) => {
     setConvLbfft(val);
-    const lb = Number(val);
-    if (!Number.isNaN(lb) && val.trim() !== '') {
-      const nm = lb / 0.737562;
+    if (val.trim() === '') {
+      setConvNm('');
+      setConvKgfm('');
+      return;
+    }
+    const lb = parseDecimalBr(val);
+    if (lb !== null && lb >= 0) {
+      const nm = lb * FATOR_LBFFT_PARA_NM;
       setConvNm(nm.toFixed(1));
-      setConvKgfm((nm / 9.80665).toFixed(2));
+      setConvKgfm((nm / FATOR_KGFM_PARA_NM).toFixed(2));
     }
   };
 
@@ -183,16 +285,24 @@ export function TorquesCalculadorasPage() {
 
   const atualizarPotenciaW = (val: string, v = tensaoV) => {
     setPotenciaW(val);
-    const w = Number(val);
-    if (!Number.isNaN(w) && w >= 0 && v > 0) {
+    if (val.trim() === '') {
+      setCorrenteA('');
+      return;
+    }
+    const w = parseDecimalBr(val);
+    if (w !== null && w >= 0 && v > 0) {
       setCorrenteA((w / v).toFixed(2));
     }
   };
 
   const atualizarCorrenteA = (val: string, v = tensaoV) => {
     setCorrenteA(val);
-    const a = Number(val);
-    if (!Number.isNaN(a) && a >= 0 && v > 0) {
+    if (val.trim() === '') {
+      setPotenciaW('');
+      return;
+    }
+    const a = parseDecimalBr(val);
+    if (a !== null && a >= 0 && v > 0) {
       setPotenciaW((a * v).toFixed(1));
     }
   };
@@ -202,37 +312,45 @@ export function TorquesCalculadorasPage() {
     atualizarPotenciaW(potenciaW, novaTensao);
   };
 
+  const correnteNumerica = useMemo(() => parseDecimalBr(correnteA) ?? 0, [correnteA]);
+
   const resistenciaOhms = useMemo(() => {
-    const a = Number(correnteA);
-    if (Number.isNaN(a) || a <= 0) return '—';
-    return `${(tensaoV / a).toFixed(2)} Ω`;
-  }, [tensaoV, correnteA]);
+    if (correnteNumerica <= 0) return '—';
+    return `${(tensaoV / correnteNumerica).toFixed(2)} Ω`;
+  }, [tensaoV, correnteNumerica]);
 
   const recomendacaoEletrica = useMemo(
-    () => sugerirFusivelEBitola(Number(correnteA) || 0),
-    [correnteA],
+    () => sugerirFusivelEBitola(correnteNumerica),
+    [correnteNumerica],
   );
 
-  // 2.3 Calculadora de Relação (Pinhão x Coroa)
-  const pinhaoOriginal = f.transmissaoFinal?.pinhaoDentes ?? 15;
-  const coroaOriginal = f.transmissaoFinal?.coroaDentes ?? 44;
+  // 2.3 Calculadora de Relação (Pinhão x Coroa) com parser robusto
+  const relacaoOriginal = useMemo(
+    () => extrairRelacaoOriginal(f.transmissaoFinal),
+    [f.transmissaoFinal],
+  );
+  const pinhaoOriginal = relacaoOriginal.pinhao;
+  const coroaOriginal = relacaoOriginal.coroa;
   const [pinhaoSimulado, setPinhaoSimulado] = useState<number>(pinhaoOriginal);
   const [coroaSimulada, setCoroaSimulada] = useState<number>(coroaOriginal);
 
   useEffect(() => {
-    setPinhaoSimulado(f.transmissaoFinal?.pinhaoDentes ?? 15);
-    setCoroaSimulada(f.transmissaoFinal?.coroaDentes ?? 44);
-  }, [moto.geracao.id, f.transmissaoFinal?.pinhaoDentes, f.transmissaoFinal?.coroaDentes]);
+    setPinhaoSimulado(relacaoOriginal.pinhao);
+    setCoroaSimulada(relacaoOriginal.coroa);
+  }, [moto.geracao.id, relacaoOriginal.pinhao, relacaoOriginal.coroa]);
 
   const analiseRelacao = useMemo(() => {
-    const razaoOrig = coroaOriginal / Math.max(1, pinhaoOriginal);
-    const razaoNova = coroaSimulada / Math.max(1, pinhaoSimulado);
+    const pOrig = Math.max(1, pinhaoOriginal);
+    const pSim = Math.max(1, pinhaoSimulado);
+    const cSim = Math.max(1, coroaSimulada);
+    const razaoOrig = coroaOriginal / pOrig;
+    const razaoNova = cSim / pSim;
     // Variação de alongamento (velocidade final na mesma RPM): (razaoOrig / razaoNova - 1) * 100
     const variacaoFinalPct = (razaoOrig / razaoNova - 1) * 100;
     return {
       razaoOrig: razaoOrig.toFixed(3),
       razaoNova: razaoNova.toFixed(3),
-      variacaoFinalPct,
+      variacaoFinalPct: Number.isFinite(variacaoFinalPct) ? variacaoFinalPct : 0,
     };
   }, [pinhaoOriginal, coroaOriginal, pinhaoSimulado, coroaSimulada]);
 
@@ -301,10 +419,10 @@ export function TorquesCalculadorasPage() {
                       className={cn(
                         'gap-1 text-xs',
                         isAuditado
-                          ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300'
+                          ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
                           : isFonteWeb
-                            ? 'border-sky-500/40 bg-sky-500/15 text-sky-300'
-                            : 'border-amber-500/40 bg-amber-500/15 text-amber-300',
+                            ? 'border-sky-500/40 bg-sky-500/15 text-sky-700 dark:text-sky-300'
+                            : 'border-amber-500/40 bg-amber-500/15 text-amber-700 dark:text-amber-300',
                       )}
                     >
                       {isAuditado ? (
@@ -383,7 +501,7 @@ export function TorquesCalculadorasPage() {
                         {t.torque.valor} N·m
                       </span>
                       <span className="text-xs font-semibold text-muted-foreground">
-                        {nmParaKgfm(t.torque.valor)} kgf·m
+                        {nmParaKgfm(t.torque.valor)}
                       </span>
                     </div>
                   </SpotlightCard>
@@ -434,8 +552,8 @@ export function TorquesCalculadorasPage() {
               </div>
 
               <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/35 bg-amber-500/8 p-3.5 text-xs">
-                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-400" />
-                <p className="leading-relaxed text-amber-200/90">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                <p className="leading-relaxed text-amber-900 dark:text-amber-200/90">
                   <strong>Regra de Ouro para Roscas em Alumínio (Cabeçote e Carcaças):</strong> Os
                   valores de torque de manual são sempre para <strong>roscas limpas e secas</strong>{' '}
                   (exceto quando o manual pede óleo ou trava-rosca). Nunca dê aperto final de vela
@@ -469,10 +587,11 @@ export function TorquesCalculadorasPage() {
                     Newton-metro (<code className="text-primary">N·m</code>) — Padrão Manuais Novos
                   </label>
                   <Input
-                    type="number"
-                    step="0.5"
+                    type="text"
+                    inputMode="decimal"
                     value={convNm}
                     onChange={(e) => atualizarDeNm(e.target.value)}
+                    placeholder="Ex.: 30"
                     className="font-mono text-base font-bold"
                   />
                 </div>
@@ -482,10 +601,11 @@ export function TorquesCalculadorasPage() {
                     Quilograma-força metro (<code className="text-primary">kgf·m</code>) — Manuais Antigos
                   </label>
                   <Input
-                    type="number"
-                    step="0.1"
+                    type="text"
+                    inputMode="decimal"
                     value={convKgfm}
                     onChange={(e) => atualizarDeKgfm(e.target.value)}
+                    placeholder="Ex.: 3,06"
                     className="font-mono text-base font-bold"
                   />
                 </div>
@@ -495,10 +615,11 @@ export function TorquesCalculadorasPage() {
                     Libra-pé (<code className="text-primary">lbf·ft</code>) — Escala Imperial EUA
                   </label>
                   <Input
-                    type="number"
-                    step="0.5"
+                    type="text"
+                    inputMode="decimal"
                     value={convLbfft}
                     onChange={(e) => atualizarDeLbfft(e.target.value)}
+                    placeholder="Ex.: 22,13"
                     className="font-mono text-base font-bold"
                   />
                 </div>
@@ -571,22 +692,22 @@ export function TorquesCalculadorasPage() {
                   <div className="space-y-1">
                     <label className="font-semibold">Potência (Watts - W)</label>
                     <Input
-                      type="number"
-                      min="0"
-                      step="1"
+                      type="text"
+                      inputMode="decimal"
                       value={potenciaW}
                       onChange={(e) => atualizarPotenciaW(e.target.value)}
+                      placeholder="Ex.: 35"
                       className="font-mono text-base font-bold"
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="font-semibold">Corrente (Amperes - A)</label>
                     <Input
-                      type="number"
-                      min="0"
-                      step="0.1"
+                      type="text"
+                      inputMode="decimal"
                       value={correnteA}
                       onChange={(e) => atualizarCorrenteA(e.target.value)}
+                      placeholder="Ex.: 2,54"
                       className="font-mono text-base font-bold"
                     />
                   </div>
@@ -599,7 +720,7 @@ export function TorquesCalculadorasPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Fusível comercial ideal:</span>
-                    <span className="font-mono font-extrabold text-emerald-300">
+                    <span className="font-mono font-extrabold text-emerald-700 dark:text-emerald-300">
                       {recomendacaoEletrica.fusivelComercial}
                     </span>
                   </div>
@@ -632,6 +753,11 @@ export function TorquesCalculadorasPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3.5 text-xs">
+                {relacaoOriginal.avisoFallback && (
+                  <div className="rounded-lg border border-amber-500/35 bg-amber-500/10 px-2.5 py-2 text-[11px] leading-snug text-amber-800 dark:text-amber-200">
+                    {relacaoOriginal.avisoFallback}
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="space-y-1">
                     <label className="font-semibold">Pinhão (Dentes Z)</label>
@@ -729,8 +855,8 @@ export function TorquesCalculadorasPage() {
                         Math.abs(analiseRelacao.variacaoFinalPct) < 0.1
                           ? 'border-border'
                           : analiseRelacao.variacaoFinalPct > 0
-                            ? 'border-sky-500/40 bg-sky-500/15 text-sky-300'
-                            : 'border-amber-500/40 bg-amber-500/15 text-amber-300',
+                            ? 'border-sky-500/40 bg-sky-500/15 text-sky-700 dark:text-sky-300'
+                            : 'border-amber-500/40 bg-amber-500/15 text-amber-700 dark:text-amber-300',
                       )}
                     >
                       {analiseRelacao.variacaoFinalPct > 0 ? '+' : ''}
@@ -740,18 +866,18 @@ export function TorquesCalculadorasPage() {
 
                   <p className="border-t border-border/60 pt-2 text-[11px] leading-relaxed">
                     {Math.abs(analiseRelacao.variacaoFinalPct) < 0.1 ? (
-                      <span className="text-emerald-300">
+                      <span className="text-emerald-700 dark:text-emerald-300">
                         <strong>Comportamento Original de Fábrica:</strong> Equilíbrio padrão entre
                         torque de saída e rotação em rodovia.
                       </span>
                     ) : analiseRelacao.variacaoFinalPct > 0 ? (
-                      <span className="text-sky-300">
+                      <span className="text-sky-700 dark:text-sky-300">
                         <strong>Relação Mais Longa (+Velocidade Final / -RPM):</strong> O motor gira{' '}
                         {Math.abs(analiseRelacao.variacaoFinalPct).toFixed(1)}% mais folgado em
                         cruzeiro, porém perde força em subidas íngremes ou com garupa.
                       </span>
                     ) : (
-                      <span className="text-amber-300">
+                      <span className="text-amber-700 dark:text-amber-300">
                         <strong>Relação Mais Curta (+Arrancada / +Força em Subida):</strong> Ganha{' '}
                         {Math.abs(analiseRelacao.variacaoFinalPct).toFixed(1)}% de torque na roda
                         para entregas/subidas, porém o motor trabalha em RPM mais alta na estrada.

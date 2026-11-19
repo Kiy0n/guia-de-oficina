@@ -30,6 +30,7 @@ import {
 } from '@/data/diagnosticos';
 import { SECTIONS } from '@/lib/sections';
 import { cn } from '@/lib/utils';
+import { getArquiteturaMoto } from '@/utils/arquiteturaMoto';
 
 type StatusEtapa = 'pendente' | 'ok' | 'falha';
 
@@ -48,6 +49,10 @@ export function DiagnosticoCorretivoPage() {
 
   const def = SECTIONS.find((s) => s.id === 'diagnostico') ?? SECTIONS[0];
   const f = moto.geracao.fichaTecnica;
+  const arq = useMemo(
+    () => getArquiteturaMoto(moto.modelo, moto.geracao),
+    [moto.modelo, moto.geracao],
+  );
 
   const cenariosFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -153,8 +158,8 @@ export function DiagnosticoCorretivoPage() {
       <SectionHeader section={def}>
         <Badge variant="outline" className="gap-1.5 px-2.5 py-1">
           <Sparkles className="size-3.5 text-primary" />
-          Filtro inteligente: {f.alimentacao === 'injecao' ? 'Injetada' : 'Carburada'} ·{' '}
-          {f.cambio.tipo === 'cvt' ? 'CVT' : 'Corrente'} · Freios{' '}
+          Filtro inteligente: {arq.descricaoAlimentacao} ·{' '}
+          {arq.isSemiautomatica ? 'Semiautomática' : 'Embreagem Manual'} · Freios{' '}
           {f.freios.dianteiro}/{f.freios.traseiro}
         </Badge>
       </SectionHeader>
@@ -248,8 +253,8 @@ export function DiagnosticoCorretivoPage() {
                       className={cn(
                         'font-mono text-[10px]',
                         falhasCount > 0
-                          ? 'border-rose-500/40 bg-rose-500/15 text-rose-300'
-                          : 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300',
+                          ? 'border-rose-500/40 bg-rose-500/15 text-rose-700 dark:text-rose-300'
+                          : 'border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
                       )}
                     >
                       {falhasCount > 0 ? `${falhasCount} falha(s)` : `${okCount} OK`}
@@ -350,7 +355,7 @@ export function DiagnosticoCorretivoPage() {
                             {destaque.aplicaDireto ? (
                               <Badge
                                 variant="outline"
-                                className="border-emerald-500/40 bg-emerald-500/10 text-[10px] text-emerald-300"
+                                className="border-emerald-500/40 bg-emerald-500/10 text-[10px] text-emerald-700 dark:text-emerald-300"
                               >
                                 Aplicável à {moto.modelo.nome} ({moto.geracao.anosLabel})
                               </Badge>
@@ -413,14 +418,14 @@ export function DiagnosticoCorretivoPage() {
                         </div>
 
                         <div className="rounded-xl border border-amber-500/25 bg-amber-500/6 p-3">
-                          <p className="flex items-center gap-1 font-bold text-amber-300">
+                          <p className="flex items-center gap-1 font-bold text-amber-700 dark:text-amber-300">
                             <AlertTriangle className="size-3.5" />
                             Se falhar — Causa provável & Solução:
                           </p>
                           <p className="mt-1 leading-relaxed text-muted-foreground">
                             {etapa.causaProvavelSeFalhar}
                           </p>
-                          <p className="mt-1.5 font-medium text-emerald-300">
+                          <p className="mt-1.5 font-medium text-emerald-700 dark:text-emerald-300">
                             → {etapa.solucaoSugerida}
                           </p>
                         </div>

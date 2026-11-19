@@ -28,6 +28,8 @@ export interface TesteMultimetroBancada {
   pontasDeProva: string;
   passoAPasso: string[];
   dicaBancada: string;
+  /** Quando verdadeiro, o teste se aplica exclusivamente a motos com injeção eletrônica. */
+  apenasInjecao?: boolean;
 }
 
 export interface CorFioFabricante {
@@ -353,103 +355,6 @@ export const CODIGOS_FALHA_FI: readonly CodigoFalhaFI[] = [
       'Medir tensão nos polos da bateria com motor funcionando e testar estator/retificador.',
     testeMultimetro: 'DCV 20V na bateria a 5.000 rpm: deve estabilizar entre 13,5V e 14,8V.',
   },
-
-  // -------------------------------------------------------------------------
-  // SUZUKI DCP-FI (Referência geral para modelos injetados)
-  // -------------------------------------------------------------------------
-  {
-    codigo: 'C12',
-    marca: 'Suzuki',
-    piscadasLabel: 'Visor: C12',
-    componente: 'Sensor CKP (Bobina de Pulso do Virabrequim)',
-    sintomaTipico: 'O sinal não chega ao ECM durante a partida; motor não pega.',
-    oQueTestarPrimeiro: 'Conector de 2 vias que sai da tampa esquerda do gerador.',
-    testeMultimetro: 'Escala 200 Ω: resistência entre 130 e 220 Ω.',
-  },
-  {
-    codigo: 'C13',
-    marca: 'Suzuki',
-    piscadasLabel: 'Visor: C13',
-    componente: 'Sensor IAP (Pressão do Ar de Admissão)',
-    sintomaTipico: 'Falha em desaceleração e perda de rendimento.',
-    oQueTestarPrimeiro: 'Conector do sensor IAP e mangueira/galeria de vácuo no coletor.',
-    testeMultimetro: 'DCV 20V: alimentação 5V; saída ~2,5 a 4,0V conforme abertura.',
-  },
-  {
-    codigo: 'C14',
-    marca: 'Suzuki',
-    piscadasLabel: 'Visor: C14',
-    componente: 'Sensor TPS (Posição da Borboleta)',
-    sintomaTipico: 'Engasgo ao acelerar e luz FI piscando.',
-    oQueTestarPrimeiro: 'Ajuste e limpeza do conector de 3 pinos do TPS lateral.',
-    testeMultimetro: 'DCV 20V: fechado ~1,1V | totalmente aberto ~4,3V.',
-  },
-  {
-    codigo: 'C15',
-    marca: 'Suzuki',
-    piscadasLabel: 'Visor: C15',
-    componente: 'Sensor ET (Temperatura do Motor)',
-    sintomaTipico: 'Mistura desregulada a frio e marcha lenta alta.',
-    oQueTestarPrimeiro: 'Fio quebrado no sensor de temperatura fixado no cilindro.',
-    testeMultimetro: 'Escala 20 kΩ: ~2,4 kΩ a 20 °C.',
-  },
-  {
-    codigo: 'C21',
-    marca: 'Suzuki',
-    piscadasLabel: 'Visor: C21',
-    componente: 'Sensor IAT (Temperatura do Ar na Caixa de Filtro)',
-    sintomaTipico:
-      'Muito comum aparecer após manutenção no filtro de ar quando esquecem o plug do sensor IAT desconectado na caixa de ar!',
-    oQueTestarPrimeiro: 'Reconectar o plug de 2 fios preso na tampa da caixa do filtro de ar.',
-    testeMultimetro: 'Escala 20 kΩ: ~2,2 a 2,7 kΩ a 20 °C.',
-  },
-  {
-    codigo: 'C23',
-    marca: 'Suzuki',
-    piscadasLabel: 'Visor: C23',
-    componente: 'Sensor TO (Tip-Over / Sensor de Inclinação)',
-    sintomaTipico: 'Corta bomba e faísca por entender que a moto está caída.',
-    oQueTestarPrimeiro: 'Verificar se o sensor TO está encaixado no suporte com a seta "UPPER" para cima.',
-    testeMultimetro: 'Escala 20 kΩ: resistência interna ~19 a 20 kΩ; tensão normal 1,5–2,5V.',
-  },
-  {
-    codigo: 'C24',
-    marca: 'Suzuki',
-    piscadasLabel: 'Visor: C24',
-    componente: 'Sistema de Ignição (Bobina de Ignição)',
-    sintomaTipico: 'Ausência de centelha na vela de ignição.',
-    oQueTestarPrimeiro: 'Terminais primários da bobina e aterramento no quadro.',
-    testeMultimetro: 'Primário (200 Ω): 3,0 a 5,0 Ω | Secundário c/ cachimbo (20 kΩ): 12 a 18 kΩ.',
-  },
-  {
-    codigo: 'C32',
-    marca: 'Suzuki',
-    piscadasLabel: 'Visor: C32',
-    componente: 'Sistema DCP / Bico Injetor Integrado (Bomba de Descarga)',
-    sintomaTipico: 'Módulo DCP não pulsa combustível no coletor.',
-    oQueTestarPrimeiro: 'Alimentação 12V pós-chave no conector do módulo DCP-FI.',
-    testeMultimetro: 'Escala 200 Ω na bobina do módulo DCP: ~10 a 16 Ω.',
-  },
-  {
-    codigo: 'C41',
-    marca: 'Suzuki',
-    piscadasLabel: 'Visor: C41',
-    componente: 'Relé / Circuito de Controle da Bomba de Combustível',
-    sintomaTipico: 'Bomba não pressuriza ao virar a chave de ignição.',
-    oQueTestarPrimeiro: 'Fusível secundário de injeção e relé de corte de combustível.',
-    testeMultimetro: 'DCV 20V: confirmar 12V por 3 segundos ao girar a chave para ON.',
-  },
-  {
-    codigo: 'C42',
-    marca: 'Suzuki',
-    piscadasLabel: 'Visor: C42',
-    componente: 'Interruptor de Ignição (Chave de Contato / Anti-Furto)',
-    sintomaTipico:
-      'Comum quando é feita ligação direta ou o resistor interno do miolo da chave está aberto: o painel acende, o motor gira, mas o ECM bloqueia a faísca!',
-    oQueTestarPrimeiro:
-      'Testar o chicote do contato de ignição (a Suzuki usa um resistor de segurança dentro do contato para enviar ~5 a 9V ao pino de validação do ECM).',
-    testeMultimetro: 'Verifique continuidade e o resistor interno na base do miolo da ignição.',
-  },
 ];
 
 // ===========================================================================
@@ -474,7 +379,7 @@ export const TESTES_MULTIMETRO_BANCADA: readonly TesteMultimetroBancada[] = [
       'ALERTA CRÍTICO: se a tensão passar de 15,0V (chegando a 16V ou 18V ao acelerar), desligue imediatamente e troque o Retificador/Regulador — sobrecarga estufa a bateria, queima lâmpadas LED/halógenas e pode queimar o módulo ECM!',
     ],
     dicaBancada:
-      'Em motos com partida elétrica e injeção eletrônica, uma bateria abaixo de 12,4V em repouso pode girar o motor lentamente e causar falha de leitura dos sensores do ECM na partida a frio.',
+      'Confira sempre o fusível principal ao lado da bateria (continuidade/bip nos terminais superiores). Em motos com partida elétrica e injeção eletrônica, uma bateria abaixo de 12,4V em repouso pode girar o motor lentamente e causar falha de leitura dos sensores do ECM na partida a frio.',
   },
   {
     id: 'teste-estator',
@@ -560,8 +465,9 @@ export const TESTES_MULTIMETRO_BANCADA: readonly TesteMultimetroBancada[] = [
   {
     id: 'teste-bomba-combustivel-fusivel',
     titulo: '6. Bomba de Combustível (Alimentação 12V & Pressão) e Fusíveis',
-    subtitulo: 'Verificação elétrica de temporização de 3 segundos do ECM e teste dos fusíveis.',
+    subtitulo: 'Exclusivo para motos com injeção eletrônica: temporização de 3 segundos do ECM e pressão de linha.',
     escalaMultimetro: 'DCV 20V + Continuidade (Bip) + Manômetro de Linha (0–7 bar)',
+    apenasInjecao: true,
     valorNormal:
       'Alimentação ao virar a chave: ~12V durante 2 a 3 segundos | Pressão Honda PGM-FI: 2,9–3,0 bar (43 psi) | Pressão Yamaha BlueFlex: 2,5 bar (36 psi)',
     valorDefeito:

@@ -37,6 +37,7 @@ import { useManuais } from '@/hooks/useManuais';
 import { SECTIONS } from '@/lib/sections';
 import { cn } from '@/lib/utils';
 import { MARCAS, type Marca } from '@/types/moto';
+import { getArquiteturaMoto } from '@/utils/arquiteturaMoto';
 import { formatFaixa } from '@/utils/format';
 
 function SwatchFio({ cor }: { cor: CorFioFabricante }) {
@@ -72,9 +73,11 @@ export function EletricaInjecaoPage() {
   const moto = useMotoSelecionada();
   const { setSection } = useMoto();
 
+  const [abaAtiva, setAbaAtiva] = useState<string>('codigos-fi');
   const [marcaFi, setMarcaFi] = useState<Marca>(moto.marca);
   const [buscaCodigo, setBuscaCodigo] = useState<string>('');
   const [buscaFio, setBuscaFio] = useState<string>('');
+  const [apenasTestesMotoAtual, setApenasTestesMotoAtual] = useState<boolean>(true);
 
   // Sincroniza a marca do decodificador sempre que o usuário trocar de moto
   useEffect(() => {
@@ -95,8 +98,20 @@ export function EletricaInjecaoPage() {
 
   const def = SECTIONS.find((s) => s.id === 'eletrica') ?? SECTIONS[0];
   const ficha = moto.geracao.fichaTecnica;
-  const isCarburada = ficha.alimentacao === 'carburador';
+  const arq = useMemo(
+    () => getArquiteturaMoto(moto.modelo, moto.geracao),
+    [moto.modelo, moto.geracao],
+  );
+  const isCarburada100 = arq.tipoAlimentacao === 'carburada';
+  const isMista = arq.tipoAlimentacao === 'mista';
   const guiaMarca = GUIAS_LEITURA_FI[marcaFi];
+
+  const testesMultimetroVisiveis = useMemo(() => {
+    if (isCarburada100 && apenasTestesMotoAtual) {
+      return TESTES_MULTIMETRO_BANCADA.filter((t) => !t.apenasInjecao);
+    }
+    return TESTES_MULTIMETRO_BANCADA;
+  }, [isCarburada100, apenasTestesMotoAtual]);
 
   const codigosFiltrados = useMemo(() => {
     const termo = buscaCodigo.trim().toLowerCase();
@@ -143,13 +158,19 @@ export function EletricaInjecaoPage() {
           variant="outline"
           className={cn(
             'gap-1.5 px-2.5 py-1',
-            isCarburada
-              ? 'border-amber-500/40 bg-amber-500/10 text-amber-300'
-              : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
+            isCarburada100
+              ? 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300'
+              : isMista
+                ? 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300'
+                : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
           )}
         >
           <Zap className="size-3.5" />
-          {isCarburada ? 'Ignição CDI/TCI · Carburada' : 'Injeção Eletrônica · PGM-FI / FI'}
+          {isCarburada100
+            ? 'Ignição CDI/TCI · Carburada'
+            : isMista
+              ? 'Geração Mista · Carburador / Injeção'
+              : `Injeção Eletrônica · ${arq.siglaInjecao}`}
         </Badge>
 
         <Button
@@ -178,11 +199,12 @@ export function EletricaInjecaoPage() {
             <span className="font-semibold uppercase">Bateria & Carga</span>
             <BatteryCharging className="size-4 text-primary" />
           </div>
-          <p className="mt-1.5 font-mono text-base font-bold text-foreground">
-            {ficha.eletrica?.bateria?.modelo ?? '12V Selada'}
+          <p className="mt-1.5 line-clamp-1 font-mono text-sm font-bold text-foreground" title={ficha.eletrica?.bateria?.modelo}>
+            {ficha.eletrica?.bateria?.modelo ?? 'Consultar Manual'}
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {ficha.eletrica?.bateria?.tensaoV ?? 12}V · {ficha.eletrica?.bateria?.capacidadeAh ?? 5} Ah ·{' '}
+            {ficha.eletrica?.bateria?.tensaoV ?? 12}V
+            {ficha.eletrica?.bateria?.capacidadeAh ? ` · ${ficha.eletrica.bateria.capacidadeAh} Ah` : ''} ·{' '}
             {ficha.eletrica?.bateria?.tensaoCargaV ?? '13,5–14,8V @ 5.000 rpm'}
           </p>
         </SpotlightCard>
@@ -206,11 +228,11 @@ export function EletricaInjecaoPage() {
             <Zap className="size-4 text-primary" />
           </div>
           <p className="mt-1.5 font-mono text-base font-bold text-foreground">
-            Principal: {ficha.eletrica?.fusivelPrincipalA ?? 15}A
+            Principal: {ficha.eletrica?.fusivelPrincipalA ? `${ficha.eletrica.fusivelPrincipalA}A` : 'Ver Manual'}
           </p>
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
-            Aux: {ficha.eletrica?.fusiveisSecundarios ?? '10A'} · Farol:{' '}
-            {ficha.eletrica?.lampadaFarol ?? '35/35W'}
+            {ficha.eletrica?.fusiveisSecundarios ? `Aux: ${ficha.eletrica.fusiveisSecundarios} · ` : ''}
+            Farol: {ficha.eletrica?.lampadaFarol ?? 'Consultar Manual'}
           </p>
         </SpotlightCard>
 
@@ -219,11 +241,11 @@ export function EletricaInjecaoPage() {
             <span className="font-semibold uppercase">Alimentação / Linha</span>
             <Gauge className="size-4 text-primary" />
           </div>
-          <p className="mt-1.5 truncate font-mono text-sm font-bold text-foreground">
-            {isCarburada ? 'Carburador (Gravidade/Vácuo)' : 'Bomba Elétrica Injetada'}
+          <p className="mt-1.5 truncate font-mono text-sm font-bold text-foreground" title={arq.descricaoAlimentacao}>
+            {arq.descricaoAlimentacao}
           </p>
-          <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
-            {ficha.motorDetalhes?.alimentacaoDetalhe ?? 'Consulte parâmetros'}
+          <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground" title={ficha.motorDetalhes?.alimentacaoDetalhe}>
+            {ficha.motorDetalhes?.alimentacaoDetalhe ?? 'Consulte parâmetros na Ficha Técnica'}
           </p>
         </SpotlightCard>
       </div>
@@ -231,7 +253,7 @@ export function EletricaInjecaoPage() {
       {/* ------------------------------------------------------------------ */}
       {/* 3 Sub-abas: Códigos FI | Testes no Multímetro | Cores de Fios      */}
       {/* ------------------------------------------------------------------ */}
-      <Tabs defaultValue="codigos-fi" className="space-y-5">
+      <Tabs value={abaAtiva} onValueChange={setAbaAtiva} className="space-y-5">
         <TabsList className="grid h-auto w-full grid-cols-1 gap-1.5 bg-card/80 p-1.5 sm:grid-cols-3">
           <TabsTrigger value="codigos-fi" className="gap-2 py-2.5 text-xs sm:text-sm">
             <Cpu className="size-4" />
@@ -251,19 +273,20 @@ export function EletricaInjecaoPage() {
         {/* ABA 1: DECODIFICADOR DE CÓDIGOS DE FALHA (FI / MIL)              */}
         {/* ================================================================ */}
         <TabsContent value="codigos-fi" className="space-y-5">
-          {/* Banner informativo caso a geração selecionada seja carburada */}
-          {isCarburada && (
+          {/* Banner informativo caso a geração selecionada seja carburada ou mista */}
+          {(isCarburada100 || isMista) && (
             <div className="flex items-start gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
-              <Info className="mt-0.5 size-5 shrink-0 text-amber-400" />
+              <Info className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400" />
               <div className="space-y-1 text-xs leading-relaxed">
-                <p className="font-bold text-amber-300">
-                  Atenção: A {moto.marca} {moto.modelo.nome} ({moto.geracao.anosLabel} ·{' '}
-                  {moto.geracao.nomeGeracao}) utiliza CARBURADOR.
+                <p className="font-bold text-amber-800 dark:text-amber-300">
+                  {isMista
+                    ? `Atenção: A ${moto.marca} ${moto.modelo.nome} (${moto.geracao.anosLabel}) abrange anos carburados e injetados (${arq.descricaoAlimentacao}).`
+                    : `Atenção: A ${moto.marca} ${moto.modelo.nome} (${moto.geracao.anosLabel} · ${moto.geracao.nomeGeracao}) é 100% CARBURADA.`}
                 </p>
                 <p className="text-foreground/85">
-                  Esta geração possui sistema de ignição por CDI/TCI e não utiliza central de injeção
-                  eletrônica com luz de falha FI/MIL. O decodificador abaixo permanece liberado para
-                  você consultar qualquer geração injetada na bancada.
+                  {isMista
+                    ? 'Os códigos de falha FI/MIL abaixo aplicam-se apenas às versões injetadas desta geração. Para as versões carburadas (CDI), utilize a aba de Testes no Multímetro.'
+                    : 'Esta geração utiliza sistema de ignição por CDI/TCI e não possui central de injeção eletrônica nem luz de falha FI/MIL. Utilize a aba de Testes no Multímetro para diagnosticar bateria, estator, retificador e bobinas.'}
                 </p>
               </div>
             </div>
@@ -292,13 +315,13 @@ export function EletricaInjecaoPage() {
                         ? 'Honda PGM-FI'
                         : m === 'Yamaha'
                           ? 'Yamaha FI'
-                          : 'Suzuki DCP-FI'}
+                          : 'Suzuki (125 Carburadas)'}
                     </span>
                     <Badge
                       variant="secondary"
                       className="px-1.5 py-0 font-mono text-[10px]"
                     >
-                      {count}
+                      {m === 'Suzuki' ? 'CDI' : count}
                     </Badge>
                   </Button>
                 );
@@ -310,7 +333,7 @@ export function EletricaInjecaoPage() {
               <Input
                 value={buscaCodigo}
                 onChange={(e) => setBuscaCodigo(e.target.value)}
-                placeholder='Filtrar código ou sintoma (ex.: "8", "12", "C21", "TPS", "bico")...'
+                placeholder='Filtrar código ou sintoma (ex.: "8", "12", "37", "TPS", "bico")...'
                 className="h-9 pl-9 text-xs"
               />
             </div>
@@ -361,55 +384,82 @@ export function EletricaInjecaoPage() {
             </CardContent>
           </Card>
 
-          {/* Lista de Cards de Códigos de Falha */}
-          <div className="grid gap-4 md:grid-cols-2">
-            {codigosFiltrados.map((item) => (
-              <Card key={`${item.marca}-${item.codigo}`} className="border-border/80 bg-card/90">
-                <CardHeader className="pb-2.5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <span className="flex h-10 min-w-12 items-center justify-center rounded-xl border border-primary/40 bg-primary/15 px-2.5 font-mono text-lg font-extrabold text-primary">
-                        {item.codigo}
-                      </span>
-                      <div>
-                        <CardTitle className="text-sm leading-snug">{item.componente}</CardTitle>
-                        <CardDescription className="mt-0.5 font-mono text-xs text-amber-400">
-                          {item.piscadasLabel}
-                        </CardDescription>
+          {/* Lista de Cards de Códigos de Falha ou Aviso Suzuki Carburada */}
+          {marcaFi === 'Suzuki' ? (
+            <Card className="border-amber-500/35 bg-amber-500/8">
+              <CardContent className="flex flex-col items-start justify-between gap-4 py-6 sm:flex-row sm:items-center">
+                <div className="space-y-1 text-xs leading-relaxed">
+                  <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+                    Todos os modelos Suzuki cadastrados (Intruder 125 e Yes 125 / EN125) são 100% Carburados
+                  </p>
+                  <p className="text-foreground/85">
+                    Não há módulo de injeção eletrônica nem tabela de códigos FI para a linha Suzuki 125
+                    do catálogo. Use a aba de <strong>Testes no Multímetro</strong> para avaliar bateria,
+                    estator, retificador, bobina de pulso (130–220 Ω) e bobina de ignição.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="default"
+                  size="sm"
+                  onClick={() => setAbaAtiva('multimetro')}
+                  className="shrink-0 gap-1.5 text-xs"
+                >
+                  <Wrench className="size-3.5" />
+                  Ir para Testes no Multímetro
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {codigosFiltrados.map((item) => (
+                <Card key={`${item.marca}-${item.codigo}`} className="border-border/80 bg-card/90">
+                  <CardHeader className="pb-2.5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="flex h-10 min-w-12 items-center justify-center rounded-xl border border-primary/40 bg-primary/15 px-2.5 font-mono text-lg font-extrabold text-primary">
+                          {item.codigo}
+                        </span>
+                        <div>
+                          <CardTitle className="text-sm leading-snug">{item.componente}</CardTitle>
+                          <CardDescription className="mt-0.5 font-mono text-xs text-amber-700 dark:text-amber-400">
+                            {item.piscadasLabel}
+                          </CardDescription>
+                        </div>
                       </div>
+                      <Badge variant="outline" className="shrink-0 text-[10px]">
+                        {item.marca}
+                      </Badge>
                     </div>
-                    <Badge variant="outline" className="shrink-0 text-[10px]">
-                      {item.marca}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2.5 text-xs">
-                  <div className="rounded-lg border bg-background/55 p-2.5">
-                    <p className="font-semibold text-rose-300">Sintoma típico na moto:</p>
-                    <p className="mt-0.5 leading-relaxed text-muted-foreground">
-                      {item.sintomaTipico}
-                    </p>
-                  </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2.5 text-xs">
+                    <div className="rounded-lg border bg-background/55 p-2.5">
+                      <p className="font-semibold text-rose-700 dark:text-rose-300">Sintoma típico na moto:</p>
+                      <p className="mt-0.5 leading-relaxed text-muted-foreground">
+                        {item.sintomaTipico}
+                      </p>
+                    </div>
 
-                  <div className="rounded-lg border bg-background/55 p-2.5">
-                    <p className="font-semibold text-amber-300">O que testar primeiro:</p>
-                    <p className="mt-0.5 leading-relaxed text-muted-foreground">
-                      {item.oQueTestarPrimeiro}
-                    </p>
-                  </div>
+                    <div className="rounded-lg border bg-background/55 p-2.5">
+                      <p className="font-semibold text-amber-700 dark:text-amber-300">O que testar primeiro:</p>
+                      <p className="mt-0.5 leading-relaxed text-muted-foreground">
+                        {item.oQueTestarPrimeiro}
+                      </p>
+                    </div>
 
-                  <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/8 p-2.5">
-                    <p className="font-semibold text-emerald-300">
-                      Valor / Checagem no Multímetro:
-                    </p>
-                    <p className="mt-0.5 font-mono leading-relaxed text-foreground/90">
-                      {item.testeMultimetro}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/8 p-2.5">
+                      <p className="font-semibold text-emerald-700 dark:text-emerald-300">
+                        Valor / Checagem no Multímetro:
+                      </p>
+                      <p className="mt-0.5 font-mono leading-relaxed text-foreground/90">
+                        {item.testeMultimetro}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         {/* ================================================================ */}
@@ -444,15 +494,52 @@ export function EletricaInjecaoPage() {
             </Button>
           </div>
 
-          {/* Grid dos 6 Testes de Multímetro */}
+          {/* Filtro automático de testes de injeção em motos 100% carburadas */}
+          {isCarburada100 && (
+            <div className="flex flex-col justify-between gap-3 rounded-xl border border-amber-500/35 bg-amber-500/10 p-3.5 sm:flex-row sm:items-center">
+              <div className="flex items-start gap-2.5 text-xs leading-relaxed">
+                <Info className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                <p className="text-foreground/90">
+                  <strong>{moto.marca} {moto.modelo.nome} ({moto.geracao.anosLabel})</strong> é 100%
+                  carburada: testes exclusivos de injeção eletrônica (bomba de combustível 3 bar /
+                  bico injetor) {apenasTestesMotoAtual ? 'estão ocultos' : 'estão sinalizados como não aplicáveis'}.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setApenasTestesMotoAtual((v) => !v)}
+                className="h-8 shrink-0 text-xs"
+              >
+                {apenasTestesMotoAtual ? 'Mostrar todos (6 testes)' : 'Ocultar testes de injeção'}
+              </Button>
+            </div>
+          )}
+
+          {/* Grid dos Testes de Multímetro */}
           <div className="grid gap-5 lg:grid-cols-2">
-            {TESTES_MULTIMETRO_BANCADA.map((teste) => (
-              <Card key={teste.id} className="flex flex-col justify-between border-border/80">
+            {testesMultimetroVisiveis.map((teste) => (
+              <Card
+                key={teste.id}
+                className={cn(
+                  'flex flex-col justify-between border-border/80',
+                  teste.apenasInjecao && isCarburada100 && 'opacity-75',
+                )}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <Badge variant="default" className="font-mono text-xs">
                       Escala: {teste.escalaMultimetro}
                     </Badge>
+                    {teste.apenasInjecao && (
+                      <Badge
+                        variant="outline"
+                        className="border-amber-500/40 bg-amber-500/10 text-[10px] text-amber-700 dark:text-amber-300"
+                      >
+                        Apenas motos com injeção eletrônica
+                      </Badge>
+                    )}
                   </div>
                   <CardTitle className="mt-2 text-base">{teste.titulo}</CardTitle>
                   <CardDescription className="text-xs">{teste.subtitulo}</CardDescription>
@@ -462,7 +549,7 @@ export function EletricaInjecaoPage() {
                   {/* Faixa normal vs defeito */}
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
-                      <p className="flex items-center gap-1.5 font-bold text-emerald-300">
+                      <p className="flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-300">
                         <CheckCircle2 className="size-3.5" />
                         Faixa Normal (Aprovado)
                       </p>
@@ -472,7 +559,7 @@ export function EletricaInjecaoPage() {
                     </div>
 
                     <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3">
-                      <p className="flex items-center gap-1.5 font-bold text-rose-300">
+                      <p className="flex items-center gap-1.5 font-bold text-rose-700 dark:text-rose-300">
                         <AlertCircle className="size-3.5" />
                         Sinal de Defeito (Reprovado)
                       </p>
@@ -508,8 +595,8 @@ export function EletricaInjecaoPage() {
 
                   {/* Dica de bancada */}
                   <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/8 p-2.5">
-                    <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-400" />
-                    <p className="leading-relaxed text-amber-200/90">
+                    <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                    <p className="leading-relaxed text-amber-900 dark:text-amber-200/90">
                       <strong>Macete de bancada:</strong> {teste.dicaBancada}
                     </p>
                   </div>

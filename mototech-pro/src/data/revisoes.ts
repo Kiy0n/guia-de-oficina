@@ -1,4 +1,5 @@
 import type { CategoriaAcaoRevisao, Geracao, Marca, Modelo } from '@/types/moto';
+import { getArquiteturaMoto } from '@/utils/arquiteturaMoto';
 import { formatFaixa, formatNumero } from '@/utils/format';
 
 export interface ItemChecklistRevisao {
@@ -64,13 +65,35 @@ export const CATEGORIA_ACAO_META: Record<
   },
 };
 
-const INTERVALOS_POR_MARCA: Record<Marca, readonly number[]> = {
-  Honda: [1000, 4000, 8000, 12000, 16000, 20000, 24000],
-  Yamaha: [1000, 5000, 10000, 15000, 20000],
-  Suzuki: [1000, 3000, 6000, 9000, 12000, 18000],
-};
+/**
+ * Intervalos validados nos manuais oficiais cacheados em `/app/data/manuals-index/`.
+ */
+const GERACOES_HONDA_3000_KM = new Set<string>([
+  'honda-biz-100-1998-2005',
+  'honda-nxr-125-bros-2003-2005',
+]);
 
 const GERACOES_HONDA_4000_KM = new Set<string>([
+  'honda-biz-100-2013-2015',
+  'honda-biz-125-2006-2010',
+  'honda-biz-125-2011-2017',
+  'honda-cg-125-2000-2008',
+  'honda-cg-125-2009-2018',
+  'honda-cg-150-2004-2008',
+  'honda-cg-150-2009-2015',
+  'honda-nxr-125-bros-2013-2015',
+  'honda-nxr-150-bros-2003-2008',
+  'honda-nxr-150-bros-2009-2014',
+  'honda-pop-100-2007-2015',
+]);
+
+const GERACOES_YAMAHA_3000_KM = new Set<string>([
+  'yamaha-ybr-factor-125-2000-2008',
+  'yamaha-ybr-factor-125-2009-2016',
+]);
+
+/** Gerações Honda com filtro secundário do sistema PAIR (troca a cada 24.000 km nos manuais 2008–2014). */
+const GERACOES_HONDA_PAIR = new Set<string>([
   'honda-cg-125-2000-2008',
   'honda-cg-125-2009-2018',
   'honda-cg-150-2004-2008',
@@ -79,22 +102,75 @@ const GERACOES_HONDA_4000_KM = new Set<string>([
 
 export function getIntervalosRevisao(marca: Marca, geracaoId?: string): readonly number[] {
   if (marca === 'Honda') {
+    if (geracaoId && GERACOES_HONDA_3000_KM.has(geracaoId)) {
+      return [1000, 3000, 6000, 9000, 12000, 15000, 18000, 24000];
+    }
     if (!geracaoId || GERACOES_HONDA_4000_KM.has(geracaoId)) {
       return [1000, 4000, 8000, 12000, 16000, 20000, 24000];
     }
     return [1000, 6000, 12000, 18000, 24000];
   }
-  return INTERVALOS_POR_MARCA[marca];
+
+  if (marca === 'Yamaha') {
+    if (geracaoId && GERACOES_YAMAHA_3000_KM.has(geracaoId)) {
+      return [1000, 3000, 6000, 9000, 12000, 18000];
+    }
+    return [1000, 5000, 10000, 15000, 20000];
+  }
+
+  return [1000, 3000, 6000, 9000, 12000, 18000];
+}
+
+export function getCicloKmGeracao(marca: Marca, geracaoId: string): number {
+  if (marca === 'Honda') {
+    if (GERACOES_HONDA_3000_KM.has(geracaoId)) return 3000;
+    if (GERACOES_HONDA_4000_KM.has(geracaoId)) return 4000;
+    return 6000;
+  }
+  if (marca === 'Yamaha') {
+    return GERACOES_YAMAHA_3000_KM.has(geracaoId) ? 3000 : 5000;
+  }
+  return 3000;
+}
+
+export function getDescricaoCicloRevisao(modelo: Modelo, geracao: Geracao): string {
+  const arq = getArquiteturaMoto(modelo, geracao);
+  const ciclo = getCicloKmGeracao(modelo.marca, geracao.id);
+  const cicloFmt = `${ciclo.toLocaleString('pt-BR')} km`;
+
+  if (modelo.marca === 'Honda') {
+    const notaFiltro =
+      arq.tipoFiltroOleo === 'centrifugo_honda'
+        ? ' (filtro centrífugo e tela a cada 12.000 km)'
+        : '';
+    return `Ciclo Honda ${modelo.nome} (${geracao.anosLabel}): 1.000 km e múltiplos de ${cicloFmt}${notaFiltro}`;
+  }
+
+  if (modelo.marca === 'Yamaha') {
+    const detalheFiltro =
+      arq.tipoFiltroOleo === 'papel_externo'
+        ? arq.temLinkTraseiro
+          ? ' (filtro de óleo em papel e lubrificação do link a cada 10.000 km)'
+          : ' (filtro de óleo em elemento de papel)'
+        : ' (tela metálica interna de óleo)';
+    return `Ciclo Yamaha ${modelo.nome} (${geracao.anosLabel}): 1.000 km e múltiplos de ${cicloFmt}${detalheFiltro}`;
+  }
+
+  return `Ciclo Suzuki ${modelo.nome} (${geracao.anosLabel}): 1.000 km e múltiplos de ${cicloFmt} (válvulas e filtro de óleo em papel)`;
 }
 
 /**
  * Constrói o plano completo de revisões adaptado à Marca, Modelo e Geração selecionados,
- * injetando automaticamente os dados técnicos reais (óleo, válvulas, vela, relação/CVT, freios, alimentação).
+ * filtrando todos os itens pela arquitetura real da moto (alimentação, freios, câmbio e filtro de óleo).
  */
 export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevisaoKm[] {
   const { marca } = modelo;
   const ficha = geracao.fichaTecnica;
-  const isHonda4000 = marca === 'Honda' && GERACOES_HONDA_4000_KM.has(geracao.id);
+  const arq = getArquiteturaMoto(modelo, geracao);
+  const cicloKm = getCicloKmGeracao(marca, geracao.id);
+  const isHonda3000 = marca === 'Honda' && cicloKm === 3000;
+  const isHonda4000 = marca === 'Honda' && cicloKm === 4000;
+  const isYamaha3000 = marca === 'Yamaha' && cicloKm === 3000;
   const intervalos = getIntervalosRevisao(marca, geracao.id);
 
   // Textos técnicos dinâmicos extraídos da ficha real da geração
@@ -112,18 +188,8 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
   const velaModelo = ficha.eletrica?.vela?.modelo ?? 'NGK';
   const velaFolga = formatFaixa(ficha.eletrica?.vela?.folgaEletrodoMm);
 
-  const isCvt = ficha.cambio.tipo === 'cvt' || ficha.transmissaoFinal?.tipo === 'correia';
-  const isInjetada = ficha.alimentacao === 'injecao';
-  const isLiquido = ficha.arrefecimento === 'liquido';
-  const temFiltroPapel =
-    (ficha.motorDetalhes?.filtroOleo ?? '').toLowerCase().includes('papel') ||
-    (marca === 'Yamaha' && (ficha.cilindradaCc >= 145 || geracao.anoInicio >= 2017) && !isCvt) ||
-    (marca === 'Suzuki' && (!isCvt || geracao.anoInicio <= 2010));
-  const temFiltroCentrifugo = (ficha.motorDetalhes?.filtroOleo ?? '').toLowerCase().includes('centrífugo');
-  const temLinkTraseiro =
-    modelo.id === 'yamaha-crosser-150' ||
-    (modelo.id === 'yamaha-fazer-150' && geracao.anoInicio >= 2023) ||
-    modelo.categoria === 'trail';
+  const temFiltroPapel = arq.tipoFiltroOleo === 'papel_externo';
+  const temFiltroCentrifugo = arq.tipoFiltroOleo === 'centrifugo_honda';
 
   const pDiant = ficha.pneus?.dianteiro;
   const pTras = ficha.pneus?.traseiro;
@@ -136,96 +202,142 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
   const folgaCorrenteStr = formatFaixa(ficha.folgas?.folgaCorrenteMm);
   const bengala = ficha.fluidos?.fluidoBengala;
 
+  const torqueBujao =
+    ficha.torques?.find(
+      (t) =>
+        t.item.toLowerCase().includes('drenagem') ||
+        t.item.toLowerCase().includes('bujão') ||
+        t.item.toLowerCase().includes('óleo'),
+    )?.torque.valor ??
+    ficha.torques?.[0]?.torque.valor ??
+    24;
+
   return intervalos.map((km): MarcoRevisaoKm => {
     const isPrimeira = km === 1000;
     const isRevisaoMedia =
       (marca === 'Honda' && km % 12000 === 0) ||
-      (marca === 'Yamaha' && km % 10000 === 0) ||
+      (marca === 'Yamaha' && (isYamaha3000 ? km % 6000 === 0 : km % 10000 === 0)) ||
       (marca === 'Suzuki' && km % 6000 === 0);
     const isRevisaoCompleta =
       (marca === 'Honda' && km >= 24000) ||
-      (marca === 'Yamaha' && km >= 20000) ||
+      (marca === 'Yamaha' && (isYamaha3000 ? km >= 18000 : km >= 20000)) ||
       (marca === 'Suzuki' && km >= 12000);
-    const isMarco16000Honda = isHonda4000 && km === 16000;
+    const isMarco16000Honda =
+      (geracao.id === 'honda-cg-125-2009-2018' || geracao.id === 'honda-cg-150-2009-2015') &&
+      km === 16000;
 
     const itens: ItemChecklistRevisao[] = [];
 
     // 1. Óleo do motor (sempre presente em todas as revisões)
-    const obsOleo2000 =
+    const obsOleo =
       geracao.id === 'honda-cg-125-2000-2008'
         ? ' • Nota Manual 2000 (pág. 36): 3 primeiras trocas a cada 1.000 km e demais a cada 1.500 km (0,80 L); Manual Fan 2008 (pág. 6-2): 1.000 km e a cada 4.000 km ou 1 ano (0,9 L)'
         : isHonda4000
           ? ' • Tabela oficial Honda: trocar aos 1.000 km e a cada 4.000 km ou 1 ano'
-          : '';
+          : isHonda3000
+            ? ' • Tabela oficial Honda desta geração: trocar aos 1.000 km e a cada 3.000 km (ou metade em uso severo)'
+            : '';
+
     itens.push({
       id: `${km}-oleo-motor`,
       titulo: 'Trocar óleo do motor',
       categoria: 'TROCAR',
-      detalheTecnico: `${temFiltroPapel ? volOleoComFiltro : volOleoTroca} de ${specOleo} • Torque do bujão: ${
-        ficha.torques?.[0]?.torque.valor ?? 24
-      } N·m${obsOleo2000}`,
+      detalheTecnico: `${temFiltroPapel ? volOleoComFiltro : volOleoTroca} de ${specOleo} • Torque do bujão: ${torqueBujao} N·m${obsOleo}`,
       tempoEstimadoMin: 15,
       criticidade: 'alta',
     });
 
-    // 2. Filtro de óleo (papel vs centrífugo vs tela)
+    // 2. Filtro de óleo (estritamente conforme tipoFiltroOleo da arquitetura)
     if (temFiltroPapel) {
       const trocarPapel = isPrimeira || km % 5000 === 0 || km % 6000 === 0 || marca === 'Suzuki';
       itens.push({
         id: `${km}-filtro-papel`,
-        titulo: trocarPapel ? 'Substituir filtro de óleo (elemento de papel)' : 'Inspecionar tampa do filtro de óleo',
+        titulo: trocarPapel
+          ? 'Substituir filtro de óleo (elemento de papel)'
+          : 'Inspecionar tampa do filtro de óleo',
         categoria: trocarPapel ? 'TROCAR' : 'CHECAR',
         detalheTecnico:
           marca === 'Suzuki'
-            ? 'Elemento de papel HF131/HF132 — ATENÇÃO ao anel O-ring interno do duto e à mola da tampa!'
-            : 'Elemento de papel descartável na tampa direita (lubrificar O-ring novo; atenção ao parafuso inferior mais longo).',
+            ? 'Elemento de papel HF131/HF132 — atenção ao anel O-ring interno do duto e à mola da tampa.'
+            : 'Elemento de papel descartável na tampa lateral direita (lubrificar O-ring novo; atenção ao parafuso inferior mais longo).',
         tempoEstimadoMin: 10,
         criticidade: 'alta',
       });
-    } else if (temFiltroCentrifugo && isRevisaoMedia) {
-      itens.push({
-        id: `${km}-filtro-centrifugo`,
-        titulo: 'Abrir tampa direita e limpar filtro centrífugo + tela do filtro de óleo',
-        categoria: 'LIMPAR_LUBRIFICAR',
-        detalheTecnico: `Obrigatório a cada 12.000 km nas tabelas Honda (${ficha.motorDetalhes?.filtroOleo ?? 'centrífugo + tela'}; no Manual CG 125 2000 pág. 36 o filtro centrífugo é limpo a cada 6.000 km). Após remontagem, volume de desmontagem: ${
-          oleo?.capacidadeTotalL ? `${formatNumero(oleo.capacidadeTotalL)} L` : '1,2 L'
-        }.`,
-        tempoEstimadoMin: 45,
-        criticidade: 'alta',
-      });
+    } else if (temFiltroCentrifugo) {
+      if (isRevisaoMedia) {
+        const notaCg2000 =
+          geracao.id === 'honda-cg-125-2000-2008'
+            ? ' (no Manual 2000 pág. 36 a limpeza é indicada a cada 6.000 km)'
+            : '';
+        itens.push({
+          id: `${km}-filtro-centrifugo`,
+          titulo: 'Abrir tampa direita e limpar filtro centrífugo + tela do filtro de óleo',
+          categoria: 'LIMPAR_LUBRIFICAR',
+          detalheTecnico: `Limpeza obrigatória a cada 12.000 km nas tabelas Honda${notaCg2000} (${ficha.motorDetalhes?.filtroOleo ?? 'filtro centrífugo + tela'}). Após remontagem, volume de desmontagem: ${
+            oleo?.capacidadeTotalL ? `${formatNumero(oleo.capacidadeTotalL)} L` : '1,2 L'
+          }.`,
+          tempoEstimadoMin: 45,
+          criticidade: 'alta',
+        });
+      } else {
+        const limparTela4000 = geracao.id === 'honda-cg-125-2000-2008';
+        itens.push({
+          id: `${km}-tela-oleo`,
+          titulo: limparTela4000
+            ? 'Remover bujão (15 N·m) e limpar tela do filtro de óleo'
+            : 'Conferir estanqueidade do bujão e programação da tela filtrante',
+          categoria: limparTela4000 ? 'LIMPAR_LUBRIFICAR' : 'CHECAR',
+          detalheTecnico: limparTela4000
+            ? 'Manual 2008 (pág. 6-2/6-7): limpar a tela do filtro de óleo em 1.000 km e a cada 4.000 km (a cada 1.500 km no Manual 2000 pág. 36) • Torque da tampa/bujão: 15 N·m (1,5 kgf·m).'
+            : `${ficha.motorDetalhes?.filtroOleo ?? 'Tela metálica interna + filtro centrífugo'} • Limpeza da tela e do rotor centrífugo programada a cada 12.000 km.`,
+          tempoEstimadoMin: limparTela4000 ? 10 : 5,
+          criticidade: limparTela4000 ? 'media' : 'rotina',
+        });
+      }
     } else {
-      const limparTela4000 = geracao.id === 'honda-cg-125-2000-2008';
+      // tela_simples (ex.: Yamaha YBR 125 / Factor 125 carburadas)
       itens.push({
         id: `${km}-tela-oleo`,
-        titulo: limparTela4000
-          ? 'Remover bujão (15 N·m) e limpar tela do filtro de óleo'
+        titulo: isRevisaoMedia
+          ? 'Limpar tela metálica interna de filtragem de óleo'
           : 'Conferir estanqueidade do bujão e tela filtrante de óleo',
-        categoria: limparTela4000 ? 'LIMPAR_LUBRIFICAR' : 'CHECAR',
-        detalheTecnico: limparTela4000
-          ? 'Manual CG 125 Fan 2008 (pág. 6-2/6-7): limpar a tela do filtro de óleo em 1.000 km e a cada 4.000 km (a cada 1.500 km no Manual 2000 pág. 36) • Torque da tampa/bujão: 15 N·m (1,5 kgf·m).'
-          : `${ficha.motorDetalhes?.filtroOleo ?? 'Tela metálica interna'} • Limpeza da tela e filtro centrífugo programada a cada 12.000 km.`,
-        tempoEstimadoMin: limparTela4000 ? 10 : 5,
-        criticidade: limparTela4000 ? 'media' : 'rotina',
+        categoria: isRevisaoMedia ? 'LIMPAR_LUBRIFICAR' : 'CHECAR',
+        detalheTecnico: `${ficha.motorDetalhes?.filtroOleo ?? 'Tela metálica interna'} • Conferir ausência de limalhas e estado do anel de vedação do bujão.`,
+        tempoEstimadoMin: isRevisaoMedia ? 15 : 5,
+        criticidade: isRevisaoMedia ? 'media' : 'rotina',
       });
     }
 
     // 3. Folga de Válvulas
-    const regularValvulas = isPrimeira || isRevisaoMedia || isHonda4000 || marca === 'Suzuki';
+    const regularValvulas =
+      isPrimeira || isRevisaoMedia || isHonda4000 || isHonda3000 || isYamaha3000 || marca === 'Suzuki';
+    const notaValvulas =
+      geracao.id === 'honda-cg-125-2000-2008'
+        ? ' • Tabela oficial: verificar em 1.000 km e a cada 4.000 km (3.000 km no Manual 2000)'
+        : isHonda4000
+          ? ' • Tabela oficial Honda: verificar em 1.000 km e a cada 4.000 km'
+          : isHonda3000
+            ? ' • Tabela oficial Honda: verificar em 1.000 km e a cada 3.000 km'
+            : '';
+
     itens.push({
       id: `${km}-valvulas`,
       titulo: regularValvulas
         ? 'Verificar e regular folga das válvulas (motor frio)'
         : 'Inspecionar ruído de comando e folga de válvulas',
       categoria: regularValvulas ? 'REGULAR' : 'CHECAR',
-      detalheTecnico: `Admissão: ${admStr} | Escape: ${escStr} (motor frio no PMS de compressão • ${comandoStr}${
-        isHonda4000 ? ' • Tabela oficial Honda: verificar em 1.000 km e a cada 4.000 km [3.000 km na CG 125 2000]' : ''
-      })`,
+      detalheTecnico: `Admissão: ${admStr} | Escape: ${escStr} (motor frio no PMS de compressão • ${comandoStr}${notaValvulas})`,
       tempoEstimadoMin: 35,
       criticidade: 'alta',
     });
 
     // 4. Vela de Ignição
-    const trocarVela = isHonda4000 ? km % 8000 === 0 : isRevisaoMedia || isRevisaoCompleta;
+    const trocarVela = isHonda4000
+      ? km % 8000 === 0
+      : isHonda3000
+        ? km % 6000 === 0
+        : isRevisaoMedia || isRevisaoCompleta;
+
     itens.push({
       id: `${km}-vela`,
       titulo: trocarVela
@@ -245,48 +357,59 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
       criticidade: trocarVela ? 'alta' : 'media',
     });
 
-    // 5. Alimentação (Injeção vs Carburador)
-    if (isInjetada) {
+    // 5. Alimentação (Injeção 100% vs Carburador 100% vs Geração Mista)
+    const lentaStr = formatFaixa(ficha.motorDetalhes?.marchaLentaRpm);
+    if (arq.tipoAlimentacao === 'injetada') {
       itens.push({
         id: `${km}-alimentacao-injecao`,
         titulo: isRevisaoMedia
-          ? 'Substituir unidade do filtro de combustível (12.000 km) e verificar linha/marcha lenta PGM-FI'
-          : 'Verificar rotação de marcha lenta e linha de combustível PGM-FI',
+          ? `Substituir filtro de combustível e inspecionar corpo de borboleta (TBI) / marcha lenta (${arq.siglaInjecao})`
+          : `Verificar rotação de marcha lenta e linha de combustível (${arq.siglaInjecao})`,
         categoria: isRevisaoMedia ? 'TROCAR' : 'CHECAR',
-        detalheTecnico: `${ficha.motorDetalhes?.alimentacaoDetalhe ?? 'Injeção eletrônica'} • Marcha lenta: ${formatFaixa(
-          ficha.motorDetalhes?.marchaLentaRpm,
-        )}`,
+        detalheTecnico: `${ficha.motorDetalhes?.alimentacaoDetalhe ?? `Injeção eletrônica ${arq.siglaInjecao}`} • Marcha lenta: ${lentaStr}`,
         tempoEstimadoMin: isRevisaoMedia ? 35 : 10,
         criticidade: isRevisaoMedia ? 'alta' : 'media',
       });
+    } else if (arq.tipoAlimentacao === 'mista') {
+      itens.push({
+        id: `${km}-alimentacao-mista`,
+        titulo: isRevisaoMedia
+          ? `Alimentação (${arq.descricaoAlimentacao}) — inspeção, limpeza/filtro e marcha lenta`
+          : `Verificar marcha lenta e linha de combustível — ${arq.descricaoAlimentacao}`,
+        categoria: isRevisaoMedia ? 'LIMPAR_LUBRIFICAR' : 'REGULAR',
+        detalheTecnico: `${arq.descricaoAlimentacao} • Marcha lenta: ${lentaStr}`,
+        tempoEstimadoMin: isRevisaoMedia ? 30 : 15,
+        criticidade: 'alta',
+      });
     } else {
+      // 100% carburada — zero menção a bico injetor, TBI, PGM-FI ou bomba de combustível
       itens.push({
         id: `${km}-alimentacao-carburador`,
         titulo: isRevisaoMedia
-          ? 'Inspecionar linha de combustível, funcionamento do afogador e ajustar marcha lenta'
+          ? 'Inspecionar linha de combustível, funcionamento do afogador e regular carburador/marcha lenta'
           : 'Verificar e ajustar rotação de marcha lenta do carburador',
         categoria: 'REGULAR',
-        detalheTecnico: `${ficha.motorDetalhes?.alimentacaoDetalhe ?? 'Carburador'} • Marcha lenta: ${formatFaixa(
-          ficha.motorDetalhes?.marchaLentaRpm,
-        )}`,
+        detalheTecnico: `${ficha.motorDetalhes?.alimentacaoDetalhe ?? 'Carburador'} • Marcha lenta: ${lentaStr}`,
         tempoEstimadoMin: isRevisaoMedia ? 30 : 15,
         criticidade: 'alta',
       });
     }
 
-    // 6. Filtro de Ar (e Filtro PAIR aos 24.000 km)
+    // 6. Filtro de Ar (e Filtro PAIR aos 24.000 km apenas onde aplicável)
     if (!isPrimeira) {
       const trocarFiltroAr = isRevisaoMedia || isMarco16000Honda;
-      const detalheFiltroAr = isHonda4000
-        ? 'Manuais 2004–2010 (filtro seco): limpar a cada 4.000 km (3.000 km na CG 125 2000) e trocar a cada 12.000 km | Manuais 2011 (filtro viscoso/úmido): NUNCA limpar com ar comprimido, trocar a cada 12.000 km | Manuais 2014 (filtro viscoso/úmido): trocar a cada 16.000 km.'
-        : 'Elemento de papel viscoso não deve ser soprado com ar comprimido (rompe as fibras); substituir na metade do prazo se rodar em estrada de terra.';
+      const isCgAntiga = modelo.id === 'honda-cg-125' || modelo.id === 'honda-cg-150';
+      const detalheFiltroAr = isCgAntiga
+        ? 'Filtros secos (modelos até 2010): limpar conforme tabela e trocar a cada 12.000 km | Filtros de papel viscoso/úmido (2011+): NUNCA soprar com ar comprimido, trocar a cada 12.000–16.000 km.'
+        : 'Elemento de papel viscoso não deve ser soprado com ar comprimido (rompe as fibras); em modelos com filtro de espuma, lavar com sabão neutro/querosene e umedecer em óleo. Reduzir pela metade em estradas de terra.';
+
       itens.push({
         id: `${km}-filtro-ar`,
         titulo: trocarFiltroAr
           ? isMarco16000Honda
-            ? 'Substituir elemento do filtro de ar (tabela 16.000 km linha 2014)'
-            : 'Substituir elemento do filtro de ar (tabela 12.000 km)'
-          : 'Inspecionar/limpar filtro de ar (apenas tipo seco 2000–2010) e tubo de respiro do motor',
+            ? 'Substituir elemento do filtro de ar (tabela 16.000 km)'
+            : 'Substituir elemento do filtro de ar'
+          : 'Inspecionar elemento do filtro de ar e esgotar dreno da caixa de ar',
         categoria: trocarFiltroAr ? 'TROCAR' : 'LIMPAR_LUBRIFICAR',
         detalheTecnico: detalheFiltroAr,
         tempoEstimadoMin: 10,
@@ -294,20 +417,20 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
       });
     }
 
-    if (isHonda4000 && km === 24000) {
+    if (GERACOES_HONDA_PAIR.has(geracao.id) && km === 24000) {
       itens.push({
         id: `${km}-filtro-pair`,
         titulo: 'Substituir filtro de ar secundário do sistema de suprimento de ar (PAIR)',
         categoria: 'TROCAR',
         detalheTecnico:
-          'Tabela oficial Honda (Manuais 2008 a 2014): substituir o filtro PAIR a cada 24.000 km ou 3 anos.',
+          'Tabela oficial Honda (modelos equipados com PAIR): substituir o filtro secundário a cada 24.000 km ou 3 anos.',
         tempoEstimadoMin: 15,
         criticidade: 'media',
       });
     }
 
     // 7. Transmissão Final (Corrente vs Scooter CVT)
-    if (isCvt) {
+    if (arq.isCvt) {
       const oleoTransm = ficha.fluidos?.oleoTransmissaoCvt;
       const cvt = relacao?.cvtDetalhe;
       itens.push({
@@ -329,7 +452,9 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
           titulo: 'Trocar óleo da transmissão final (redutor traseiro)',
           categoria: 'TROCAR',
           detalheTecnico: `Volume exato: ${
-            oleoTransm ? `${formatNumero(oleoTransm.capacidadeL * 1000)} ml (${formatNumero(oleoTransm.capacidadeL)} L)` : '100–120 ml'
+            oleoTransm
+              ? `${formatNumero(oleoTransm.capacidadeL * 1000)} ml (${formatNumero(oleoTransm.capacidadeL)} L)`
+              : '100–120 ml'
           } de ${oleoTransm?.especificacao ?? 'SAE 10W-30 / 10W-40'}`,
           tempoEstimadoMin: 15,
           criticidade: 'media',
@@ -351,7 +476,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
     }
 
     // 8. Arrefecimento líquido (quando aplicável)
-    if (isLiquido) {
+    if (arq.isArrefecimentoLiquido) {
       const arref = ficha.fluidos?.liquidoArrefecimento;
       itens.push({
         id: `${km}-arrefecimento`,
@@ -367,26 +492,33 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
       });
     }
 
-    // 9. Sistema de Freios (Disco / CBS / UBS / ABS / Tambor)
-    const { dianteiro, traseiro, sistema } = ficha.freios;
-    const temDisco = dianteiro === 'disco' || traseiro === 'disco';
-    const temTambor = dianteiro === 'tambor' || traseiro === 'tambor';
+    // 9. Sistema de Freios (Disco / CBS / UBS / ABS / Tambor) — 100% filtrado por arquitetura
+    const { sistema } = ficha.freios;
 
-    if (temDisco) {
-      let obsSistema = `Fluido ${ficha.fluidos?.fluidoFreio ?? 'DOT 4'}`;
+    if (arq.temAlgumFreioDisco) {
+      const eixoDisco =
+        arq.temFreioDiscoDianteiro && arq.temFreioDiscoTraseiro
+          ? 'dianteiro e traseiro'
+          : arq.temFreioDiscoDianteiro
+            ? 'dianteiro'
+            : 'traseiro';
+
+      let obsSistema = `Freio a disco ${eixoDisco} • Fluido ${ficha.fluidos?.fluidoFreio ?? 'DOT 4'}`;
       if (sistema === 'CBS') {
-        obsSistema += ' • Freio CBS: se sangrar, fazer nos 2 sangradores da pinça dianteira de 3 êmbolos';
+        obsSistema +=
+          ' • Freio CBS: se sangrar, fazer nos 2 sangradores da pinça dianteira de 3 êmbolos';
       } else if (sistema === 'UBS') {
         obsSistema += ' • Freio UBS: conferir sincronismo do cabo combinador acionado pelo pedal';
       } else if (sistema === 'ABS') {
-        obsSistema += ' • Freio ABS: inspecionar limpeza da roda fônica e distância do sensor hall (0,7–1,2 mm)';
+        obsSistema +=
+          ' • Freio ABS: inspecionar limpeza da roda fônica e distância do sensor hall (0,7–1,2 mm)';
       }
 
       itens.push({
         id: `${km}-freio-disco`,
         titulo: isRevisaoCompleta
-          ? 'Substituir fluido de freio DOT 4, sangrar linha e medir pastilhas/disco'
-          : 'Inspecionar espessura das pastilhas e nível do fluido de freio',
+          ? `Substituir fluido de freio DOT 4, sangrar linha e medir pastilhas/disco (${eixoDisco})`
+          : `Inspecionar espessura das pastilhas e nível do fluido de freio (${eixoDisco})`,
         categoria: isRevisaoCompleta ? 'TROCAR' : 'CHECAR',
         detalheTecnico: obsSistema,
         tempoEstimadoMin: isRevisaoCompleta ? 25 : 10,
@@ -394,14 +526,25 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
       });
     }
 
-    if (temTambor) {
+    if (arq.temAlgumFreioTambor) {
+      const eixoTambor = arq.isSomenteTambor ? 'dianteiro e traseiro' : 'traseiro';
+      const folgaPedal =
+        formatFaixa(ficha.folgas?.folgaPedalFreioMm) !== '—'
+          ? formatFaixa(ficha.folgas?.folgaPedalFreioMm)
+          : '20 – 30 mm';
+      const folgaTamborDetalhe = arq.isSomenteTambor
+        ? `Manete dianteiro: 10 – 20 mm | Pedal traseiro: ${folgaPedal}${
+            sistema === 'CBS' ? ' • Sistema CBS mecânico: conferir equalização dos cabos' : ''
+          }`
+        : `Folga livre do pedal traseiro: ${folgaPedal}`;
+
       itens.push({
         id: `${km}-freio-tambor`,
         titulo: isRevisaoMedia
-          ? 'Abrir espelho do tambor, limpar pó das lonas e lubrificar eixo came'
-          : 'Regular curso livre do freio a tambor e checar indicador de desgaste',
+          ? `Abrir espelho do tambor (${eixoTambor}), limpar pó das lonas e lubrificar eixo came`
+          : `Regular curso livre do freio a tambor (${eixoTambor}) e checar indicador de desgaste`,
         categoria: isRevisaoMedia ? 'LIMPAR_LUBRIFICAR' : 'REGULAR',
-        detalheTecnico: `Folga livre do pedal/manete: ${formatFaixa(ficha.folgas?.folgaPedalFreioMm) !== '—' ? formatFaixa(ficha.folgas?.folgaPedalFreioMm) : '20 – 30 mm'} • Nunca engraxar excessivamente o came para não contaminar a lona.`,
+        detalheTecnico: `${folgaTamborDetalhe} • Nunca engraxar excessivamente o came para não contaminar a lona.`,
         tempoEstimadoMin: isRevisaoMedia ? 20 : 5,
         criticidade: 'media',
       });
@@ -413,16 +556,16 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
       itens.push({
         id: `${km}-suspensao-direcao`,
         titulo: isMarco16000Honda
-          ? 'Substituir fluido da suspensão dianteira (tabela 16.000 km linha 2014)'
+          ? 'Substituir fluido da suspensão dianteira (tabela 16.000 km)'
           : isRevisaoCompleta
             ? 'Substituir fluido da suspensão dianteira e lubrificar rolamentos da coluna de direção'
-            : `Lubrificar rolamentos da coluna de direção (12.000 km) e inspecionar suspensão${temLinkTraseiro ? ' e link traseiro' : ''}`,
+            : `Lubrificar rolamentos da coluna de direção e inspecionar suspensão${arq.temLinkTraseiro ? ' e link traseiro' : ''}`,
         categoria: trocarFluidoBengala ? 'TROCAR' : 'LIMPAR_LUBRIFICAR',
         detalheTecnico: bengala
           ? `Bengala: ${bengala.volumePorCanelaMl} cm³ (ml) por canela de ${bengala.especificacao}${
               bengala.observacao ? ` (${bengala.observacao})` : ''
             }${bengala.nivelMm ? ` • Nível: ${bengala.nivelMm} mm` : ''}${
-              temLinkTraseiro ? ' • Desmontar e engraxar buchas do link/balança' : ''
+              arq.temLinkTraseiro ? ' • Desmontar e engraxar buchas do link/balança' : ''
             }`
           : 'Inspecionar vazamentos nos retentores e pré-carga dos amortecedores.',
         tempoEstimadoMin: trocarFluidoBengala ? 50 : 25,
@@ -430,19 +573,45 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
       });
     }
 
-    // 11. Cabos, Manetes e Bateria / Sistema de Carga
-    itens.push({
-      id: `${km}-cabos-bateria`,
-      titulo: 'Lubrificar cabos/manetes e testar tensão de carga da bateria',
-      categoria: 'CHECAR',
-      detalheTecnico: `Bateria ${ficha.eletrica?.bateria?.modelo ?? '12V'} (${
-        ficha.eletrica?.bateria?.capacidadeAh ?? 5
-      }Ah) • Carga esperada: ${ficha.eletrica?.bateria?.tensaoCargaV ?? '13,5V – 14,8V @ 5.000 rpm'} • Folga acelerador: ${formatFaixa(
-        ficha.folgas?.folgaAceleradorMm,
-      )}`,
-      tempoEstimadoMin: 10,
-      criticidade: 'rotina',
-    });
+    // 11. Cabos, Embreagem (quando manual) e Bateria / Sistema de Carga
+    const bateriaTxt = `Bateria ${ficha.eletrica?.bateria?.modelo ?? '12V'} (${
+      ficha.eletrica?.bateria?.capacidadeAh ?? 5
+    }Ah)${!arq.isBateriaSelada ? ' [conferir nível de eletrólito se convencional]' : ''} • Carga esperada: ${
+      ficha.eletrica?.bateria?.tensaoCargaV ?? '13,5V – 14,8V @ 5.000 rpm'
+    }`;
+
+    if (arq.isSemiautomatica) {
+      itens.push({
+        id: `${km}-cabos-bateria`,
+        titulo: 'Lubrificar cabo do acelerador, verificar engate da embreagem centrífuga e testar bateria',
+        categoria: 'CHECAR',
+        detalheTecnico: `${bateriaTxt} • Folga acelerador: ${formatFaixa(
+          ficha.folgas?.folgaAceleradorMm,
+        )} • Câmbio semiautomático (embreagem centrífuga): conferir suavidade nas trocas de marcha.`,
+        tempoEstimadoMin: 10,
+        criticidade: 'rotina',
+      });
+    } else if (arq.isCvt) {
+      itens.push({
+        id: `${km}-cabos-bateria`,
+        titulo: 'Lubrificar cabo do acelerador e testar tensão de carga da bateria',
+        categoria: 'CHECAR',
+        detalheTecnico: `${bateriaTxt} • Folga acelerador: ${formatFaixa(ficha.folgas?.folgaAceleradorMm)}`,
+        tempoEstimadoMin: 10,
+        criticidade: 'rotina',
+      });
+    } else {
+      itens.push({
+        id: `${km}-cabos-bateria`,
+        titulo: 'Lubrificar cabos (acelerador e embreagem), conferir folgas e testar bateria',
+        categoria: 'CHECAR',
+        detalheTecnico: `${bateriaTxt} • Folga acelerador: ${formatFaixa(
+          ficha.folgas?.folgaAceleradorMm,
+        )} • Embreagem: ${formatFaixa(ficha.folgas?.folgaManeteEmbreagemMm)}`,
+        tempoEstimadoMin: 10,
+        criticidade: 'rotina',
+      });
+    }
 
     // 12. Pneus e Reaperto Geral de Torques Críticos
     itens.push({
@@ -461,26 +630,30 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
         : 1
       : isHonda4000
         ? Math.round((km / 4000) * 6) + 6
-        : Math.round((km / (marca === 'Suzuki' ? 3000 : 5000)) * 6);
+        : Math.round((km / cicloKm) * 6);
 
     let subtitulo = 'Revisão Preventiva Periódica';
-    let destaqueOficina = 'Manutenção preventiva de rotina para preservar motor, transmissão e segurança.';
+    let destaqueOficina =
+      'Manutenção preventiva de rotina para preservar motor, transmissão e segurança.';
 
     if (isPrimeira) {
       subtitulo = '1ª Revisão de Amaciamento';
       destaqueOficina =
         'Crucial para remover limalhas do amaciamento, assentar folga inicial de válvulas e reapertar chassi.';
     } else if (isRevisaoCompleta) {
-      subtitulo = 'Revisão Maior Completa (Fluido de Bengala / Freio / Transmissão)';
-      destaqueOficina =
-        'Revisão profunda: além de motor e válvulas, inclui renovação de fluidos hidráulicos, suspensão e transmissão.';
+      subtitulo = arq.temAlgumFreioDisco
+        ? 'Revisão Maior Completa (Fluido de Bengala / Freio / Transmissão)'
+        : 'Revisão Maior Completa (Fluido de Bengala / Freios / Transmissão)';
+      destaqueOficina = arq.temAlgumFreioDisco
+        ? 'Revisão profunda: além de motor e válvulas, inclui renovação de fluidos hidráulicos, suspensão e transmissão.'
+        : 'Revisão profunda: além de motor e válvulas, inclui renovação do fluido das bengalas, freios e transmissão.';
     } else if (isRevisaoMedia) {
       subtitulo = temFiltroCentrifugo
         ? 'Revisão Intermediária + Limpeza do Filtro Centrífugo'
         : 'Revisão Intermediária Completa (Válvulas, Vela, Filtro de Ar e Alimentação)';
       destaqueOficina = temFiltroCentrifugo
         ? 'Atenção obrigatória na abertura da tampa direita para limpeza do filtro centrífugo e peneira inferior.'
-        : 'Inclui troca de vela, filtro de ar, regulagem de válvulas e limpeza de alimentação.';
+        : 'Inclui troca de vela, filtro de ar, regulagem de válvulas e revisão do sistema de alimentação.';
     }
 
     return {
@@ -500,9 +673,10 @@ export const DIRETRIZES_TEMPO_USO_SEVERO: readonly DiretrizTempoSevero[] = [
     id: 'oleo-tempo',
     titulo: 'Óleo do Motor (Quilometragem vs Tempo / Uso Severo)',
     prazoNormal: 'A cada revisão do manual ou 6 meses (o que ocorrer primeiro)',
-    prazoSevero: 'Reduzir pela METADE (1.500 a 2.500 km) em entregas, trânsito pesado ou trajetos curtos',
+    prazoSevero:
+      'Reduzir pela METADE (1.500 a 2.500 km) em entregas, trânsito pesado ou trajetos curtos',
     explicacao:
-      'Motos de baixa cilindrada operam em alto giro e levam apenas 0,7 L a 1,0 L de óleo. Em uso severo (iFood/motoboy, poeira ou ladeiras com garupa), realizar troca intermediária de óleo na metade do intervalo do manual e conferir o nível na vareta toda semana.',
+      'Motos de baixa cilindrada operam em alto giro e levam apenas 0,7 L a 1,0 L de óleo. Em uso severo (entregas, poeira ou ladeiras com garupa), realizar troca intermediária de óleo na metade do intervalo do manual e conferir o nível toda semana.',
   },
   {
     id: 'fluido-freio',
@@ -529,3 +703,49 @@ export const DIRETRIZES_TEMPO_USO_SEVERO: readonly DiretrizTempoSevero[] = [
       'Corrente seca ou excessivamente esticada desgasta prematuramente os dentes da coroa/pinhão e sobrecarrega o rolamento do eixo secundário do câmbio.',
   },
 ];
+
+/**
+ * Filtra e adapta as diretrizes de tempo / uso severo à arquitetura real da moto
+ * (ex.: omite fluido DOT 4 em motos somente a tambor; adapta transmissão em scooters CVT).
+ */
+export function getDiretrizesTempoUsoSevero(
+  modelo: Modelo,
+  geracao: Geracao,
+): DiretrizTempoSevero[] {
+  const arq = getArquiteturaMoto(modelo, geracao);
+  const lista: DiretrizTempoSevero[] = [];
+
+  for (const d of DIRETRIZES_TEMPO_USO_SEVERO) {
+    if (d.id === 'fluido-freio') {
+      if (arq.isSomenteTambor) {
+        lista.push({
+          id: 'freio-tambor-severo',
+          titulo: 'Freios a Tambor (Lonas, Cubos e Cabos/Vareta)',
+          prazoNormal: 'Limpeza de pó e regulagem a cada revisão periódica do manual',
+          prazoSevero: 'Abrir e limpar a cada 3.000–4.000 km em chuva, barro ou uso urbano intenso',
+          explicacao:
+            'O acúmulo de pó das lonas dentro do cubo provoca chiado e perda de eficiência. Limpar com pano/ar, quebrar o espelhamento com lixa 160/180 e aplicar película mínima de graxa no eixo came.',
+        });
+      } else {
+        lista.push(d);
+      }
+      continue;
+    }
+
+    if (d.id === 'corrente-relacao' && arq.isCvt) {
+      lista.push({
+        id: 'cvt-severo',
+        titulo: 'Transmissão CVT (Correia, Roletes e Filtro da Caixa)',
+        prazoNormal: 'Inspeção e limpeza a cada revisão intermediária; troca da correia na revisão maior',
+        prazoSevero: 'Limpar filtro de ar da caixa CVT e soprar pó da campana a cada 5.000 km',
+        explicacao:
+          'Poeira acumulada na campana da embreagem centrífuga causa trepidação nas saídas e desgaste prematuro dos roletes e da correia.',
+      });
+      continue;
+    }
+
+    lista.push(d);
+  }
+
+  return lista;
+}

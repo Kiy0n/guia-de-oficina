@@ -44,9 +44,9 @@ import { PROCEDIMENTOS_OFICINA } from '@/data/procedimentos';
 import {
   ACAO_SUGERIDA_LABEL,
   FEEDBACK_STATUS_META,
-  PERFIS_REVISAO,
-  ZONA_VISUAL_INFO,
   gerarRoteiroRevisao,
+  getPerfisRevisao,
+  getZonaVisualInfo,
   type PassoRevisao,
   type RegistroFeedbackPasso,
   type StatusFeedbackPasso,
@@ -55,6 +55,7 @@ import {
 } from '@/data/roteiroRevisao';
 import { SECTIONS } from '@/lib/sections';
 import { cn } from '@/lib/utils';
+import { getArquiteturaMoto } from '@/utils/arquiteturaMoto';
 
 type EtapaTelaRevisao = 'preparar' | 'executar' | 'relatorio';
 
@@ -150,14 +151,21 @@ export function IniciarRevisaoPage() {
     setComentarioGeral('');
   }, [draftKey]);
 
+  const arq = useMemo(
+    () => getArquiteturaMoto(moto.modelo, moto.geracao),
+    [moto.modelo, moto.geracao],
+  );
+  const perfisRevisao = useMemo(
+    () => getPerfisRevisao(moto.modelo, moto.geracao),
+    [moto.modelo, moto.geracao],
+  );
   const passos = useMemo(
     () => gerarRoteiroRevisao(moto.modelo, moto.geracao, tipoRevisao),
     [moto.modelo, moto.geracao, tipoRevisao],
   );
 
   const passoAtual: PassoRevisao | undefined = passos[passoIndex] ?? passos[0];
-  const isScooter =
-    moto.modelo.categoria === 'scooter' || moto.geracao.fichaTecnica.cambio.tipo === 'cvt';
+  const isScooter = arq.isCvt;
   const isAuditado = moto.geracao.auditoria.status === 'verificado_manual';
   const def = SECTIONS.find((s) => s.id === 'iniciar-revisao') ?? SECTIONS[0];
 
@@ -339,7 +347,7 @@ export function IniciarRevisaoPage() {
 
   const montarTextoWhatsAppRelatorio = (): string => {
     const dataHoje = new Date().toLocaleDateString('pt-BR');
-    const perfilMeta = PERFIS_REVISAO.find((p) => p.id === tipoRevisao);
+    const perfilMeta = perfisRevisao.find((p) => p.id === tipoRevisao);
     const linhas: string[] = [
       `🛠️ *MOTOTECH PRO — RELATÓRIO DE REVISÃO*`,
       `🏍️ *Moto:* ${moto.marca} ${moto.modelo.nome} (${moto.geracao.anosLabel} · ${moto.geracao.nomeGeracao})`,
@@ -465,7 +473,7 @@ export function IniciarRevisaoPage() {
                       <p className="text-xs text-muted-foreground">
                         Perfil:{' '}
                         <strong>
-                          {PERFIS_REVISAO.find((p) => p.id === rascunhoDetectado.tipoRevisao)?.titulo}
+                          {perfisRevisao.find((p) => p.id === rascunhoDetectado.tipoRevisao)?.titulo}
                         </strong>{' '}
                         · {Object.keys(rascunhoDetectado.registros).length} itens já registrados
                         {rascunhoDetectado.apelidoOuPlaca
@@ -509,7 +517,7 @@ export function IniciarRevisaoPage() {
               </h2>
 
               <div className="grid gap-4 md:grid-cols-3">
-                {PERFIS_REVISAO.map((perfil) => {
+                {perfisRevisao.map((perfil) => {
                   const selecionado = perfil.id === tipoRevisao;
                   const qtdExata = gerarRoteiroRevisao(
                     moto.modelo,
@@ -565,10 +573,7 @@ export function IniciarRevisaoPage() {
                 </CardTitle>
                 <CardDescription className="text-xs">
                   O roteiro já está adaptado automaticamente para{' '}
-                  <strong>
-                    {moto.geracao.fichaTecnica.alimentacao === 'injecao' ? 'Injeção Eletrônica' : 'Carburador'}
-                  </strong>
-                  ,{' '}
+                  <strong>{arq.descricaoAlimentacao}</strong>,{' '}
                   <strong>{isScooter ? 'Transmissão CVT' : 'Transmissão por Corrente'}</strong> e{' '}
                   <strong>
                     Freios {moto.geracao.fichaTecnica.freios.dianteiro}/
@@ -595,7 +600,7 @@ export function IniciarRevisaoPage() {
                   <Input
                     value={apelidoOuPlaca}
                     onChange={(e) => setApelidoOuPlaca(e.target.value)}
-                    placeholder="Ex.: Minha Titan · ABC-1D23"
+                    placeholder={`Ex.: Minha ${moto.modelo.nome} · ABC-1D23`}
                     className="h-11 text-sm"
                   />
                 </div>
@@ -707,6 +712,7 @@ export function IniciarRevisaoPage() {
                 <MotoBlueprintVisual
                   marca={moto.marca}
                   isScooter={isScooter}
+                  arquitetura={arq}
                   zonaAtiva={passoAtual.zonaVisual}
                   passoAtual={passoAtual}
                   passos={passos}
@@ -730,7 +736,7 @@ export function IniciarRevisaoPage() {
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="flex flex-wrap items-center gap-1.5">
                             <Badge variant="outline" className="font-mono text-xs">
-                              {ZONA_VISUAL_INFO[passoAtual.zonaVisual].tituloCurto}
+                              {getZonaVisualInfo(passoAtual.zonaVisual, arq).tituloCurto}
                             </Badge>
                             <Badge
                               variant="outline"
@@ -954,7 +960,7 @@ export function IniciarRevisaoPage() {
                     </CardTitle>
                     <CardDescription>
                       {moto.geracao.nomeGeracao} ·{' '}
-                      {PERFIS_REVISAO.find((p) => p.id === tipoRevisao)?.titulo}
+                      {perfisRevisao.find((p) => p.id === tipoRevisao)?.titulo}
                     </CardDescription>
                   </div>
                 </div>

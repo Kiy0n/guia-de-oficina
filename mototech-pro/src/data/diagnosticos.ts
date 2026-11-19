@@ -1,5 +1,6 @@
 import type { SectionId } from '@/lib/sections';
 import type { MotoSelecionada } from '@/types/moto';
+import { getArquiteturaMoto } from '@/utils/arquiteturaMoto';
 
 export type SistemaDiagnostico =
   | 'Partida/Motor'
@@ -12,10 +13,12 @@ export type FocoArquiteturaEtapa =
   | 'todas'
   | 'injecao'
   | 'carburador'
-  | 'corrente'
-  | 'cvt'
   | 'disco'
-  | 'tambor';
+  | 'tambor'
+  | 'embreagem_manual'
+  | 'semiautomatica'
+  | 'centrifugo_honda'
+  | 'filtro_papel';
 
 export interface EtapaDiagnosticoCorretivo {
   id: string;
@@ -60,46 +63,61 @@ export function etapaDestacadaParaMoto(
   foco: FocoArquiteturaEtapa,
   moto: MotoSelecionada,
 ): { aplicaDireto: boolean; badgeLabel?: string } {
-  const f = moto.geracao.fichaTecnica;
-  const isCvt = f.cambio.tipo === 'cvt' || f.transmissaoFinal?.tipo === 'correia';
+  const arq = getArquiteturaMoto(moto.modelo, moto.geracao);
 
   if (foco === 'todas') {
     return { aplicaDireto: true };
   }
   if (foco === 'injecao') {
     return {
-      aplicaDireto: f.alimentacao === 'injecao',
-      badgeLabel: 'Específico Injeção Eletrônica',
+      aplicaDireto: arq.isInjetada,
+      badgeLabel: arq.isAlimentacaoMista
+        ? 'Anos Injetados desta Geração'
+        : 'Específico Injeção Eletrônica',
     };
   }
   if (foco === 'carburador') {
     return {
-      aplicaDireto: f.alimentacao === 'carburador',
-      badgeLabel: 'Específico Carburador',
-    };
-  }
-  if (foco === 'corrente') {
-    return {
-      aplicaDireto: !isCvt,
-      badgeLabel: 'Transmissão Manual / Corrente',
-    };
-  }
-  if (foco === 'cvt') {
-    return {
-      aplicaDireto: isCvt,
-      badgeLabel: 'Específico Scooter CVT',
+      aplicaDireto: arq.isCarburada,
+      badgeLabel: arq.isAlimentacaoMista
+        ? 'Anos Carburados desta Geração'
+        : 'Específico Carburador',
     };
   }
   if (foco === 'disco') {
     return {
-      aplicaDireto: f.freios.dianteiro === 'disco' || f.freios.traseiro === 'disco',
+      aplicaDireto: arq.temAlgumFreioDisco,
       badgeLabel: 'Freio a Disco Hidráulico',
     };
   }
   if (foco === 'tambor') {
     return {
-      aplicaDireto: f.freios.traseiro === 'tambor' || f.freios.dianteiro === 'tambor',
+      aplicaDireto: arq.temAlgumFreioTambor,
       badgeLabel: 'Freio a Tambor Mecânico',
+    };
+  }
+  if (foco === 'embreagem_manual') {
+    return {
+      aplicaDireto: arq.temEmbreagemManual,
+      badgeLabel: 'Embreagem Manual (Manete/Cabo)',
+    };
+  }
+  if (foco === 'semiautomatica') {
+    return {
+      aplicaDireto: arq.isSemiautomatica,
+      badgeLabel: 'Embreagem Semiautomática / Centrífuga',
+    };
+  }
+  if (foco === 'centrifugo_honda') {
+    return {
+      aplicaDireto: arq.tipoFiltroOleo === 'centrifugo_honda',
+      badgeLabel: 'Filtro Centrífugo Honda',
+    };
+  }
+  if (foco === 'filtro_papel') {
+    return {
+      aplicaDireto: arq.tipoFiltroOleo === 'papel_externo',
+      badgeLabel: 'Filtro de Óleo em Papel',
     };
   }
 
@@ -129,7 +147,7 @@ export const CENARIOS_DIAGNOSTICO: readonly CenarioDiagnosticoCorretivo[] = [
         solucaoSugerida:
           'Abastecer, jumpear temporariamente o interruptor do cavalete para teste e reposicionar o sensor de inclinação com a seta "UP" para cima.',
         focoArquitetura: 'todas',
-        atalhoSecao: { sectionId: 'eletrica', label: 'Ver Códigos FI (54 / 30 / C23)' },
+        atalhoSecao: { sectionId: 'eletrica', label: 'Ver Códigos FI (54 / 30)' },
       },
       {
         id: '1-faisca-vela-cachimbo',
@@ -149,7 +167,7 @@ export const CENARIOS_DIAGNOSTICO: readonly CenarioDiagnosticoCorretivo[] = [
         oQueVerificar:
           'Ao virar a chave para ON, escute se a bomba elétrica arma por ~3 segundos. Se armar, verifique com manômetro se há 2,9–3,0 bar (Honda) ou 2,5 bar (Yamaha) e se o bico injetor está pulverizando (10–14 Ω).',
         causaProvavelSeFalhar:
-          'Refil da bomba queimado/travado, filtro de combustível saturado, fusível secundário 10A aberto ou conector do bico injetor frouxo (Código 12 / 39 / C32).',
+          'Refil da bomba queimado/travado, filtro de combustível saturado, fusível secundário 10A aberto ou conector do bico injetor frouxo (Código 12 Honda / 39 Yamaha).',
         solucaoSugerida:
           'Medir chegada de 12V por 3 segundos no plug da bomba, limpar/testar o bico injetor ou substituir o refil da bomba.',
         focoArquitetura: 'injecao',
@@ -231,13 +249,13 @@ export const CENARIOS_DIAGNOSTICO: readonly CenarioDiagnosticoCorretivo[] = [
       },
       {
         id: '2-interruptor-neutro-embreagem-freio',
-        titulo: '4º) Relé Não Faz Nem "Tec" (Botão Start, Interruptor de Embreagem / Freio Scooter)',
+        titulo: '4º) Relé Não Faz Nem "Tec" (Botão Start, Interruptor de Neutro / Embreagem)',
         oQueVerificar:
-          'Se o relé fica 100% mudo: coloque o câmbio em ponto morto ou aperte firme o manete da embreagem ao dar partida (verifique se o interruptor de neutro/embreagem está fechando contato).',
+          'Se o relé fica 100% mudo: coloque o câmbio em ponto morto (luz verde N acesa) ou, em motos com embreagem manual, aperte firme o manete da embreagem ao dar partida para testar o interruptor de segurança.',
         causaProvavelSeFalhar:
-          'Cebolinha do freio (em scooters) ou interruptor de neutro/embreagem aberto, impedindo que o negativo/positivo chegue à bobina do relé.',
+          'Interruptor de neutro, sensor do manete de embreagem (motos manuais) ou botão Start oxidado/aberto, impedindo que o comando chegue à bobina do relé.',
         solucaoSugerida:
-          'Limpar ou substituir o interruptor da manete de freio/embreagem e aplicar limpa-contatos no botão Start.',
+          'Testar continuidade do interruptor de neutro/embreagem e aplicar limpa-contatos no botão Start.',
         focoArquitetura: 'todas',
         atalhoSecao: { sectionId: 'eletrica', label: 'Guia de Cores de Fios' },
       },
@@ -300,7 +318,7 @@ export const CENARIOS_DIAGNOSTICO: readonly CenarioDiagnosticoCorretivo[] = [
         causaProvavelSeFalhar:
           'Restrição severa de entrada de ar deixando a mistura excessivamente rica em alta rotação.',
         solucaoSugerida:
-          'Substituir o elemento do filtro de ar (ou lavar e umedecer com óleo apenas nos filtros de espuma das 125/Intruder/XTZ 125).',
+          'Substituir o elemento do filtro de ar (ou lavar e umedecer com óleo apenas nos filtros de espuma laváveis).',
         focoArquitetura: 'todas',
       },
     ],
@@ -461,9 +479,9 @@ export const CENARIOS_DIAGNOSTICO: readonly CenarioDiagnosticoCorretivo[] = [
         causaProvavelSeFalhar:
           'Folga nas borrachas amortecedoras internas da campana da embreagem ou rolamento de encosto.',
         solucaoSugerida:
-          'Abrir a tampa direita para revisar a campana (aproveitando para limpar o filtro centrífugo e a peneira nas Honda).',
-        focoArquitetura: 'corrente',
-        atalhoSecao: { sectionId: 'procedimentos', label: 'Procedimento: Tampa Direita & Centrífugo' },
+          'Abrir a tampa direita para revisar a campana e conferir a filtragem interna de óleo conforme a arquitetura do motor.',
+        focoArquitetura: 'embreagem_manual',
+        atalhoSecao: { sectionId: 'procedimentos', label: 'Ver Procedimentos de Motor & Óleo' },
       },
       {
         id: '6-batida-seca-biela-pistao',
@@ -632,51 +650,52 @@ export const CENARIOS_DIAGNOSTICO: readonly CenarioDiagnosticoCorretivo[] = [
   },
 
   // -------------------------------------------------------------------------
-  // 10. Embreagem patinando / marchas duras (ou CVT trepidando em scooters)
+  // 10. Embreagem patinando / marchas duras (Manual e Semiautomática)
   // -------------------------------------------------------------------------
   {
-    id: 'embreagem-patinando-marchas-duras-cvt',
+    id: 'embreagem-patinando-marchas-duras',
     numero: 10,
-    sintoma: 'Embreagem patinando / marchas duras (ou CVT patinando/trepidando em scooters)',
+    sintoma: 'Embreagem patinando, engate duro ou marchas arranhando',
     resumo:
-      'Diagnóstico da transmissão primária e secundária: folga do cabo, discos queimados, regulagem da semiautomática (Biz/Pop/Crypton) e polias/roletes CVT.',
+      'Diagnóstico da transmissão primária: folga do cabo/manete (embreagem manual), regulagem externa da centrífuga (Biz / Pop 110i ES 2025+), discos queimados e óleo JASO MA.',
     sistema: 'Chassi/Transmissao',
     urgencia: 'media',
     etapas: [
       {
         id: '10-folga-manete-cabo-embreagem',
-        titulo: '1º) Folga Livre do Manete de Embreagem (10 a 20 mm) e Óleo Correto (JASO MA)',
+        titulo: '1º) Folga Livre do Manete de Embreagem (10 a 20 mm) e Cabo',
         oQueVerificar:
-          'Antes de abrir a tampa da embreagem: verifique se o manete tem de 10 a 20 mm de folga livre na ponta antes de começar a puxar o braço. Se estiver esticado sem folga, a embreagem fica pré-acionada e patina em subida!',
+          'Antes de abrir a tampa da embreagem: verifique se o manete tem de 10 a 20 mm de folga livre na ponta antes de começar a puxar o braço acionador. Se estiver esticado sem folga, a embreagem fica pré-acionada e patina em subida!',
         causaProvavelSeFalhar:
-          'Cabo de embreagem enforcado sem folga, discos de fibra gastos ou uso de óleo automotivo com redutor de atrito (que faz a embreagem banhada a óleo deslizar).',
+          'Cabo de embreagem enforcado sem folga, conduzindo a embreagem a deslizar sob carga, ou cabo desfiando/preso dificultando o engate.',
         solucaoSugerida:
-          'Deixar 10–20 mm de folga no manete, usar óleo com norma JASO MA/MA2 e, se persistir, trocar o kit de discos, separadores e molas.',
-        focoArquitetura: 'corrente',
-        atalhoSecao: { sectionId: 'ficha-tecnica', label: 'Ver Folga e Óleo JASO na Ficha' },
+          'Regular a folga livre conforme a Ficha Técnica (10–20 mm Honda / 10–15 mm Yamaha e Suzuki) e lubrificar/substituir o cabo se estiver pesado.',
+        focoArquitetura: 'embreagem_manual',
+        atalhoSecao: { sectionId: 'ficha-tecnica', label: 'Ver Folga de Embreagem na Ficha' },
       },
       {
         id: '10-regulagem-externa-cub',
-        titulo: '2º) Regulagem Externa da Embreagem Semiautomática (Biz 125 / Pop 110i / Crypton)',
+        titulo: '2º) Regulagem Externa da Embreagem Semiautomática / Centrífuga (Biz e Pop 110i ES 2025+)',
         oQueVerificar:
-          'Nas CUBs sem manete de embreagem, se o pedal de câmbio estiver duro para engatar ou patinando: utilize o parafuso regulador externo na tampa lateral do motor.',
+          'Nas CUBs semiautomáticas (sem manete de embreagem), se o pedal de câmbio estiver duro para engatar ou a moto patinar na saída: utilize o parafuso regulador externo na tampa lateral direita do motor.',
         causaProvavelSeFalhar:
-          'Desajuste do mecanismo acionador do câmbio rotativo ou excesso de óleo no cárter (lembre-se: a Biz 125 leva apenas 700 ml na troca!).',
+          'Desajuste do mecanismo acionador da embreagem centrífuga ou excesso de óleo no cárter (respeite o volume exato de troca na Ficha Técnica).',
         solucaoSugerida:
-          'Soltar a contraporca externa (14 mm), girar o parafuso de ajuste até sentir resistência do encosto e retornar 1/8 a 1/4 de volta.',
-        focoArquitetura: 'corrente',
+          'Soltar a contraporca externa (14 mm), girar o parafuso de ajuste no sentido anti-horário até sentir leve resistência do encosto e retornar 1/8 a 1/4 de volta antes de travar a contraporca.',
+        focoArquitetura: 'semiautomatica',
+        atalhoSecao: { sectionId: 'ficha-tecnica', label: 'Ver Volume de Óleo na Ficha' },
       },
       {
-        id: '10-cvt-scooter-trepidando',
-        titulo: '3º) Scooter Trepidando na Saída ou Sem Velocidade Final (CVT: Campana, Roletes e Correia)',
+        id: '10-discos-molas-oleo-jaso',
+        titulo: '3º) Óleo Incorreto (Sem Norma JASO MA) ou Desgaste de Discos e Molas',
         oQueVerificar:
-          'Em modelos com transmissão CVT: se o veículo trepida ao arrancar devagar, há pó de sapata acumulado na campana traseira. Se o motor berra e não desenvolve, os roletes estão quadrados ou a correia gastou abaixo da largura limite.',
+          'Confirme se não foi colocado óleo automotivo (com aditivos redutores de atrito) no motor. Se o óleo estiver correto (JASO MA/MA2) e a regulagem externa não resolver, abra a tampa direita e meça espessura dos discos e comprimento livre das molas.',
         causaProvavelSeFalhar:
-          'Vitrificação das sapatas da embreagem centrífuga seca, roletes com calo ou correia V-Belt desgastada.',
+          'Óleo fora de especificação fazendo os discos banhados a óleo deslizarem, discos de fricção vitrificados/queimados ou separadores empenados.',
         solucaoSugerida:
-          'Abrir a tampa do CVT, soprar o pó, lixar de leve a campana e as sapatas com lixa 160/180, conferir se os 6 roletes estão perfeitamente cilíndricos e medir a largura da correia.',
-        focoArquitetura: 'cvt',
-        atalhoSecao: { sectionId: 'ficha-tecnica', label: 'Ver Código da Correia e Roletes CVT' },
+          'Trocar o óleo por lubrificante JASO MA/MA2 na viscosidade do manual e, havendo desgaste, substituir o kit de discos de embreagem e molas.',
+        focoArquitetura: 'todas',
+        atalhoSecao: { sectionId: 'ficha-tecnica', label: 'Conferir Óleo JASO MA na Ficha' },
       },
     ],
   },
