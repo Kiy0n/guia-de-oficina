@@ -3,17 +3,26 @@ import { motion } from 'framer-motion';
 import {
   AlertTriangle,
   BatteryCharging,
+  BookOpen,
   Check,
+  ChevronDown,
+  ChevronUp,
   CircleDot,
+  Clock,
   Cog,
   Copy,
   Disc3,
   Droplets,
+  FileCheck2,
   Flame,
+  FolderOpen,
   Fuel,
   Gauge,
+  RefreshCw,
   Search,
   Settings2,
+  ShieldAlert,
+  ShieldCheck,
   SlidersHorizontal,
   Sparkles,
   Wrench,
@@ -21,14 +30,23 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import { ManualPdfViewer } from '@/components/ManualPdfViewer';
 import { SectionHeader } from '@/components/SectionHeader';
 import { SpotlightCard } from '@/components/SpotlightCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useMotoSelecionada } from '@/context/MotoContext';
+import { useMoto, useMotoSelecionada } from '@/context/MotoContext';
+import { gerarCaminhoSugeridoManual, useManuais } from '@/hooks/useManuais';
 import { SECTIONS } from '@/lib/sections';
 import { cn } from '@/lib/utils';
 import type { Geracao, Modelo } from '@/types/moto';
@@ -116,13 +134,41 @@ function montarTextoResumo(modelo: Modelo, geracao: Geracao): string {
 }
 
 export function FichaTecnicaPage() {
-  const { marca, modelo, geracao } = useMotoSelecionada();
+  const moto = useMotoSelecionada();
+  const { marca, modelo, geracao } = moto;
+  const { setSection } = useMoto();
   const [copiado, setCopiado] = useState(false);
+  const [copiadoPasta, setCopiadoPasta] = useState(false);
   const [buscaTorque, setBuscaTorque] = useState('');
   const [unidadeTorque, setUnidadeTorque] = useState<'ambos' | 'nm' | 'kgfm'>('ambos');
+  const [modalPdfAberto, setModalPdfAberto] = useState(false);
+  const [detalheAuditoriaAberto, setDetalheAuditoriaAberto] = useState(false);
+
+  const filtroManuais = useMemo(
+    () => ({
+      marca: marca.toLowerCase(),
+      modelo: modelo.id,
+      anoInicio: geracao.anoInicio,
+      anoFim: geracao.anoFim,
+    }),
+    [marca, modelo.id, geracao.anoInicio, geracao.anoFim],
+  );
+
+  const {
+    manuais: manuaisGeracao,
+    carregando: carregandoManuais,
+    recarregar: recarregarManuais,
+  } = useManuais(filtroManuais);
+
+  const { pastaRelativa, exemploArquivo } = useMemo(
+    () => gerarCaminhoSugeridoManual(moto),
+    [moto],
+  );
 
   const def = SECTIONS.find((s) => s.id === 'ficha-tecnica') ?? SECTIONS[0];
   const ficha = geracao.fichaTecnica;
+  const auditoria = geracao.auditoria;
+  const isVerificadoManual = auditoria.status === 'verificado_manual';
 
   const torquesFiltrados = useMemo(() => {
     const lista = ficha.torques ?? [];
@@ -157,6 +203,16 @@ export function FichaTecnicaPage() {
     }
   };
 
+  const handleCopiarPasta = async () => {
+    try {
+      await navigator.clipboard.writeText(pastaRelativa);
+      setCopiadoPasta(true);
+      window.setTimeout(() => setCopiadoPasta(false), 2200);
+    } catch {
+      // ignore
+    }
+  };
+
   // Valores formatados para o Hero Grid de Leitura Rápida
   const oleo = ficha.fluidos?.oleoMotor;
   const oleoVolumePrincipal = oleo
@@ -183,6 +239,26 @@ export function FichaTecnicaPage() {
             Ref: {ficha.versaoReferencia}
           </Badge>
         )}
+
+        <Button
+          type="button"
+          variant={manuaisGeracao.length > 0 ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setModalPdfAberto(true)}
+          className="gap-1.5"
+        >
+          <BookOpen className="size-4" />
+          <span>Abrir Manual PDF</span>
+          {manuaisGeracao.length > 0 && (
+            <Badge
+              variant="secondary"
+              className="ml-0.5 border border-white/20 bg-black/25 px-1.5 py-0 font-mono text-[11px] text-white"
+            >
+              {manuaisGeracao.length}
+            </Badge>
+          )}
+        </Button>
+
         <Button
           variant={copiado ? 'default' : 'secondary'}
           size="sm"
@@ -193,6 +269,236 @@ export function FichaTecnicaPage() {
           {copiado ? 'Copiado!' : 'Copiar Ficha Resumida'}
         </Button>
       </SectionHeader>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Selo de Auditoria Técnica                                          */}
+      {/* ------------------------------------------------------------------ */}
+      <div
+        className={cn(
+          'rounded-xl border p-3.5 transition-colors',
+          isVerificadoManual
+            ? 'border-emerald-500/35 bg-emerald-500/8'
+            : 'border-amber-500/35 bg-amber-500/8',
+        )}
+      >
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+          <div className="flex items-start gap-3">
+            <span
+              className={cn(
+                'mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border',
+                isVerificadoManual
+                  ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-400'
+                  : 'border-amber-500/40 bg-amber-500/15 text-amber-400',
+              )}
+            >
+              {isVerificadoManual ? (
+                <ShieldCheck className="size-5" />
+              ) : (
+                <ShieldAlert className="size-5" />
+              )}
+            </span>
+
+            <div className="min-w-0 space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    'gap-1.5 font-semibold',
+                    isVerificadoManual
+                      ? 'border-emerald-500/50 bg-emerald-500/15 text-emerald-300'
+                      : 'border-amber-500/50 bg-amber-500/15 text-amber-300',
+                  )}
+                >
+                  {isVerificadoManual ? (
+                    <>
+                      <FileCheck2 className="size-3.5" />
+                      Dados Auditados via Manual Oficial
+                    </>
+                  ) : (
+                    <>
+                      <ShieldAlert className="size-3.5" />
+                      Pendente de conferência com PDF oficial
+                    </>
+                  )}
+                </Badge>
+
+                {auditoria.ultimaRevisao && (
+                  <span className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground">
+                    <Clock className="size-3" />
+                    Revisão: {auditoria.ultimaRevisao}
+                  </span>
+                )}
+              </div>
+
+              <p className="text-xs leading-relaxed text-foreground/90">
+                {auditoria.fonte ??
+                  'Especificações técnicas baseadas nos padrões de fábrica da montadora.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {manuaisGeracao.length > 0 ? (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setModalPdfAberto(true)}
+                className="h-8 gap-1.5 text-xs"
+              >
+                <BookOpen className="size-3.5 text-emerald-400" />
+                Conferir no PDF ({manuaisGeracao.length})
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setSection('manuais-pdf')}
+                className="h-8 gap-1.5 text-xs"
+              >
+                <FolderOpen className="size-3.5 text-amber-400" />
+                Anexar PDF em public/manuals
+              </Button>
+            )}
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setDetalheAuditoriaAberto((v) => !v)}
+              className="h-8 gap-1 text-xs"
+            >
+              <span>{detalheAuditoriaAberto ? 'Ocultar detalhes' : 'Detalhes da auditoria'}</span>
+              {detalheAuditoriaAberto ? (
+                <ChevronUp className="size-3.5" />
+              ) : (
+                <ChevronDown className="size-3.5" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {detalheAuditoriaAberto && (
+          <div className="mt-3 space-y-2 border-t border-border/60 pt-3 text-xs text-muted-foreground">
+            {auditoria.notas && (
+              <p className="leading-relaxed">
+                <strong className="text-foreground">Notas de conferência:</strong> {auditoria.notas}
+              </p>
+            )}
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-background/60 px-3 py-2">
+              <span>
+                Pasta local desta geração:{' '}
+                <code className="font-mono text-emerald-400">{exemploArquivo}</code>
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => void handleCopiarPasta()}
+                className="h-7 gap-1 px-2 text-xs"
+              >
+                {copiadoPasta ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
+                {copiadoPasta ? 'Copiado!' : 'Copiar pasta'}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Modal / Sheet Amplo com Visualizador de PDF Integrado              */}
+      {/* ------------------------------------------------------------------ */}
+      <Sheet open={modalPdfAberto} onOpenChange={setModalPdfAberto}>
+        <SheetContent
+          side="right"
+          className="flex w-[96vw] flex-col gap-3 overflow-y-auto p-4 sm:max-w-[92vw]"
+        >
+          <SheetHeader className="pb-1">
+            <SheetTitle className="flex flex-wrap items-center gap-2 text-lg">
+              <BookOpen className="size-5 text-primary" />
+              <span>
+                Manual PDF — {marca} {modelo.nome} ({geracao.anosLabel})
+              </span>
+              {isVerificadoManual && (
+                <Badge
+                  variant="outline"
+                  className="border-emerald-500/40 bg-emerald-500/15 text-xs text-emerald-300"
+                >
+                  Auditado via Manual Oficial
+                </Badge>
+              )}
+            </SheetTitle>
+            <SheetDescription>
+              Consulte páginas, torques e diagramas originais em paralelo com a Ficha Técnica.
+            </SheetDescription>
+          </SheetHeader>
+
+          {manuaisGeracao.length > 0 ? (
+            <ManualPdfViewer
+              manuais={manuaisGeracao}
+              onRecarregar={() => void recarregarManuais()}
+              carregando={carregandoManuais}
+              alturaMinimaClass="min-h-[76vh]"
+            />
+          ) : (
+            <Card className="border-dashed border-amber-500/40 bg-amber-500/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <FolderOpen className="size-5 text-amber-400" />
+                  Nenhum PDF salvo ainda para {marca} {modelo.nome} ({geracao.anosLabel})
+                </CardTitle>
+                <CardDescription>
+                  Salve o arquivo PDF do manual na pasta abaixo e clique em &ldquo;Recarregar lista de PDFs&rdquo;.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-col justify-between gap-2 rounded-xl border bg-zinc-950 p-3.5 sm:flex-row sm:items-center">
+                  <code className="font-mono text-xs text-emerald-400 sm:text-sm">
+                    {exemploArquivo}
+                  </code>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => void handleCopiarPasta()}
+                    className="shrink-0 gap-1.5"
+                  >
+                    {copiadoPasta ? <Check className="size-4 text-emerald-400" /> : <Copy className="size-4" />}
+                    {copiadoPasta ? 'Caminho copiado!' : 'Copiar pasta'}
+                  </Button>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="default"
+                    size="sm"
+                    onClick={() => {
+                      setModalPdfAberto(false);
+                      setSection('manuais-pdf');
+                    }}
+                    className="gap-1.5"
+                  >
+                    <BookOpen className="size-4" />
+                    Abrir Biblioteca Completa de Manuais PDF
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void recarregarManuais()}
+                    disabled={carregandoManuais}
+                    className="gap-1.5"
+                  >
+                    <RefreshCw className={cn('size-3.5', carregandoManuais && 'animate-spin')} />
+                    Recarregar lista de PDFs
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </SheetContent>
+      </Sheet>
 
       {/* ------------------------------------------------------------------ */}
       {/* Hero Grid — 6 Cards de Leitura Rápida de Bancada (1 metro de dist) */}

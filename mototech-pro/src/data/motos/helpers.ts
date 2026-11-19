@@ -1,14 +1,24 @@
-import type { Faixa, Geracao, TorqueAperto } from '@/types/moto';
+import type { AuditoriaTecnica, Faixa, Geracao, TorqueAperto } from '@/types/moto';
 
-export interface GeracaoInput extends Omit<Geracao, 'id' | 'anosLabel'> {
+export interface GeracaoInput extends Omit<Geracao, 'id' | 'anosLabel' | 'auditoria'> {
   /** Sufixo opcional para desambiguar ids com a mesma faixa de anos. */
   sufixoId?: string;
+  /** Metadados de auditoria técnica; se omitido, assume pendente de conferência com PDF local. */
+  auditoria?: AuditoriaTecnica;
 }
 
-export function geracao(modeloId: string, { sufixoId, ...g }: GeracaoInput): Geracao {
+export function geracao(modeloId: string, { sufixoId, auditoria, ...g }: GeracaoInput): Geracao {
+  const anosLabel = `${g.anoInicio}–${g.anoFim}`;
   return {
     id: [modeloId, g.anoInicio, g.anoFim, sufixoId].filter(Boolean).join('-'),
-    anosLabel: `${g.anoInicio}–${g.anoFim}`,
+    anosLabel,
+    auditoria: auditoria ?? {
+      status: 'pendente_conferencia',
+      ultimaRevisao: '2026-11-19',
+      fonte: `Base técnica de fábrica (${g.nomeGeracao} • ${anosLabel}) — aguardando anexo do PDF local em public/manuals/`,
+      notas:
+        'Valores preenchidos conforme especificações de serviço da montadora. Adicione o PDF oficial na biblioteca para vincular a conferência página a página.',
+    },
     ...g,
   };
 }

@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   CalendarCheck,
   Calculator,
   ClipboardList,
@@ -12,6 +13,7 @@ import {
 export type SectionId =
   | 'ficha-tecnica'
   | 'manual-revisoes'
+  | 'manuais-pdf'
   | 'procedimentos'
   | 'ferramentas'
   | 'eletrica'
@@ -41,6 +43,13 @@ export const SECTIONS: readonly SectionDef[] = [
     descricao: 'Plano de manutenção preventiva por quilometragem e tempo.',
     icon: CalendarCheck,
     previsto: ['Tabela de revisões (km / meses)', 'Checklist por revisão', 'Próxima revisão pela quilometragem atual'],
+  },
+  {
+    id: 'manuais-pdf',
+    titulo: 'Manuais PDF',
+    descricao: 'Biblioteca integrada de manuais de serviço e proprietário em PDF.',
+    icon: BookOpen,
+    previsto: ['Leitor PDF embutido na página', 'Busca automática em public/manuals/', 'Navegação rápida por página e tela cheia'],
   },
   {
     id: 'procedimentos',

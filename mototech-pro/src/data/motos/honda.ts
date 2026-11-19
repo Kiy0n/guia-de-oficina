@@ -24,28 +24,42 @@ const TORQUES_CG160_BROS_XRE: TorqueAperto[] = [
 ];
 
 const TORQUES_CG150: TorqueAperto[] = [
-  torque('Bujão de drenagem do óleo do motor', 24, 'motor', 'Arruela de alumínio 12 mm'),
-  torque('Vela de ignição (NGK CPR8EA-9)', 16, 'motor'),
+  torque('Bujão de drenagem do óleo do motor', 30, 'motor', 'Faixa manual 2004: 25–34 N·m (2,5–3,5 kgf·m) | Manual 2009+: 30 N·m (3,1 kgf·m) • Arruela 12 mm'),
+  torque('Vela de ignição (NGK CPR8EA-9)', 16, 'motor', 'Rosca M10 — encostar à mão antes de aplicar torque'),
   torque('Parafusos da tampa do cabeçote', 10, 'motor'),
   torque('Contratuerca de regulagem de válvula', 14, 'motor'),
   torque('Porca castelo do filtro centrífugo', 64, 'motor'),
-  torque('Porca do eixo dianteiro', 59, 'chassi'),
-  torque('Porca do eixo traseiro', 88, 'chassi'),
+  torque('Porca do eixo dianteiro', 62, 'chassi', 'Manual oficial: 62 N·m (6,3 kgf·m) / faixa 54–69 N·m'),
+  torque('Porca do eixo traseiro', 88, 'chassi', 'Manual oficial: 88 N·m (9,0 kgf·m) / faixa 78–98 N·m'),
   torque('Porcas da coroa traseira', 64, 'chassi'),
-  torque('Parafusos da pinça de freio dianteira', 30, 'freios', 'Trava-rosca médio'),
+  torque('Porca do braço limitador do freio traseiro', 22, 'freios', 'Manual oficial: 22 N·m (2,2 kgf·m) + contrapino novo'),
+  torque('Parafusos da pinça de freio dianteira (ESD/EX)', 30, 'freios', 'Trava-rosca médio'),
   torque('Porca da mesa superior (coluna de direção)', 74, 'suspensao'),
 ];
 
-const TORQUES_CG125: TorqueAperto[] = [
-  torque('Bujão de drenagem do óleo do motor', 24, 'motor', 'Arruela de vedação 12 mm'),
-  torque('Vela de ignição', 16, 'motor', 'DP8EA-9 (18 N·m na OHV M12) / CPR8EA-9 (16 N·m na OHC M10)'),
+const TORQUES_CG125_OHV: TorqueAperto[] = [
+  torque('Tampa do filtro de tela / dreno de óleo (36 mm)', 15, 'motor', 'Manual CG 125 Titan/Cargo 2000 pág. 41: 15 N·m (1,5 kgf·m) • Conferir O-ring'),
+  torque('Bujão de drenagem do óleo (carcaça Fan 2005–2008)', 24, 'motor', 'Arruela de vedação 12 mm'),
+  torque('Vela de ignição (NGK DP8EA-9 — Rosca M12)', 18, 'motor'),
   torque('Parafusos da tampa de válvulas', 10, 'motor'),
-  torque('Contratuerca do regulador de válvula', 14, 'motor'),
+  torque('Contratuerca do regulador de válvula (OHV)', 14, 'motor'),
   torque('Porca castelo do filtro centrífugo', 54, 'motor'),
-  torque('Porca do eixo dianteiro', 59, 'chassi'),
-  torque('Porca do eixo traseiro', 88, 'chassi'),
+  torque('Porca do eixo dianteiro', 63, 'chassi', 'Manual CG 125 2000 pág. 71: 63 N·m (6,3 kgf·m)'),
+  torque('Porca do eixo traseiro', 90, 'chassi', 'Manual CG 125 2000 pág. 58/71: 90 N·m (9,0 kgf·m)'),
   torque('Porcas da coroa de transmissão', 54, 'chassi'),
-  torque('Porca do braço do freio a tambor', 10, 'freios'),
+  torque('Porca do braço de ancoragem do freio traseiro', 22, 'freios', 'Manual CG 125 2000 pág. 72: 22 N·m (2,2 kgf·m)'),
+];
+
+const TORQUES_CG125_OHC: TorqueAperto[] = [
+  torque('Bujão de drenagem do óleo do motor', 30, 'motor', 'Manual CG 125 Fan/Cargo 2011 pág. 6-8: 30 N·m (3,1 kgf·m) • Arruela 12 mm'),
+  torque('Vela de ignição (NGK CPR8EA-9 — Rosca M10)', 16, 'motor'),
+  torque('Parafusos da tampa de válvulas', 10, 'motor'),
+  torque('Contratuerca do regulador de válvula (OHC)', 14, 'motor'),
+  torque('Porca castelo do filtro centrífugo', 64, 'motor'),
+  torque('Porca do eixo dianteiro', 62, 'chassi', 'Manual CG 125 2011 pág. 6-24: 62 N·m (6,3 kgf·m)'),
+  torque('Porca do eixo traseiro', 88, 'chassi', 'Manual CG 125 2011 pág. 6-15: 88 N·m (9,0 kgf·m)'),
+  torque('Porcas da coroa de transmissão', 64, 'chassi'),
+  torque('Porca do braço limitador do freio traseiro', 22, 'freios', 'Manual CG 125 2011 pág. 6-25: 22 N·m (2,2 kgf·m)'),
 ];
 
 const TORQUES_CUB_BIZ_POP: TorqueAperto[] = [
@@ -184,8 +198,9 @@ const cg150Base: FichaTecnica = {
     fluidoFreio: 'DOT 4 (versões ESD/Sport) / Tambor nas versões KS/ES',
     fluidoBengala: {
       especificacao: 'Fluido ATF / Fork Oil 10W',
-      volumePorCanelaMl: 139,
+      volumePorCanelaMl: 141.5,
       nivelMm: 152,
+      observacao: '141,5 cm³ (ml) por canela nas versões Titan/Job/Fan | 137,5 cm³ na CG 150 Sport (Manual 2004 pág. 102)',
     },
   },
   folgas: {
@@ -705,6 +720,14 @@ export const HONDA: Modelo[] = [
           'Acionador da corrente de comando perde pressão de mola com o tempo — testar travamento da catraca antes de montar.',
           'Limpar filtro centrífugo e peneira inferior a cada 12.000 km; trocar junta da tampa direita.',
         ],
+        auditoria: {
+          status: 'verificado_manual',
+          ultimaRevisao: '2026-11-19',
+          fonte:
+            'Manuais Oficiais Honda: CG 150 Titan, Sport e Job 2004.pdf (D2203-MAN-0408, págs. 62–69, 76–78 e 102–105) e CG 150 Titan, Sport e Job 2008.pdf',
+          notas:
+            'Conferido com PDF local: óleo 1,0 L drenagem / 1,2 L desmontagem; bujão 25–34 N·m (30 N·m); válvulas Adm 0,08 mm / Esc 0,12 mm; bengala 141,5 cm³ (137,5 cm³ Sport); eixo diant. 62 N·m e tras. 88 N·m.',
+        },
         fichaTecnica: cg150Base,
       }),
       geracao('honda-cg-150', {
@@ -719,6 +742,14 @@ export const HONDA: Modelo[] = [
           'Filtro de combustível externo fica junto à bomba/chassi — substituir a cada 12.000 km para não forçar o refil da bomba (2,9 bar).',
           'Folga de válvulas permanece Adm 0,08 ± 0,02 mm e Esc 0,12 ± 0,02 mm com motor totalmente frio.',
         ],
+        auditoria: {
+          status: 'verificado_manual',
+          ultimaRevisao: '2026-11-19',
+          fonte:
+            'Manuais Oficiais Honda: CG 150 Titan 2009.pdf (D2203-MAN-0669, págs. 6-7 a 6-24 e 10-1 a 10-4), CG 150 Titan 2010.pdf, CG 150 Fan/Titan 2011.pdf e CG 150 Titan 2014.pdf',
+          notas:
+            'Conferido com 5 PDFs locais: óleo SAE 10W-30 JASO MA (1,0 L drenagem / 1,2 L desmontagem); bujão 30 N·m (3,1 kgf·m); válvulas Adm 0,08 mm / Esc 0,12 mm; corrente 15–25 mm; bengala 141,5 cm³.',
+        },
         fichaTecnica: {
           ...cg150Base,
           versaoReferencia: 'Titan Mix / EX ESD',
@@ -733,6 +764,11 @@ export const HONDA: Modelo[] = [
           fluidos: {
             ...cg150Base.fluidos,
             tanqueL: 16.1,
+            reservaL: 4.2,
+          },
+          folgas: {
+            ...cg150Base.folgas,
+            folgaCorrenteMm: faixaMm(15, 25, '15 – 25 mm'),
           },
         },
       }),
@@ -759,8 +795,16 @@ export const HONDA: Modelo[] = [
           'Motor OHV (Vareta): TANTO admissão QUANTO escape usam 0,08 ± 0,02 mm — diferente do motor OHC 2009+ que usa 0,12 mm no escape.',
           'Vela de rosca grossa M12 (NGK DP8EA-9) — não confundir com a CPR8EA-9 (M10) da linha OHC 2009+.',
           'Ao desmontar cabeçote, não inverter as varetas e conferir o desgaste dos pinos e buchas dos balancins.',
-          'Na Titan 2000–2004 a bengala leva 77 ml de ATF por canela; na Fan 125 2005–2008 (tubo maior) leva 125 ml.',
+          'Na Titan 2000–2004 a bengala leva 82,5 cm³ (ml) de ATF por canela (pág. 82); na Fan 125 2005–2008 leva 72 cm³.',
         ],
+        auditoria: {
+          status: 'verificado_manual',
+          ultimaRevisao: '2026-11-19',
+          fonte:
+            'Manuais Oficiais Honda: CG 125 Titan e Cargo 2000.pdf (D2203-MAN-0176, págs. 40–43, 53–58, 68–72 e 82–83) e CG 125 Fan 2008.pdf',
+          notas:
+            'Conferido com 2 PDFs locais: válvulas OHV Adm 0,08 mm / Esc 0,08 mm; óleo 0,80 L na troca (1,0 L total); tampa do filtro de tela 15 N·m; relação 14x43 (3,071); eixo diant. 63 N·m e tras. 90 N·m; bengala 82,5 cm³.',
+        },
         fichaTecnica: {
           versaoReferencia: 'Titan KS / Fan 125',
           cilindradaCc: 124.9,
@@ -785,18 +829,18 @@ export const HONDA: Modelo[] = [
           },
           fluidos: {
             oleoMotor: {
-              especificacao: 'SAE 20W-50 Mineral ou 10W-30 Semissintético (API SL / JASO MA)',
-              capacidadeTrocaL: 0.9,
-              capacidadeTotalL: 1.1,
-              observacao: '0,9 L na troca periódica | 1,1 L após desmontagem',
+              especificacao: 'SAE 20W-50 Mineral (API SF/SL) ou 10W-30 Semissintético (JASO MA)',
+              capacidadeTrocaL: 0.8,
+              capacidadeTotalL: 1.0,
+              observacao: '0,80 L na troca periódica | 1,0 L após desmontagem (Manual CG 125 2000 págs. 40 e 82)',
             },
-            tanqueL: 13.5,
+            tanqueL: 13.0,
             reservaL: 2.0,
             fluidoFreio: 'Não utiliza (freios a tambor mecânico)',
             fluidoBengala: {
               especificacao: 'Fluido ATF',
-              volumePorCanelaMl: 125,
-              observacao: '125 ml na Fan 125 (2005–2008) | 77 ml na Titan 125 (2000–2004)',
+              volumePorCanelaMl: 82.5,
+              observacao: '82,5 cm³ (ml) na Titan/Cargo 2000–2004 (pág. 82) | 72 cm³ na Fan 125 2005–2008',
             },
           },
           folgas: {
@@ -828,11 +872,11 @@ export const HONDA: Modelo[] = [
           },
           transmissaoFinal: {
             tipo: 'corrente',
-            corrente: '428H x 116L',
+            corrente: 'DID 428M / 428H x 116L',
             pinhaoDentes: 14,
-            coroaDentes: 44,
+            coroaDentes: 43,
           },
-          torques: TORQUES_CG125,
+          torques: TORQUES_CG125_OHV,
         },
       }),
       geracao('honda-cg-125', {
@@ -849,8 +893,16 @@ export const HONDA: Modelo[] = [
           'Mudança radical em 2009: saiu o motor vareta (OHV) e entrou o OHC com corrente de comando; a válvula de escape passou para 0,12 ± 0,02 mm.',
           'Vela passou para rosca fina M10 (NGK CPR8EA-9) — nunca forçar vela DP8EA-9 antiga.',
           'De 2009 a 2015 usa carburador Keihin com TPS integrado ao CDI; de 2016 a 2018 (CG 125i) passou a ser injetada PGM-FI (somente gasolina).',
-          'Capacidade de óleo é 1,0 L na troca periódica (1,2 L na desmontagem) com SAE 10W-30 JASO MA.',
+          'Capacidade de óleo é 1,0 L na troca periódica (1,2 L na desmontagem) com SAE 10W-30 JASO MA e bujão de dreno com 30 N·m (3,1 kgf·m).',
         ],
+        auditoria: {
+          status: 'verificado_manual',
+          ultimaRevisao: '2026-11-19',
+          fonte:
+            'Manuais Oficiais Honda: CG 125 Fan e Cargo 2011.pdf (D2203-MAN-0734, págs. 6-6 a 6-25 e 10-1 a 10-4) e CG 125 Fan e Cargo 2014.pdf',
+          notas:
+            'Conferido com 2 PDFs locais: óleo SAE 10W-30 JASO MA (1,0 L drenagem / 1,2 L desmontagem); bujão 30 N·m (3,1 kgf·m); válvulas OHC Adm 0,08 mm / Esc 0,12 mm; relação 14x43 (DID 428MX-116RB); bengala 72 cm³.',
+        },
         fichaTecnica: {
           versaoReferencia: 'Fan ES / 125i',
           cilindradaCc: 124.7,
@@ -875,23 +927,24 @@ export const HONDA: Modelo[] = [
           },
           fluidos: {
             oleoMotor: {
-              especificacao: 'SAE 10W-30 Semissintético (API SL / JASO MA)',
+              especificacao: 'SAE 10W-30 Semissintético (API SJ/SL / JASO MA)',
               capacidadeTrocaL: 1.0,
               capacidadeTotalL: 1.2,
+              observacao: '1,0 L após drenagem | 1,2 L após desmontagem (Manual CG 125 2011 pág. 10-1)',
             },
             tanqueL: 15.1,
-            reservaL: 2.0,
+            reservaL: 2.5,
             fluidoFreio: 'Tambor mecânico (KS/ES/125i) / DOT 4 na versão ESD',
             fluidoBengala: {
               especificacao: 'Fluido ATF / Fork Oil 10W',
-              volumePorCanelaMl: 138,
-              nivelMm: 154,
+              volumePorCanelaMl: 72,
+              observacao: '72 cm³ (ml) por canela (Manual CG 125 Fan/Cargo 2011 pág. 10-1)',
             },
           },
           folgas: {
             valvulaAdmissaoMm: faixaMm(0.06, 0.1, '0,08 ± 0,02 mm'),
             valvulaEscapeMm: faixaMm(0.1, 0.14, '0,12 ± 0,02 mm'),
-            folgaCorrenteMm: faixaMm(20, 30, '20 – 30 mm'),
+            folgaCorrenteMm: faixaMm(10, 20, '10 – 20 mm'),
             folgaManeteEmbreagemMm: faixaMm(10, 20, '10 – 20 mm'),
             folgaPedalFreioMm: faixaMm(20, 30, '20 – 30 mm'),
             folgaAceleradorMm: faixaMm(2, 6, '2 – 6 mm'),
@@ -909,6 +962,7 @@ export const HONDA: Modelo[] = [
               tensaoCargaV: '13,5V – 14,8V @ 5.000 rpm',
             },
             fusivelPrincipalA: 15,
+            fusiveisSecundarios: '10A',
             lampadaFarol: 'HS1 / H4 12V 35/35W',
           },
           pneus: {
@@ -917,11 +971,11 @@ export const HONDA: Modelo[] = [
           },
           transmissaoFinal: {
             tipo: 'corrente',
-            corrente: '428H x 116L',
+            corrente: 'DID 428MX – 116RB (116 elos)',
             pinhaoDentes: 14,
             coroaDentes: 43,
           },
-          torques: TORQUES_CG125,
+          torques: TORQUES_CG125_OHC,
         },
       }),
     ],

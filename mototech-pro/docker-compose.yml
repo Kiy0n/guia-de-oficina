@@ -4,7 +4,7 @@ services:
   # -------------------------------------------------------------------------
   # Desenvolvimento: hot reload do front (Vite) e do back (tsx watch)
   #   docker compose up dev
-  #   -> http://localhost:5173  (front, /api é proxiado para o Express)
+  #   -> http://localhost:5173  (front, /api e /manuals são proxiados para o Express)
   #   -> http://localhost:3001/api/health
   # -------------------------------------------------------------------------
   dev:
@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
 
   # -------------------------------------------------------------------------
-  # Produção: Express 5 servindo a API e o build estático do React
+  # Produção: Express 5 servindo a API, os manuais PDF e o build estático do React
   #   docker compose --profile prod up --build prod
   #   -> http://localhost:8080
   # -------------------------------------------------------------------------
@@ -47,6 +47,7 @@ services:
       PORT: 3001
     volumes:
       - ./data:/app/data
+      - ./public/manuals:/app/public/manuals:ro
     restart: unless-stopped
 
 volumes:

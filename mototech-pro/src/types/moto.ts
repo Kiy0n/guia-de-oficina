@@ -222,6 +222,20 @@ export interface Diagnostico {
 }
 
 // ---------------------------------------------------------------------------
+// Auditoria Técnica (Selo de Confiabilidade de Manual)
+// ---------------------------------------------------------------------------
+
+export type StatusAuditoria = 'verificado_manual' | 'pendente_conferencia';
+
+export interface AuditoriaTecnica {
+  status: StatusAuditoria;
+  ultimaRevisao?: string;
+  /** Fonte documental exata (ex.: "Manual do Proprietário Honda CG 150 2004, pág. 62–65 / 102–105"). */
+  fonte?: string;
+  notas?: string;
+}
+
+// ---------------------------------------------------------------------------
 // Hierarquia do catálogo
 // ---------------------------------------------------------------------------
 
@@ -237,6 +251,8 @@ export interface Geracao {
   alertasBancada?: string[];
   versoes?: string[]; // ex.: ["Start", "Fan", "Titan"]
   fichaTecnica: FichaTecnica;
+  /** Selo de auditoria técnica e rastreabilidade dos dados de óleo, válvulas e torques. */
+  auditoria: AuditoriaTecnica;
   planoManutencao?: ItemPlanoManutencao[];
   procedimentos?: Procedimento[];
   diagnosticos?: Diagnostico[];
