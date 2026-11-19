@@ -46,8 +46,13 @@ function lerStorage(): { moto: MotoSelecionada | null; section: SectionId } {
       typeof data.modeloId === 'string' && typeof data.geracaoId === 'string'
         ? resolverSelecao(data.modeloId, data.geracaoId)
         : null;
+    if (!moto) {
+      localStorage.removeItem(STORAGE_KEY);
+      return { moto: null, section: DEFAULT_SECTION };
+    }
     return { moto, section: isSectionId(data.section) ? data.section : DEFAULT_SECTION };
   } catch {
+    localStorage.removeItem(STORAGE_KEY);
     return { moto: null, section: DEFAULT_SECTION };
   }
 }

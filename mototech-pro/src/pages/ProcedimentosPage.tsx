@@ -236,32 +236,6 @@ function extrairDadosContextuaisMoto(
     return dados;
   }
 
-  if (proc.id === 'troca-pneu-roda-traseira-scooter') {
-    const pT = f.pneus?.traseiro;
-    dados.push(
-      {
-        rotulo: 'Medida & Pressão do Pneu Traseiro',
-        valor: `${pT?.medida ?? '—'} (${pT?.pressaoPsi ?? '—'} PSI solo / ${pT?.pressaoComGarupaPsi ?? '—'} PSI garupa)`,
-        detalhe: pT?.tipo,
-      },
-      {
-        rotulo: 'Óleo da Transmissão Final CVT',
-        valor: f.fluidos?.oleoTransmissaoCvt
-          ? `${formatNumero(f.fluidos.oleoTransmissaoCvt.capacidadeL)} L (${f.fluidos.oleoTransmissaoCvt.especificacao})`
-          : '—',
-      },
-    );
-    const tRoda = acharTorque('roda traseira') ?? acharTorque('eixo traseiro');
-    if (tRoda) {
-      dados.push({
-        rotulo: tRoda.item,
-        valor: `${tRoda.torque.valor} N·m (${nmParaKgfm(tRoda.torque.valor)} kgf·m)`,
-        detalhe: tRoda.observacao,
-      });
-    }
-    return dados;
-  }
-
   // Default (ex.: Caixa de Direção)
   const tMesa = acharTorque('direção') ?? acharTorque('mesa');
   if (tMesa) {

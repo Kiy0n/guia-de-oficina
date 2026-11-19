@@ -159,7 +159,7 @@ export const CENARIOS_DIAGNOSTICO: readonly CenarioDiagnosticoCorretivo[] = [
         id: '1-carburador-torneira',
         titulo: '3º-B) Alimentação na Cuba do Carburador e Torneira/Vácuo',
         oQueVerificar:
-          'Abra o parafuso de dreno no fundo da cuba do carburador: deve sair gasolina limpa imediatamente. Se não sair, verifique a torneira de combustível (ou mangueira de vácuo na Yes 125 / Burgman / Neo).',
+          'Abra o parafuso de dreno no fundo da cuba do carburador: deve sair gasolina limpa imediatamente. Se não sair, verifique a torneira de combustível (ou mangueira de vácuo na Yes 125 / Intruder 125).',
         causaProvavelSeFalhar:
           'Agulha da boia travada fechada, peneira da torneira entupida ou água no fundo da cuba.',
         solucaoSugerida:
@@ -233,7 +233,7 @@ export const CENARIOS_DIAGNOSTICO: readonly CenarioDiagnosticoCorretivo[] = [
         id: '2-interruptor-neutro-embreagem-freio',
         titulo: '4º) Relé Não Faz Nem "Tec" (Botão Start, Interruptor de Embreagem / Freio Scooter)',
         oQueVerificar:
-          'Se o relé fica 100% mudo: em motos manuais, aperte a embreagem ao dar partida; em scooters (PCX/Fluo/Burgman), aperte firme o manete de freio traseiro/dianteiro (veja se a luz de freio acende!).',
+          'Se o relé fica 100% mudo: coloque o câmbio em ponto morto ou aperte firme o manete da embreagem ao dar partida (verifique se o interruptor de neutro/embreagem está fechando contato).',
         causaProvavelSeFalhar:
           'Cebolinha do freio (em scooters) ou interruptor de neutro/embreagem aberto, impedindo que o negativo/positivo chegue à bobina do relé.',
         solucaoSugerida:
@@ -296,7 +296,7 @@ export const CENARIOS_DIAGNOSTICO: readonly CenarioDiagnosticoCorretivo[] = [
         id: '3-filtro-ar-afogador',
         titulo: '3º) Filtro de Ar Saturado (Especialmente Filtro Viscoso de Papel)',
         oQueVerificar:
-          'Inspecione o elemento do filtro de ar. Atenção: filtros de papel viscoso (CG 160, Bros 160, Factor 150, PCX) NÃO podem ser soprados com ar comprimido — quando saturam de poeira fina, estrangulam a moto em alta.',
+          'Inspecione o elemento do filtro de ar. Atenção: filtros de papel viscoso (CG 125/150 2011+, CG 160, Bros 160, Factor 150) NÃO podem ser soprados com ar comprimido — quando saturam de poeira fina, estrangulam a moto em alta.',
         causaProvavelSeFalhar:
           'Restrição severa de entrada de ar deixando a mistura excessivamente rica em alta rotação.',
         solucaoSugerida:
@@ -670,7 +670,7 @@ export const CENARIOS_DIAGNOSTICO: readonly CenarioDiagnosticoCorretivo[] = [
         id: '10-cvt-scooter-trepidando',
         titulo: '3º) Scooter Trepidando na Saída ou Sem Velocidade Final (CVT: Campana, Roletes e Correia)',
         oQueVerificar:
-          'Em scooters (PCX 150/160, Fluo 125, Neo 125, Burgman 125): se a moto trepida ao arrancar devagar, há pó de sapata acumulado na campana traseira. Se o motor berra e não desenvolve, os roletes estão quadrados ou a correia gastou abaixo da largura limite.',
+          'Em modelos com transmissão CVT: se o veículo trepida ao arrancar devagar, há pó de sapata acumulado na campana traseira. Se o motor berra e não desenvolve, os roletes estão quadrados ou a correia gastou abaixo da largura limite.',
         causaProvavelSeFalhar:
           'Vitrificação das sapatas da embreagem centrífuga seca, roletes com calo ou correia V-Belt desgastada.',
         solucaoSugerida:

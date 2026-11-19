@@ -25,7 +25,7 @@ export const GLOSSARIO_SIGLAS: readonly TermoGlossario[] = [
     nomeCompleto: 'Combined Brake System (Freio Combinado Honda)',
     explicacao:
       'Sistema em que apertar o freio traseiro aciona automaticamente parte do freio dianteiro. Nas pinças a disco CBS existem 3 pistões e 2 sangradores independentes.',
-    ondeAparece: 'Honda CG 160 (2018+), Bros 160 ESDD, Biz 125, Pop ES e PCX',
+    ondeAparece: 'Honda CG 160 (2018+), Bros 160 ESDD, Biz 110i (2018+), Biz 125 e Pop ES',
   },
   {
     sigla: 'UBS',
@@ -39,7 +39,7 @@ export const GLOSSARIO_SIGLAS: readonly TermoGlossario[] = [
     nomeCompleto: 'Anti-lock Braking System (Freio Antitravamento)',
     explicacao:
       'Sensor na roda fônica evita que a roda trave em freadas bruscas. Ao desmontar a roda, nunca bater no anel dentado nem no sensor.',
-    ondeAparece: 'XRE 190, CG 160 Titan 2025+, Bros ABS 2025+, FZ15, Crosser ABS, Fluo, PCX ABS',
+    ondeAparece: 'XRE 190, CG 160 Titan 2025+, Bros ABS 2025+, FZ15 e Crosser ABS',
   },
   {
     sigla: 'JASO MA',
@@ -53,7 +53,7 @@ export const GLOSSARIO_SIGLAS: readonly TermoGlossario[] = [
     nomeCompleto: 'Norma Japonesa de Baixa Fricção (Scooters CVT)',
     explicacao:
       'Óleo mais escorregadio para economia de combustível, exclusivo para scooters onde a embreagem trabalha a seco fora do óleo do motor.',
-    ondeAparece: 'Honda PCX 150/160, Yamaha Fluo/Neo, Suzuki Burgman',
+    ondeAparece: 'Scooters com embreagem seca (NÃO usar em motos manuais ou semiautomáticas com embreagem banhada a óleo)',
   },
   {
     sigla: 'CKP',
@@ -95,7 +95,7 @@ export const GLOSSARIO_SIGLAS: readonly TermoGlossario[] = [
     nomeCompleto: 'Continuously Variable Transmission (Câmbio Automático)',
     explicacao:
       'Transmissão de scooter feita por polias variáveis, roletes, correia V-Belt e embreagem centrífuga seca, sem troca de marchas.',
-    ondeAparece: 'Honda PCX, Yamaha Fluo/Neo, Suzuki Burgman',
+    ondeAparece: 'Scooters com câmbio automático por correia (não se aplica a motos com corrente de transmissão)',
   },
   {
     sigla: 'OHV',

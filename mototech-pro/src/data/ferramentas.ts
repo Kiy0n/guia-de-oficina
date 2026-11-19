@@ -113,7 +113,7 @@ export const CATALOGO_FERRAMENTAS: readonly ItemFerramenta[] = [
     nivel: 'essencial',
     categoria: 'insumos',
     paraQueServe:
-      'Drenar óleo usado sem sujar o piso, medir o volume exato de óleo do cárter (ex.: 700 ml na Biz, 800 ml na PCX/Pop, 950 ml na Yes/Intruder) e dosar os ml exatos do fluido de bengala.',
+      'Drenar óleo usado sem sujar o piso, medir o volume exato de óleo do cárter (ex.: 700 ml na Biz, 800 ml na Pop, 950 ml na Yes/Intruder) e dosar os ml exatos do fluido de bengala.',
     faixaPrecoEstimada: 'R$ 35 – R$ 70',
     prioridade: 1,
   },
@@ -205,7 +205,7 @@ export const CATALOGO_FERRAMENTAS: readonly ItemFerramenta[] = [
     nivel: 'intermediario',
     categoria: 'especiais',
     paraQueServe:
-      'Expulsar bolhas de ar em sistemas a disco convencional, freio combinado Honda CBS (pinça de 3 êmbolos com 2 sangradores) e módulos ABS (XRE 190, CG Titan 2025+, Crosser, Fluo, PCX).',
+      'Expulsar bolhas de ar em sistemas a disco convencional, freio combinado Honda CBS (pinça de 3 êmbolos com 2 sangradores) e módulos ABS (XRE 190, CG Titan 2025+, Crosser, FZ15).',
     faixaPrecoEstimada: 'R$ 20 – R$ 45',
     prioridade: 3,
   },
@@ -267,16 +267,5 @@ export const CATALOGO_FERRAMENTAS: readonly ItemFerramenta[] = [
       'Extrair as pistas de rolamento do chassi e ajustar a pré-carga exata da porca castelo da coluna de direção sem marcar com talhadeira.',
     faixaPrecoEstimada: 'R$ 75 – R$ 150',
     prioridade: 4,
-  },
-  {
-    id: 'travador-polia-cvt-scooter',
-    nome: 'Chave Fixadora de Polia CVT / Volante Magnético (Tipo Y / Cinta)',
-    especificacao: 'Chave universal em Y com pinos ajustáveis + Chave de cinta reforçada',
-    nivel: 'avancado',
-    categoria: 'especiais',
-    paraQueServe:
-      'Travar o variador primário e a campana da embreagem CVT em scooters (Honda PCX 150/160, Yamaha Fluo/Neo, Suzuki Burgman) e segurar o rotor do magneto.',
-    faixaPrecoEstimada: 'R$ 65 – R$ 130',
-    prioridade: 5,
   },
 ];

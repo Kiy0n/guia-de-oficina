@@ -762,83 +762,11 @@ export const PROCEDIMENTOS_OFICINA: readonly ProcedimentoOficina[] = [
   },
 
   // -------------------------------------------------------------------------
-  // 10. Troca de Pneu / Roda Traseira de Scooter (PCX / Fluo / Burgman)
-  // -------------------------------------------------------------------------
-  {
-    id: 'troca-pneu-roda-traseira-scooter',
-    titulo: 'Troca de Pneu / Roda Traseira de Scooter (PCX / Fluo / Burgman)',
-    resumo:
-      'Sequência correta de desmontagem do escapamento, sub-balança triangular direita com rolamento e porca central 24 mm em scooters CVT.',
-    categoria: 'chassi',
-    dificuldade: 'Intermediario',
-    tempoEstimado: '35 – 55 min',
-    marcasAplicaveis: ['Honda', 'Yamaha', 'Suzuki'],
-    tagsAplicacao: ['cvt'],
-    ferramentasExatas: [
-      {
-        ferramentaId: 'jogo-catraca-soquetes',
-        nome: 'Soquete 24 mm (1/2") com Cabo de Força Longo',
-        medidaOuDetalhe: 'Soltar e torquear a porca central do eixo traseiro (torque alto: 118 N·m na PCX)',
-        obrigatoria: true,
-      },
-      {
-        ferramentaId: 'chaves-l-canhao-8-10-12',
-        nome: 'Chave L 10 mm e 12 mm + Soquete 12 mm c/ Extensão',
-        medidaOuDetalhe: 'Soltar prisioneiros do coletor do escapamento no cabeçote e parafusos do silencioso',
-        obrigatoria: true,
-      },
-      {
-        ferramentaId: 'jogo-combinadas-8-24',
-        nome: 'Chave Combinada / Soquete 14 mm',
-        medidaOuDetalhe: 'Parafuso inferior do amortecedor direito e parafusos da balança auxiliar (suporte triangular)',
-        obrigatoria: true,
-      },
-      {
-        ferramentaId: 'torquimetro-estalo',
-        nome: 'Torquímetro 20–110+ N·m',
-        medidaOuDetalhe: 'Aperto seguro da porca 24 mm do eixo traseiro e suporte da balança',
-        obrigatoria: false,
-      },
-    ],
-    insumos: [
-      'Anel de vedação (gaxeta de amianto/cobre) do coletor do escapamento (substituir se estiver amassado para não dar vazamento de escape)',
-      'Graxa azul para o tubo espaçador interno e estrias do eixo traseiro',
-      'Bico de válvula sem câmara (TR412 curto) novo a cada troca de pneu',
-    ],
-    passoAPasso: [
-      'Coloque a scooter no cavalete central, acione e trave o manete de freio traseiro (com uma cinta ou auxílio) e já destrave 1/2 volta a porca central 24 mm da roda traseira com o cabo de força longo.',
-      'Solte as duas porcas/parafusos do coletor do escapamento sob o motor (soquete 12 mm com extensão longa — cuidado com a sonda lambda nas gerações que a possuem no tubo) e depois remova os 3 parafusos laterais do silencioso (12 ou 14 mm), retirando o escapamento.',
-      'Nas scooters com sub-balança direita (como Honda PCX 150/160 e Yamaha Fluo/Neo): solte o parafuso inferior do amortecedor direito (14 mm), o suporte do para-lama/cabo/pinça traseira e os 2 parafusos que fixam o braço triangular ao bloco do motor.',
-      'Puxe a sub-balança triangular direita para fora observando a posição do tubo espaçador cônico interno (o lado com colar/rebaixo tem sentido único!).',
-      'Remova a porca 24 mm, a arruela e puxe a roda traseira das estrias do eixo.',
-      'Na desmontagem do pneu sem câmara na máquina ou espátulas com protetor de aro, substitua a válvula TR412 curta e observe a seta de sentido de rotação na banda lateral do pneu novo.',
-      'Limpe as estrias do eixo traseiro, aplique uma fina película de graxa nas estrias e no espaçador, monte a roda, encaixe a sub-balança direita com o espaçador interno na posição original e fixe o amortecedor.',
-      'Com o freio traseiro acionado, aplique o torque final na porca 24 mm do eixo (118 N·m na PCX) e reinstale o escapamento encostando primeiro as porcas do cabeçote antes de apertar os parafusos traseiros.',
-    ],
-    dicasDeOuro: [
-      'Ao remontar o escapamento da scooter, SEMPRE aponte e encoste primeiro as duas porcas do coletor no cabeçote com a mão antes de colocar os 3 parafusos laterais do silencioso: se prender o silencioso primeiro, o flanje fica desalinhado e vaza barulho no cabeçote.',
-      'Atenção máxima ao tubo espaçador que fica entre a roda e a sub-balança direita da PCX: se montado invertido, ele trava a roda traseira ou destrói o rolamento do suporte.',
-    ],
-    errosComuns: [
-      'Soltar os 3 parafusos pesados do silencioso antes de soltar as 2 porcas do coletor no cabeçote, deixando o peso do escapamento entortar os prisioneiros M8 do cabeçote.',
-      'Deixar cair e perder a gaxeta metálica de vedação do escapamento ao retirar o cano.',
-    ],
-    videos: [
-      {
-        youtubeId: 'sGNIMMX1Tu8',
-        titulo: 'Como realizar a troca do pneu da PCX',
-        canal: 'Nicolas Engrenados',
-        url: 'https://www.youtube.com/watch?v=sGNIMMX1Tu8',
-      },
-    ],
-  },
-
-  // -------------------------------------------------------------------------
-  // 11. Troca de Óleo + Filtro de Papel (Yamaha 150 / Suzuki 125 & 150)
+  // 10. Troca de Óleo + Filtro de Papel (Yamaha 150 / Suzuki 125)
   // -------------------------------------------------------------------------
   {
     id: 'troca-oleo-filtro-papel',
-    titulo: 'Troca de Óleo + Filtro de Papel (Yamaha 150 / Suzuki 125 & 150)',
+    titulo: 'Troca de Óleo + Filtro de Papel (Yamaha 150 / Suzuki 125)',
     resumo:
       'Substituição do óleo lubrificante e do elemento filtrante em papel com conferência da mola de pressão, O-ring da tampa e sentido da válvula bypass.',
     categoria: 'motor',
@@ -850,7 +778,7 @@ export const PROCEDIMENTOS_OFICINA: readonly ProcedimentoOficina[] = [
       {
         ferramentaId: 'jogo-combinadas-8-24',
         nome: 'Chave Combinada / Soquete 12 mm ou 17 mm',
-        medidaOuDetalhe: 'Soltar o bujão de drenagem inferior do cárter (12 mm na Yamaha 150 / 17 mm na Suzuki 125/150)',
+        medidaOuDetalhe: 'Soltar o bujão de drenagem inferior do cárter (12 mm na Yamaha 150 / 17 mm na Suzuki 125)',
         obrigatoria: true,
       },
       {
@@ -862,28 +790,28 @@ export const PROCEDIMENTOS_OFICINA: readonly ProcedimentoOficina[] = [
       {
         ferramentaId: 'bacia-drenagem-funil',
         nome: 'Bacia Coletora + Funil + Copo Graduado',
-        medidaOuDetalhe: 'Medir o volume exato COM filtro de óleo (ex.: 1,05 L na Yamaha 150 / 0,95 L na Suzuki Yes/Intruder/GSR)',
+        medidaOuDetalhe: 'Medir o volume exato COM filtro de óleo (ex.: 1,05 L na Yamaha 150 / 0,95 L na Suzuki Yes/Intruder)',
         obrigatoria: true,
       },
     ],
     insumos: [
       'Óleo na viscosidade e volume exatos da Ficha Técnica (usando a medida "Com troca de filtro")',
-      'Elemento de filtro de óleo em papel novo (código específico Yamaha 150 ou Suzuki 125/150 — não são intercambiáveis!)',
+      'Elemento de filtro de óleo em papel novo (código específico Yamaha 150 ou Suzuki 125 — não são intercambiáveis!)',
       'Anel O-ring grande da tampa do filtro + O-ring pequeno do fundo do alojamento (muito comum nas Suzuki)',
       'Arruela de vedação do bujão de óleo',
     ],
     passoAPasso: [
       'Funcione o motor por 2 a 3 minutos para amornar o óleo (facilita o escoamento), desligue e remova a vareta/tampa de abastecimento superior.',
-      'Posicione a bacia coletora, solte o bujão inferior do cárter (12 mm nas Yamaha Factor/Fazer/Crosser 150 ou 17 mm nas Suzuki Yes/Intruder/GSR) e deixe escorrer completamente.',
+      'Posicione a bacia coletora, solte o bujão inferior do cárter (12 mm nas Yamaha Factor/Fazer/Crosser 150 ou 17 mm nas Suzuki Yes/Intruder) e deixe escorrer completamente.',
       'Na tampa lateral direita do motor, solte de forma cruzada os 3 parafusos/porcas (L 8 mm) da tampinha redonda do filtro de óleo, segurando a tampa pois há uma mola interna fazendo pressão.',
-      'ATENÇÃO AO DESMONTAR: observe a posição da MOLA na tampa externa e, nas motos Suzuki (Yes 125 / Intruder 125 / GSR 150i / Burgman), verifique se o pequeno O-ring interno de borracha não ficou grudado no fundo do filtro velho!',
+      'ATENÇÃO AO DESMONTAR: observe a posição da MOLA na tampa externa e, nas motos Suzuki (Yes 125 / Intruder 125), verifique se o pequeno O-ring interno de borracha não ficou grudado no fundo do filtro velho!',
       'Limpe o alojamento interno do filtro com um pano limpo (sem fiapos). Umedeça as borrachas do filtro novo com óleo limpo e insira o filtro novo no sentido correto (o furo com vedação de borracha encaixa no pino de passagem ao fundo do bloco, e o lado fechado metálico com válvula recebe a mola da tampa).',
       'Instale um anel O-ring novo na tampa do filtro, posicione a mola centralizada e aperte os 3 parafusos 8 mm de forma cruzada e suave (apenas 7 a 10 N·m — a rosca no alumínio é M6 e espana fácil se exagerar!).',
-      'Reinstale o bujão de drenagem inferior (20 N·m na Yamaha / 23 N·m na Suzuki) e abasteça com o volume exato para troca COM filtro indicado no banner da moto.',
+      'Reinstale o bujão de drenagem inferior (20 N·m na Yamaha / 21 N·m na Suzuki) e abasteça com o volume exato para troca COM filtro indicado no banner da moto.',
       'Ligue o motor em marcha lenta por 2 minutos, desligue, aguarde 2 minutos para o óleo assentar e confira o nível na vareta ou no visor de vidro lateral (com a moto nivelada na vertical).',
     ],
     dicasDeOuro: [
-      'Nas Suzuki Intruder 125, Yes 125 e GSR 150i, existe um O-ring pequeno no pino do fundo da câmara do filtro: 50% das pessoas jogam esse O-ring fora grudado no filtro velho. Sem ele, o óleo passa direto sem filtrar e a pressão do cabeçote cai!',
+      'Nas Suzuki Intruder 125 e Yes 125, existe um O-ring pequeno no pino do fundo da câmara do filtro: 50% das pessoas jogam esse O-ring fora grudado no filtro velho. Sem ele, o óleo passa direto sem filtrar e a pressão do cabeçote cai!',
       'Nunca aperte os 3 parafusos 8 mm da tampa do filtro com cabo de força: quem faz a vedação é o anel O-ring de borracha, não o aperto excessivo.',
     ],
     errosComuns: [
@@ -1029,8 +957,8 @@ export function verificarCompatibilidadeProcedimento(
         f.transmissaoFinal?.tipo === 'correia' ||
         modelo.categoria === 'scooter';
       return isCvt
-        ? { compativel: true, motivo: 'Scooter com transmissão CVT e roda traseira em balança' }
-        : { compativel: false, motivo: 'Específico para scooters CVT (PCX / Fluo / Neo / Burgman)' };
+        ? { compativel: true, motivo: 'Transmissão CVT por correia' }
+        : { compativel: false, motivo: 'Específico para transmissão CVT' };
     }
 
     if (tag === 'centrifugo') {
@@ -1043,10 +971,7 @@ export function verificarCompatibilidadeProcedimento(
         ? { compativel: true, motivo: 'Motor Honda com filtro centrífugo + peneira metálica' }
         : {
             compativel: false,
-            motivo:
-              modelo.categoria === 'scooter'
-                ? 'A PCX utiliza apenas tela filtrante lateral (sem rotor centrífugo)'
-                : 'Utiliza filtro de óleo em elemento de papel',
+            motivo: 'Utiliza filtro de óleo em elemento de papel',
           };
     }
 

@@ -32,17 +32,10 @@ const TORQUES_YBR_125: TorqueAperto[] = [
   torque('Parafusos da pinça de freio dianteira (ED)', 35, 'freios'),
 ];
 
-const TORQUES_FLUO_125: TorqueAperto[] = [
-  torque('Bujão de drenagem do óleo do motor', 20, 'motor'),
-  torque('Bujão de drenagem do óleo da transmissão final', 20, 'motor', 'Usar arruela de vedação nova'),
-  torque('Vela de ignição (NGK CR6HSA)', 13, 'motor'),
-  torque('Contratuerca do regulador de válvula', 7, 'motor'),
-  torque('Porca da polia primária do CVT (variador)', 45, 'motor'),
-  torque('Porca da campana da embreagem CVT', 45, 'motor'),
-  torque('Porca do eixo dianteiro', 26, 'chassi'),
-  torque('Porca do eixo da roda traseira', 150, 'chassi'),
-  torque('Parafusos da pinça de freio dianteira', 35, 'freios'),
-];
+const AUDITORIA_PENDENTE_INICIAL = {
+  status: 'pendente_conferencia' as const,
+  notas: 'Dados de referência inicial — confirmar óleo, folga de válvulas e torques no Manual Oficial em PDF.',
+};
 
 // ---------------------------------------------------------------------------
 // Bases de Ficha Técnica Yamaha
@@ -195,81 +188,8 @@ const ybr125Base: FichaTecnica = {
   torques: TORQUES_YBR_125,
 };
 
-const fluo125Base: FichaTecnica = {
-  cilindradaCc: 125,
-  motor: 'Monocilíndrico 4T SOHC 2 válvulas Blue Core',
-  alimentacao: 'injecao',
-  combustivel: 'gasolina',
-  arrefecimento: 'ar',
-  partida: 'eletrica',
-  cambio: { tipo: 'cvt' },
-  freios: { dianteiro: 'disco', traseiro: 'tambor', sistema: 'ABS' },
-  pesoSecoKg: 98,
-  motorDetalhes: {
-    diametroCursoMm: { diametro: 52.4, curso: 57.9 },
-    taxaCompressao: '9,5:1',
-    potencia: '9,5 cv @ 8.000 rpm',
-    torque: '1,0 kgf·m @ 5.500 rpm',
-    marchaLentaRpm: faixaRpm(1400, 1600, '1.500 ± 100 rpm'),
-    comando: 'SOHC 2V Blue Core com Smart Motor Generator (SMG) e Stop & Start',
-    filtroOleo: 'Tela metálica no bujão de drenagem inferior',
-    alimentacaoDetalhe: 'Injeção eletrônica Yamaha (gasolina) • Pressão da bomba: 2,5 bar (250 kPa)',
-  },
-  fluidos: {
-    oleoMotor: {
-      especificacao: 'Yamalube Scooter SAE 10W-40 Semissintético (API SL / JASO MB)',
-      capacidadeTrocaL: 0.8,
-      capacidadeTotalL: 0.84,
-      observacao: '800 ml na troca periódica — verificar com a vareta apenas apoiada (sem rosquear)',
-    },
-    oleoTransmissaoCvt: {
-      especificacao: 'Yamalube SAE 10W-40 ou 85W-140',
-      capacidadeL: 0.1,
-    },
-    tanqueL: 4.2,
-    fluidoFreio: 'DOT 4 (ABS dianteiro de série)',
-    fluidoBengala: {
-      especificacao: 'Yamaha Fork Oil 10W',
-      volumePorCanelaMl: 61,
-    },
-  },
-  folgas: {
-    valvulaAdmissaoMm: faixaMm(0.06, 0.1, '0,06 – 0,10 mm'),
-    valvulaEscapeMm: faixaMm(0.1, 0.14, '0,10 – 0,14 mm'),
-    folgaAceleradorMm: faixaMm(3, 5, '3 – 5 mm'),
-  },
-  eletrica: {
-    vela: {
-      modelo: 'NGK CR6HSA',
-      folgaEletrodoMm: faixaMm(0.6, 0.7, '0,6 – 0,7 mm'),
-    },
-    bateria: {
-      modelo: 'Yuasa YTZ6V (12V 5Ah — compatível Stop & Start)',
-      tensaoV: 12,
-      capacidadeAh: 5,
-      tensaoCargaV: '14,0V ± 0,5V @ 5.000 rpm',
-    },
-    fusivelPrincipalA: 15,
-    fusiveisSecundarios: '7,5A (ABS, Smart Key, ECU)',
-    lampadaFarol: 'Full LED',
-  },
-  pneus: {
-    dianteiro: { medida: '100/90-12 59J', pressaoPsi: 22, pressaoComGarupaPsi: 22, tipo: 'Sem câmara (pneu largo)' },
-    traseiro: { medida: '110/90-12 64J', pressaoPsi: 25, pressaoComGarupaPsi: 29, tipo: 'Sem câmara' },
-  },
-  transmissaoFinal: {
-    tipo: 'correia',
-    cvtDetalhe: {
-      correiaCodigo: 'Yamaha B44-E7641-00 (V-Belt)',
-      larguraLimiteMm: 18.0,
-      roletesMedidaPeso: '6 roletes 20x12 mm (10g)',
-    },
-  },
-  torques: TORQUES_FLUO_125,
-};
-
 // ---------------------------------------------------------------------------
-// Catálogo YAMAHA (5 modelos / 11 gerações)
+// Catálogo YAMAHA (5 modelos / 10 gerações)
 // ---------------------------------------------------------------------------
 
 export const YAMAHA: Modelo[] = [
@@ -628,48 +548,99 @@ export const YAMAHA: Modelo[] = [
     ],
   },
   {
-    id: 'yamaha-fluo-125',
+    id: 'yamaha-fazer-125',
     marca: 'Yamaha',
-    nome: 'Fluo 125 ABS',
-    categoria: 'scooter',
-    aliases: ['Fluo', 'Fluo ABS', 'Fluo Hybrid'],
+    nome: 'Fazer 125',
+    categoria: 'street',
+    aliases: ['Fazer 125', 'Fazer125', 'YBR 125 Fazer', 'Factor 125i'],
     geracoes: [
-      geracao('yamaha-fluo-125', {
-        anoInicio: 2022,
-        anoFim: 2026,
-        nomeGeracao: 'Fluo 125 ABS (Blue Core)',
+      geracao('yamaha-fazer-125', {
+        anoInicio: 2016,
+        anoFim: 2024,
+        nomeGeracao: 'Fazer 125',
+        versoes: ['Standard'],
         destaques: [
-          'Motor Blue Core 125cc SOHC arrefecido a ar',
-          'ABS dianteiro de série e Smart Key',
-          'Partida silenciosa (SMG) e sistema Stop & Start',
+          'Street 125cc SOHC 2 válvulas arrefecida a ar',
+          'Injeção eletrônica BlueFlex (confirmar especificação exata no Manual Oficial)',
+          'Câmbio manual de 5 marchas e freio dianteiro a disco',
         ],
         alertasBancada: [
-          'Folga de válvulas da Fluo 125: Adm 0,06 – 0,10 mm e Esc 0,10 – 0,14 mm com motor frio.',
-          'Volume de óleo do motor é 0,8 L (800 ml) de Yamalube Scooter 10W-40 JASO MB + 0,10 L (100 ml) de óleo na transmissão final.',
-          'Limpar filtro de espuma da caixa de ventilação do CVT a cada 5.000 km; se entupir, superaquece a correia e derrete os roletes.',
-          'Vela é a NGK CR6HSA (rosca curta M10, folga 0,6–0,7 mm).',
+          'Dados de referência inicial: confirmar viscosidade/volume de óleo, folga de válvulas, vela, relação e torques exatos no Manual Oficial em PDF antes da manutenção.',
+          'Verificar presença de filtro de óleo em elemento de papel e sistema de freio combinado UBS conforme ano/versão do modelo.',
         ],
-        fichaTecnica: fluo125Base,
-      }),
-      geracao('yamaha-fluo-125', {
-        anoInicio: 2025,
-        anoFim: 2026,
-        sufixoId: 'hybrid',
-        nomeGeracao: 'Fluo 125 Hybrid Connected ABS',
-        destaques: [
-          'Assistência elétrica Power Assist (SMG atua como motor auxiliar na arrancada)',
-          'Conectividade Y-Connect e novo painel LCD',
-          'ABS dianteiro e chave presencial Smart Key',
-        ],
-        alertasBancada: [
-          'Sistema Mild-Hybrid usa o próprio Smart Motor Generator (SMG) alimentado pela bateria 12V para dar impulso nos primeiros 3 segundos de arrancada.',
-          'Exige bateria YTZ6V em perfeito estado de saúde (acima de 12,6V em repouso) para habilitar tanto o Power Assist quanto o Stop & Start.',
-          'Mecânica de cabeçote (Adm 0,06–0,10 mm / Esc 0,10–0,14 mm) e óleo (0,8 L motor + 0,10 L transmissão) permanece idêntica à Fluo padrão.',
-        ],
+        auditoria: AUDITORIA_PENDENTE_INICIAL,
         fichaTecnica: {
-          ...fluo125Base,
-          versaoReferencia: 'Hybrid Connected',
-          motor: 'Monocilíndrico 4T SOHC 2V Blue Core Hybrid (Power Assist)',
+          ...yamaha150Base,
+          versaoReferencia: 'Fazer 125',
+          cilindradaCc: 125,
+          motor: MOTOR_SOHC_2V,
+          alimentacao: 'injecao',
+          combustivel: 'flex',
+          arrefecimento: 'ar',
+          partida: 'eletrica',
+          cambio: { tipo: 'manual', marchas: 5 },
+          freios: { dianteiro: 'disco', traseiro: 'tambor', sistema: 'UBS' },
+          pesoSecoKg: 117,
+          motorDetalhes: {
+            diametroCursoMm: { diametro: 52.4, curso: 57.9 },
+            taxaCompressao: '10,0:1',
+            potencia: '11,1 cv @ 7.500 rpm (referência — confirmar no manual)',
+            torque: '1,16 kgf·m @ 6.000 rpm (referência — confirmar no manual)',
+            marchaLentaRpm: faixaRpm(1300, 1500, '1.400 ± 100 rpm'),
+            comando: 'SOHC 2 válvulas (corrente de comando)',
+            filtroOleo: 'Elemento de papel descartável (confirmar no manual)',
+            alimentacaoDetalhe: 'Injeção eletrônica Yamaha — confirmar pressão da bomba e parâmetros no Manual Oficial',
+          },
+          fluidos: {
+            oleoMotor: {
+              especificacao: 'Yamalube 4T SAE 10W-40 / 20W-50 JASO MA (confirmar no manual)',
+              capacidadeTrocaL: 1.0,
+              capacidadeTrocaComFiltroL: 1.05,
+              capacidadeTotalL: 1.15,
+              observacao: 'Volume de referência — confirmar no Manual Oficial em PDF',
+            },
+            tanqueL: 15.7,
+            reservaL: 2.2,
+            fluidoFreio: 'DOT 4 (confirmar no manual)',
+            fluidoBengala: {
+              especificacao: 'Yamaha Fork Oil 10W (confirmar volume no manual)',
+              volumePorCanelaMl: 155,
+            },
+          },
+          folgas: {
+            valvulaAdmissaoMm: faixaMm(0.08, 0.12, '0,08 – 0,12 mm (confirmar no manual)'),
+            valvulaEscapeMm: faixaMm(0.1, 0.14, '0,10 – 0,14 mm (confirmar no manual)'),
+            folgaCorrenteMm: faixaMm(25, 35, '25 – 35 mm'),
+            folgaManeteEmbreagemMm: faixaMm(10, 15, '10 – 15 mm'),
+            folgaPedalFreioMm: faixaMm(20, 30, '20 – 30 mm'),
+            folgaAceleradorMm: faixaMm(3, 5, '3 – 5 mm'),
+          },
+          eletrica: {
+            vela: {
+              modelo: 'NGK CPR8EA-9 (confirmar no manual)',
+              folgaEletrodoMm: faixaMm(0.8, 0.9, '0,8 – 0,9 mm'),
+            },
+            bateria: {
+              modelo: '12V 5Ah (confirmar no manual)',
+              tensaoV: 12,
+              capacidadeAh: 5,
+              tensaoCargaV: '14,0V ± 0,5V @ 5.000 rpm',
+            },
+            fusivelPrincipalA: 15,
+            fusiveisSecundarios: '7,5A / 10A (confirmar no manual)',
+            lampadaFarol: '12V 35/35W',
+          },
+          pneus: {
+            dianteiro: { medida: '2.75-18 M/C 42P', pressaoPsi: 25, pressaoComGarupaPsi: 25, tipo: 'Sem câmara' },
+            traseiro: { medida: '90/90-18 M/C 57P', pressaoPsi: 29, pressaoComGarupaPsi: 33, tipo: 'Sem câmara' },
+          },
+          transmissaoFinal: {
+            tipo: 'corrente',
+            corrente: '428H (confirmar nº de elos no manual)',
+            pinhaoDentes: 14,
+            coroaDentes: 39,
+          },
+          torques: TORQUES_YAMAHA_150,
         },
       }),
     ],

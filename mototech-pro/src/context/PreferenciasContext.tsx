@@ -11,6 +11,7 @@ import {
 
 import { useToast } from '@/context/ToastContext';
 import { useWakeLock } from '@/hooks/useWakeLock';
+import { resolverSelecao } from '@/utils/catalog';
 
 export type TemaBancada = 'oficina' | 'sol';
 
@@ -69,6 +70,7 @@ function normalizarListaAtalhos(raw: unknown, max: number): MotoAtalho[] {
     const ultimoAcesso =
       typeof obj.ultimoAcesso === 'string' ? obj.ultimoAcesso : new Date().toISOString();
     if (!modeloId || !geracaoId) continue;
+    if (!resolverSelecao(modeloId, geracaoId)) continue;
     const chave = `${modeloId}::${geracaoId}`;
     if (vistos.has(chave)) continue;
     vistos.add(chave);

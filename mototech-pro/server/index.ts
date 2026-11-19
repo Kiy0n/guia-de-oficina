@@ -150,9 +150,29 @@ async function listarPdfsRecursivo(dirAtual: string, baseDir: string): Promise<M
   return resultado;
 }
 
+const ALIASES_SLUG_MODELO: Record<string, string> = {
+  bros125: 'nxr125bros',
+  nxr125: 'nxr125bros',
+  bros150: 'nxr150bros',
+  nxr150: 'nxr150bros',
+  bros160: 'nxr160bros',
+  nxr160: 'nxr160bros',
+  c100: 'biz100',
+  c100biz: 'biz100',
+  biz110: 'biz110i',
+  ybr125fazer: 'fazer125',
+  en125: 'yes125',
+  gn125: 'intruder125',
+};
+
+function canonizarSlugModelo(valor: string): string {
+  const simples = normalizarSlugSimples(valor);
+  return ALIASES_SLUG_MODELO[simples] ?? simples;
+}
+
 function modelosCasam(modeloPdfSlug: string, filtroModelo: string): boolean {
-  const a = normalizarSlugSimples(modeloPdfSlug);
-  const b = normalizarSlugSimples(filtroModelo);
+  const a = canonizarSlugModelo(modeloPdfSlug);
+  const b = canonizarSlugModelo(filtroModelo);
   if (!a || !b) return true;
   if (a === b) return true;
   if (a.length >= 4 && b.includes(a)) return true;

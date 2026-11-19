@@ -376,7 +376,7 @@ export function gerarRoteiroRevisao(
       acaoSugerida: 'checar',
       valorFicha: 'Verificar elemento filtrante + esgotar o tubinho transparente de dreno de óleo/água sob a caixa de ar',
       comoInspecionar:
-        'Abra a tampa da caixa de ar, retire o elemento filtrante e examine contra a luz. Em filtros de papel viscoso (CG 160, Bros, Factor 150, PCX), NUNCA sopre ar comprimido — se estiver preto/saturado, troque.',
+        'Abra a tampa da caixa de ar, retire o elemento filtrante e examine contra a luz. Em filtros de papel viscoso (CG 125/150 2011+, CG 160, Bros, Factor 150), NUNCA sopre ar comprimido — se estiver preto/saturado, troque.',
       criterioVisual: {
         ok: 'Elemento limpo sem poeira grossa, borracha de vedação intacta e caixa de ar seca.',
         atencao: 'Filtro de espuma (125 antigas/XTZ/Intruder) sujo: lavar com querosene/sabão neutro, secar e umedecer em óleo.',

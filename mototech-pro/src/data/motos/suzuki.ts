@@ -4,10 +4,10 @@ import type { FichaTecnica, Modelo, TorqueAperto } from '@/types/moto';
 const MOTOR_SOHC_2V = 'Monocilíndrico 4T SOHC 2 válvulas';
 
 // ---------------------------------------------------------------------------
-// Tabelas de Torque Padrão Suzuki (Manuais de Serviço EN125 / GN125 / GSR / AN125)
+// Tabelas de Torque Padrão Suzuki (Manuais de Serviço EN125 / GN125)
 // ---------------------------------------------------------------------------
 
-const TORQUES_SUZUKI_125_150: TorqueAperto[] = [
+const TORQUES_SUZUKI_125: TorqueAperto[] = [
   torque('Bujão de drenagem do óleo do motor', 21, 'motor', 'Cuidado redobrado: carcaça de alumínio Suzuki espana se passar de 23 N·m'),
   torque('Porcas da tampa do filtro de óleo (3x M6)', 9, 'motor', 'Conferir posição da mola e o O-ring interno do filtro'),
   torque('Parafusos da tampa inferior da peneira de óleo', 10, 'motor'),
@@ -19,17 +19,6 @@ const TORQUES_SUZUKI_125_150: TorqueAperto[] = [
   torque('Porcas da coroa traseira', 25, 'chassi', 'Dobrar chapas trava de segurança'),
   torque('Parafusos da pinça de freio dianteira', 25, 'freios'),
   torque('Porca da coluna de direção (mesa superior)', 65, 'suspensao'),
-];
-
-const TORQUES_BURGMAN_125: TorqueAperto[] = [
-  torque('Bujão de drenagem do óleo do motor', 18, 'motor'),
-  torque('Bujão de drenagem do óleo de transmissão final', 12, 'motor'),
-  torque('Vela de ignição (NGK CR7E)', 11, 'motor'),
-  torque('Porca da polia primária do CVT (variador)', 50, 'motor'),
-  torque('Porca da campana da embreagem CVT', 50, 'motor'),
-  torque('Porca do eixo dianteiro', 42, 'chassi'),
-  torque('Porca do eixo da roda traseira', 110, 'chassi'),
-  torque('Parafusos da pinça de freio dianteira', 23, 'freios'),
 ];
 
 // ---------------------------------------------------------------------------
@@ -107,11 +96,11 @@ const suzuki125Base: FichaTecnica = {
     pinhaoDentes: 14,
     coroaDentes: 43,
   },
-  torques: TORQUES_SUZUKI_125_150,
+  torques: TORQUES_SUZUKI_125,
 };
 
 // ---------------------------------------------------------------------------
-// Catálogo SUZUKI (4 modelos / 6 gerações)
+// Catálogo SUZUKI (2 modelos / 3 gerações)
 // ---------------------------------------------------------------------------
 
 export const SUZUKI: Modelo[] = [
@@ -229,266 +218,6 @@ export const SUZUKI: Modelo[] = [
             pinhaoDentes: 14,
             coroaDentes: 45,
           },
-        },
-      }),
-    ],
-  },
-  {
-    id: 'suzuki-gsr-150i',
-    marca: 'Suzuki',
-    nome: 'GSR 150i',
-    categoria: 'street',
-    aliases: ['GSR', 'GSR150', 'GSR 150'],
-    geracoes: [
-      geracao('suzuki-gsr-150i', {
-        anoInicio: 2011,
-        anoFim: 2017,
-        nomeGeracao: 'GSR 150i Injetada (6 Marchas)',
-        versoes: ['GSR 150i', 'GSR 150i Cargo'],
-        destaques: [
-          'Motor 149,5cc SOHC com balanceiro e câmbio exclusivo de 6 marchas',
-          'Injeção eletrônica Mikuni DCP-FI',
-          'Suspensão traseira com amortecedores a gás (reservatório externo)',
-        ],
-        alertasBancada: [
-          'Folga de válvulas da GSR 150i é ligeiramente maior que da Yes 125: Adm 0,06 – 0,10 mm e Esc 0,10 – 0,14 mm com motor frio.',
-          'O sistema de injeção Mikuni DCP-FI integra a bomba de alta pressão e o bico injetor em uma única peça (alimentada por gravidade do tanque): nunca deixar faltar combustível para não travar o êmbolo do DCP.',
-          'Utiliza o mesmo filtro de óleo em papel (HF131) com O-ring interno e mola da linha 125; capacidade de óleo é 0,95 L com troca de filtro.',
-          'Única street 150 da categoria com câmbio de 6 marchas e eixo balanceiro anti-vibração.',
-        ],
-        fichaTecnica: {
-          ...suzuki125Base,
-          cilindradaCc: 149.5,
-          alimentacao: 'injecao',
-          partida: 'eletrica',
-          cambio: { tipo: 'manual', marchas: 6 },
-          pesoSecoKg: 120,
-          motorDetalhes: {
-            diametroCursoMm: { diametro: 57.0, curso: 58.6 },
-            taxaCompressao: '9,1:1',
-            potencia: '12,0 cv @ 8.000 rpm',
-            torque: '1,08 kgf·m @ 6.000 rpm',
-            marchaLentaRpm: faixaRpm(1300, 1500, '1.400 ± 100 rpm'),
-            comando: 'SOHC 2 válvulas com eixo balanceiro e câmbio de 6 velocidades',
-            filtroOleo: 'Elemento de papel descartável (HF131) + peneira inferior no cárter',
-            alimentacaoDetalhe:
-              'Injeção eletrônica Mikuni DCP-FI (Discharge Pump Fuel Injection — bomba e bico integrados)',
-          },
-          fluidos: {
-            ...suzuki125Base.fluidos,
-            tanqueL: 14.0,
-            oleoMotor: {
-              especificacao: 'SAE 10W-40 Semissintético (API SL / JASO MA)',
-              capacidadeTrocaL: 0.9,
-              capacidadeTrocaComFiltroL: 0.95,
-              capacidadeTotalL: 1.1,
-            },
-            fluidoBengala: {
-              especificacao: 'Fork Oil 10W',
-              volumePorCanelaMl: 151,
-              nivelMm: 149,
-            },
-          },
-          folgas: {
-            ...suzuki125Base.folgas,
-            valvulaAdmissaoMm: faixaMm(0.06, 0.1, '0,06 – 0,10 mm'),
-            valvulaEscapeMm: faixaMm(0.1, 0.14, '0,10 – 0,14 mm'),
-          },
-          pneus: {
-            dianteiro: { medida: '2.75-18 42P', pressaoPsi: 25, pressaoComGarupaPsi: 25, tipo: 'Sem câmara' },
-            traseiro: { medida: '90/90-18 57P', pressaoPsi: 29, pressaoComGarupaPsi: 33, tipo: 'Sem câmara' },
-          },
-          transmissaoFinal: {
-            tipo: 'corrente',
-            corrente: '428H x 122L',
-            pinhaoDentes: 14,
-            coroaDentes: 42,
-          },
-        },
-      }),
-    ],
-  },
-  {
-    id: 'suzuki-burgman-125',
-    marca: 'Suzuki',
-    nome: 'Burgman 125 / i',
-    categoria: 'scooter',
-    aliases: ['Burgman', 'Burgman i', 'AN125', 'AN 125'],
-    geracoes: [
-      geracao('suzuki-burgman-125', {
-        anoInicio: 2005,
-        anoFim: 2010,
-        nomeGeracao: 'AN125 Burgman Carburada',
-        destaques: [
-          'Motor 124cc SOHC carburado com filtro de óleo em papel',
-          'Transmissão automática CVT e rodas aro 10',
-          'Folga de válvulas Adm 0,05–0,09 mm / Esc 0,08–0,12 mm',
-        ],
-        alertasBancada: [
-          'A Burgman 125 carburada (AN125 2005–2010) USA filtro de óleo em elemento de papel (HF132): leva 0,8 L sem filtro e 0,9 L trocando o filtro.',
-          'Afogador automático elétrico (by-starter) no carburador Mikuni BS26: se a moto beber demais ou afogar quente, testar se a agulha térmica do afogador está expandindo com 12V.',
-          'Torneira de combustível a vácuo: quando o diafragma fura, passa gasolina direto pelo tubo de vácuo para o coletor e calça hidraulicamente o motor.',
-          'Óleo da transmissão final traseira leva 90 ml (0,09 L) de SAE 10W-40.',
-        ],
-        fichaTecnica: {
-          cilindradaCc: 124,
-          motor: MOTOR_SOHC_2V,
-          alimentacao: 'carburador',
-          combustivel: 'gasolina',
-          arrefecimento: 'ar',
-          partida: 'pedal-eletrica',
-          cambio: { tipo: 'cvt' },
-          freios: { dianteiro: 'disco', traseiro: 'tambor', sistema: 'convencional' },
-          pesoSecoKg: 109,
-          motorDetalhes: {
-            diametroCursoMm: { diametro: 53.5, curso: 55.2 },
-            taxaCompressao: '9,6:1',
-            potencia: '11,2 cv @ 8.500 rpm',
-            torque: '1,0 kgf·m @ 7.000 rpm',
-            marchaLentaRpm: faixaRpm(1400, 1600, '1.500 ± 100 rpm'),
-            comando: 'SOHC 2 válvulas horizontal com refrigeração forçada por ventoinha',
-            filtroOleo: 'Elemento de papel descartável (HF132) + tela metálica',
-            alimentacaoDetalhe:
-              'Carburador Mikuni BS26 a vácuo com afogador elétrico automático • Giclê alta #102,5 / baixa #15',
-          },
-          fluidos: {
-            oleoMotor: {
-              especificacao: 'SAE 10W-40 Semissintético (API SL / JASO MB ou MA)',
-              capacidadeTrocaL: 0.8,
-              capacidadeTrocaComFiltroL: 0.9,
-              capacidadeTotalL: 0.95,
-            },
-            oleoTransmissaoCvt: {
-              especificacao: 'SAE 10W-40',
-              capacidadeL: 0.09,
-            },
-            tanqueL: 6.0,
-            fluidoFreio: 'DOT 4 (disco dianteiro)',
-            fluidoBengala: {
-              especificacao: 'Fork Oil 10W',
-              volumePorCanelaMl: 68,
-            },
-          },
-          folgas: {
-            valvulaAdmissaoMm: faixaMm(0.05, 0.09, '0,05 – 0,09 mm'),
-            valvulaEscapeMm: faixaMm(0.08, 0.12, '0,08 – 0,12 mm'),
-            folgaAceleradorMm: faixaMm(2, 4, '2 – 4 mm'),
-          },
-          eletrica: {
-            vela: {
-              modelo: 'NGK CR7E',
-              iridiumAlternativa: 'NGK CR7EIX',
-              folgaEletrodoMm: faixaMm(0.7, 0.8, '0,7 – 0,8 mm'),
-            },
-            bateria: {
-              modelo: 'Yuasa YTX7A-BS',
-              tensaoV: 12,
-              capacidadeAh: 6,
-              tensaoCargaV: '13,5V – 15,0V @ 5.000 rpm',
-            },
-            fusivelPrincipalA: 15,
-            lampadaFarol: 'HS1 12V 35/35W',
-          },
-          pneus: {
-            dianteiro: { medida: '3.50-10 51J', pressaoPsi: 25, pressaoComGarupaPsi: 25, tipo: 'Sem câmara' },
-            traseiro: { medida: '3.50-10 51J', pressaoPsi: 29, pressaoComGarupaPsi: 36, tipo: 'Sem câmara' },
-          },
-          transmissaoFinal: {
-            tipo: 'correia',
-            cvtDetalhe: {
-              correiaCodigo: 'Suzuki 27601-06F10 / Mitsuboshi V-Belt',
-              larguraLimiteMm: 18.1,
-              roletesMedidaPeso: '6 roletes 17x12 mm (11g)',
-            },
-          },
-          torques: TORQUES_BURGMAN_125,
-        },
-      }),
-      geracao('suzuki-burgman-125', {
-        anoInicio: 2011,
-        anoFim: 2019,
-        nomeGeracao: 'Burgman 125i Injetada',
-        destaques: [
-          'Injeção eletrônica Mikuni DCP-FI',
-          'Novo design e painel atualizado',
-          'Transmissão automática CVT',
-        ],
-        alertasBancada: [
-          'Usa sistema de injeção Mikuni DCP-FI (bomba e bico injetor conjugados): manter filtro de combustível limpo e nunca rodar até secar o tanque.',
-          'Volume de óleo do motor é 0,8 L de SAE 10W-40 + 90 ml (0,09 L) na transmissão final.',
-          'Folga de válvulas a frio: Adm 0,05 – 0,09 mm e Esc 0,08 – 0,12 mm.',
-          'Inspecionar desgaste de roletes (calos planos) e largura da correia CVT a cada 6.000 km.',
-        ],
-        fichaTecnica: {
-          cilindradaCc: 124,
-          motor: MOTOR_SOHC_2V,
-          alimentacao: 'injecao',
-          combustivel: 'gasolina',
-          arrefecimento: 'ar',
-          partida: 'pedal-eletrica',
-          cambio: { tipo: 'cvt' },
-          freios: { dianteiro: 'disco', traseiro: 'tambor', sistema: 'convencional' },
-          pesoSecoKg: 110,
-          motorDetalhes: {
-            diametroCursoMm: { diametro: 53.5, curso: 55.2 },
-            taxaCompressao: '9,6:1',
-            potencia: '9,0 cv @ 7.500 rpm',
-            torque: '0,95 kgf·m @ 6.000 rpm',
-            marchaLentaRpm: faixaRpm(1400, 1600, '1.500 ± 100 rpm'),
-            comando: 'SOHC 2 válvulas horizontal com refrigeração forçada',
-            filtroOleo: 'Tela metálica no bujão inferior do cárter',
-            alimentacaoDetalhe: 'Injeção eletrônica Mikuni DCP-FI (bomba e injetor integrados)',
-          },
-          fluidos: {
-            oleoMotor: {
-              especificacao: 'SAE 10W-40 Semissintético (API SL / JASO MB)',
-              capacidadeTrocaL: 0.8,
-              capacidadeTotalL: 0.9,
-            },
-            oleoTransmissaoCvt: {
-              especificacao: 'SAE 10W-40',
-              capacidadeL: 0.09,
-            },
-            tanqueL: 5.5,
-            fluidoFreio: 'DOT 4 (disco dianteiro)',
-            fluidoBengala: {
-              especificacao: 'Fork Oil 10W',
-              volumePorCanelaMl: 68,
-            },
-          },
-          folgas: {
-            valvulaAdmissaoMm: faixaMm(0.05, 0.09, '0,05 – 0,09 mm'),
-            valvulaEscapeMm: faixaMm(0.08, 0.12, '0,08 – 0,12 mm'),
-            folgaAceleradorMm: faixaMm(2, 4, '2 – 4 mm'),
-          },
-          eletrica: {
-            vela: {
-              modelo: 'NGK CR7E',
-              iridiumAlternativa: 'NGK CR7EIX',
-              folgaEletrodoMm: faixaMm(0.7, 0.8, '0,7 – 0,8 mm'),
-            },
-            bateria: {
-              modelo: 'Yuasa YTX7A-BS',
-              tensaoV: 12,
-              capacidadeAh: 6,
-              tensaoCargaV: '13,5V – 15,0V @ 5.000 rpm',
-            },
-            fusivelPrincipalA: 15,
-            lampadaFarol: 'HS1 12V 35/35W',
-          },
-          pneus: {
-            dianteiro: { medida: '90/90-10 50J', pressaoPsi: 25, pressaoComGarupaPsi: 25, tipo: 'Sem câmara' },
-            traseiro: { medida: '100/90-10 56J', pressaoPsi: 29, pressaoComGarupaPsi: 36, tipo: 'Sem câmara' },
-          },
-          transmissaoFinal: {
-            tipo: 'correia',
-            cvtDetalhe: {
-              correiaCodigo: 'Mitsuboshi V-Belt Burgman 125i',
-              larguraLimiteMm: 18.1,
-              roletesMedidaPeso: '6 roletes 17x12 mm (11g)',
-            },
-          },
-          torques: TORQUES_BURGMAN_125,
         },
       }),
     ],

@@ -350,7 +350,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
       });
     }
 
-    // 8. Arrefecimento líquido (quando aplicável, ex: PCX 150 / 160)
+    // 8. Arrefecimento líquido (quando aplicável)
     if (isLiquido) {
       const arref = ficha.fluidos?.liquidoArrefecimento;
       itens.push({
@@ -521,11 +521,11 @@ export const DIRETRIZES_TEMPO_USO_SEVERO: readonly DiretrizTempoSevero[] = [
       'O óleo ATF / Fork Oil 10W sofre cisalhamento e acumula micropartículas de alumínio das buchas, deixando a frente boba e estourando retentores precocemente.',
   },
   {
-    id: 'arrefecimento-cvt',
-    titulo: 'Líquido de Arrefecimento & Correia CVT (Scooters)',
-    prazoNormal: 'Aditivo radiador: 24 meses | Correia CVT: inspeção a cada 6.000 km, troca aos 20.000–24.000 km',
-    prazoSevero: 'Limpar filtro de espuma da tampa CVT a cada 3.000 km',
+    id: 'corrente-relacao',
+    titulo: 'Corrente de Transmissão e Kit Relação (Limpeza, Lubrificação e Folga)',
+    prazoNormal: 'Inspeção, ajuste de folga e lubrificação a cada 500–1.000 km',
+    prazoSevero: 'Limpar e lubrificar após cada chuva forte ou trecho de terra/areia',
     explicacao:
-      'Em scooters (PCX, Fluo, Burgman), o filtro de ventilação do CVT entupido superaquece as polias, vitrifica as sapatas da embreagem (trepidação na arrancada) e reduz a vida útil da correia pela metade.',
+      'Corrente seca ou excessivamente esticada desgasta prematuramente os dentes da coroa/pinhão e sobrecarrega o rolamento do eixo secundário do câmbio.',
   },
 ];

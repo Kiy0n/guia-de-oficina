@@ -162,7 +162,7 @@ export function MotoBlueprintVisual({
 
           {isScooter ? (
             /* ============================================================= */
-            /* SILHUETA TÉCNICA — MODO SCOOTER (PCX / Fluo / Burgman)        */
+            /* SILHUETA TÉCNICA — MODO SCOOTER CVT                           */
             /* ============================================================= */
             <g
               fill="none"

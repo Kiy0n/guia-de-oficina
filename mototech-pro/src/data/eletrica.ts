@@ -74,7 +74,7 @@ export const GUIAS_LEITURA_FI: Record<Marca, GuiaLeituraFI> = {
       'Piscada LONGA (1,0 s) = 10 (dezena) · Piscada CURTA (0,5 s) = 1 (unidade) — ou número de 2 dígitos exibido diretamente no visor LCD.',
     comoLer: [
       'Ao girar a chave para ON, a luz amarela da injeção acende por ~2 a 3 segundos (autoteste) e apaga. Se permanecer acesa ou piscando, o módulo ECU detectou anomalia.',
-      'Nos modelos com painel digital completo (Factor 150 / Fazer 150 / Crosser / Fluo), o código de 2 dígitos (ex.: 12, 15, 37, 46) pode ser exibido no display LCD ou lido contando as piscadas longas (dezenas) e curtas (unidades).',
+      'Nos modelos com painel digital completo (Factor 150 / Fazer 125 / Fazer 150 / Crosser 150), o código de 2 dígitos (ex.: 12, 15, 37, 46) pode ser exibido no display LCD ou lido contando as piscadas longas (dezenas) e curtas (unidades).',
     ],
     comoResetar: [
       'Após corrigir o defeito elétrico/conector, a luz MIL apaga automaticamente ao funcionar o motor.',
@@ -83,16 +83,15 @@ export const GUIAS_LEITURA_FI: Record<Marca, GuiaLeituraFI> = {
   },
   Suzuki: {
     marca: 'Suzuki',
-    sistemaNome: 'Suzuki DCP-FI (Dealer Mode — Códigos Cxx)',
+    sistemaNome: 'Suzuki 125 Carburada (Intruder 125 / Yes 125 — Ignição CDI)',
     regraPiscadas:
-      'Exibe o código no formato "Cxx" no visor digital do painel ao jumpear o Conector de Modo Concessionária (Dealer Mode).',
+      'As Suzuki do catálogo (Intruder 125 e Yes 125 / EN125) são carburadas com ignição CDI — não possuem luz MIL nem códigos de falha FI.',
     comoLer: [
-      'Quando o módulo ECM detecta falha, o visor exibe a sigla "FI" alternando com o hodômetro e o LED vermelho pisca.',
-      'Para revelar o código exato ("C12", "C21", "C32"...): localize o conector branco de diagnóstico (sob o banco/rabeta) e faça um jumper entre o fio Branco/Vermelho e o fio Preto/Branco com o motor funcionando ou logo após tentar a partida (não desligue a chave antes de ler, ou o código temporário some).',
-      'Se não houver falha ativa, o painel exibe "C00".',
+      'A linha Suzuki 125 do catálogo (Intruder 125 e Yes 125) utiliza carburador Mikuni e módulo CDI convencional, sem conector de diagnóstico eletrônico.',
+      'Para falhas de ignição ou partida, utilize diretamente os testes de bancada no multímetro (bateria/carga, bobina de pulso, estator e bobina de ignição).',
     ],
     comoResetar: [
-      'Na linha Suzuki DCP-FI (GSR 150i / Burgman 125i), os códigos são de leitura em tempo real: assim que o componente ou chicote é reparado e o jumper do Dealer Mode é removido, o visor volta ao normal ("C00").',
+      'Não há memória de falhas eletrônicas (ECM) para resetar nos modelos Suzuki 125 carburados.',
     ],
   },
 };
@@ -219,7 +218,7 @@ export const CODIGOS_FALHA_FI: readonly CodigoFalhaFI[] = [
   },
 
   // -------------------------------------------------------------------------
-  // YAMAHA FI (Factor 150 / Fazer 150 / Crosser 150 / Fluo 125)
+  // YAMAHA FI (Factor 150 / Fazer 125 / Fazer 150 / Crosser 150)
   // -------------------------------------------------------------------------
   {
     codigo: '12',
@@ -356,7 +355,7 @@ export const CODIGOS_FALHA_FI: readonly CodigoFalhaFI[] = [
   },
 
   // -------------------------------------------------------------------------
-  // SUZUKI DCP-FI (GSR 150i / Burgman 125i)
+  // SUZUKI DCP-FI (Referência geral para modelos injetados)
   // -------------------------------------------------------------------------
   {
     codigo: 'C12',
@@ -475,7 +474,7 @@ export const TESTES_MULTIMETRO_BANCADA: readonly TesteMultimetroBancada[] = [
       'ALERTA CRÍTICO: se a tensão passar de 15,0V (chegando a 16V ou 18V ao acelerar), desligue imediatamente e troque o Retificador/Regulador — sobrecarga estufa a bateria, queima lâmpadas LED/halógenas e pode queimar o módulo ECM!',
     ],
     dicaBancada:
-      'Em motos com sistema Idling Stop (Honda PCX 150/160), se a bateria estiver abaixo de 12,4V em repouso a moto ainda dá partida normalmente, mas o ECM desativa a função Idling Stop por segurança.',
+      'Em motos com partida elétrica e injeção eletrônica, uma bateria abaixo de 12,4V em repouso pode girar o motor lentamente e causar falha de leitura dos sensores do ECM na partida a frio.',
   },
   {
     id: 'teste-estator',
