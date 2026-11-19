@@ -213,7 +213,7 @@ export function AppShell() {
         </Button>
 
         <div className="flex items-center justify-between pt-0.5 text-[11px] text-muted-foreground">
-          <span>MotoTech Pro · local</span>
+          <span>Guia de Oficina · local</span>
           <ApiStatusIndicator />
         </div>
       </div>
@@ -260,7 +260,7 @@ export function AppShell() {
             <span className="rounded-lg bg-primary/15 p-1.5 text-primary">
               <Wrench className="size-4" />
             </span>
-            <span className="font-bold tracking-tight">MotoTech Pro</span>
+            <span className="font-bold tracking-tight">Guia de Oficina</span>
           </div>
 
           <Separator orientation="vertical" className="mx-0.5 hidden !h-6 lg:block" />
@@ -390,7 +390,7 @@ export function AppShell() {
               <span className="rounded-lg bg-primary/15 p-1.5 text-primary">
                 <Wrench className="size-4" />
               </span>
-              MotoTech Pro
+              Guia de Oficina
             </SheetTitle>
             <SheetDescription>Navegação e controles da bancada</SheetDescription>
           </SheetHeader>

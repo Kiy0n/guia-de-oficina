@@ -4,7 +4,7 @@ import { DEFAULT_SECTION, isSectionId, type SectionId } from '@/lib/sections';
 import type { Marca, MotoSelecionada } from '@/types/moto';
 import { resolverSelecao } from '@/utils/catalog';
 
-const STORAGE_KEY = 'mototech-pro:moto:v1';
+const STORAGE_KEY = 'guia-oficina:moto:v1';
 
 interface PersistedState {
   modeloId: string;

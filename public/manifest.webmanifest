@@ -1,7 +1,7 @@
 {
-  "name": "MotoTech Pro — Bancada de Manutenção",
-  "short_name": "MotoTech",
-  "description": "Manual técnico interativo, revisões guiadas e gestão de oficina para motos Honda, Yamaha e Suzuki até 190cc.",
+  "name": "Guia de Oficina",
+  "short_name": "Guia de Oficina",
+  "description": "Guia de Oficina — manual técnico interativo, revisões guiadas e gestão de oficina para motos Honda, Yamaha e Suzuki até 190cc.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "any",

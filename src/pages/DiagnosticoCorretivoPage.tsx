@@ -105,7 +105,7 @@ export function DiagnosticoCorretivoPage() {
     const verificadosOk = cenario.etapas.filter((e) => statusEtapas[e.id] === 'ok');
 
     const linhas: string[] = [
-      `🩺 *MOTOTECH PRO — RESUMO DE DIAGNÓSTICO*`,
+      `🩺 *GUIA DE OFICINA — RESUMO DE DIAGNÓSTICO*`,
       `🏍️ *Moto:* ${moto.marca} ${moto.modelo.nome} (${moto.geracao.anosLabel})`,
       `⚠️ *Sintoma:* ${cenario.sintoma}`,
       `----------------------------------------`,

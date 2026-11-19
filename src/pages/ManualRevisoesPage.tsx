@@ -43,7 +43,7 @@ const CATEGORIAS_FILTRO: readonly ('TODAS' | CategoriaAcaoRevisao)[] = [
 ];
 
 function getChecklistStorageKey(modeloId: string, geracaoId: string, km: number): string {
-  return `mototech-pro:checklist:v1:${modeloId}:${geracaoId}:${km}`;
+  return `guia-oficina:checklist:v1:${modeloId}:${geracaoId}:${km}`;
 }
 
 function lerChecklistSalvo(storageKey: string): Record<string, boolean> {
@@ -71,7 +71,7 @@ function montarTextoWhatsApp(
   const pct = total > 0 ? Math.round((concluidos / total) * 100) : 0;
 
   const linhas = [
-    `🛠️ *MOTOTECH PRO — CHECKLIST DE REVISÃO*`,
+    `🛠️ *GUIA DE OFICINA — CHECKLIST DE REVISÃO*`,
     `*Moto:* ${modelo.marca} ${modelo.nome} (${geracao.anosLabel})`,
     `*Geração:* ${geracao.nomeGeracao}`,
     `*Revisão:* ${marco.labelKm} (${marco.subtitulo})`,

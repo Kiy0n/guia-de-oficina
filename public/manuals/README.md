@@ -1,6 +1,6 @@
-# Biblioteca de Manuais Técnicos em PDF — MotoTech Pro
+# Biblioteca de Manuais Técnicos em PDF — Guia de Oficina
 
-Coloque os manuais oficiais em formato `.pdf` dentro desta estrutura de pastas para que o **MotoTech Pro** os descubra automaticamente via API (`GET /api/manuais`) e os exiba no **Visualizador de PDF Integrado** dentro da aplicação.
+Coloque os manuais oficiais em formato `.pdf` dentro desta estrutura de pastas para que o **Guia de Oficina** os descubra automaticamente via API (`GET /api/manuais`) e os exiba no **Visualizador de PDF Integrado** dentro da aplicação.
 
 ## Convenção de Pastas
 

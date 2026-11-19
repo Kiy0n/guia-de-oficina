@@ -1,5 +1,5 @@
 /**
- * Tipos de domínio do MotoTech Pro.
+ * Tipos de domínio do Guia de Oficina.
  *
  * Hierarquia: Marca → Modelo → Geracao (faixa de anos + diferenças mecânicas).
  * Todos os manuais e fichas técnicas são módulos TypeScript estáticos em `src/data`.

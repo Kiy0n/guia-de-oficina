@@ -49,7 +49,7 @@ interface PreferenciasContextValue {
   isFavorita: (modeloId: string, geracaoId: string) => boolean;
 }
 
-const STORAGE_KEY = 'mototech-pro:prefs:v1';
+const STORAGE_KEY = 'guia-oficina:prefs:v1';
 
 const DEFAULT_PREFS: PreferenciasPersistidas = {
   tema: 'oficina',

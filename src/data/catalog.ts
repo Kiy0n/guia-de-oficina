@@ -1,5 +1,5 @@
 /**
- * Agregador único do catálogo de motos do MotoTech Pro.
+ * Agregador único do catálogo de motos do Guia de Oficina.
  *
  * Os dados completos de manual por fabricante e geração estão modularizados em:
  * - `src/data/motos/honda.ts` (12 modelos / 24 gerações)

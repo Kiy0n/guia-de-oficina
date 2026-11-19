@@ -1,4 +1,4 @@
-name: mototech-pro
+name: guia-de-oficina
 
 services:
   # -------------------------------------------------------------------------
@@ -11,8 +11,8 @@ services:
     build:
       context: .
       target: dev
-    image: mototech-pro:dev
-    container_name: mototech-pro-dev
+    image: guia-de-oficina:dev
+    container_name: guia-de-oficina-dev
     ports:
       - "5173:5173"
       - "3001:3001"
@@ -38,8 +38,8 @@ services:
     build:
       context: .
       target: prod
-    image: mototech-pro:latest
-    container_name: mototech-pro
+    image: guia-de-oficina:latest
+    container_name: guia-de-oficina-prod
     ports:
       - "8080:3001"
     environment:

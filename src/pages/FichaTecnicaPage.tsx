@@ -111,7 +111,7 @@ function montarTextoResumo(modelo: Modelo, geracao: Geracao): string {
   const bengala = f.fluidos?.fluidoBengala;
 
   const linhas = [
-    `🔧 MOTOTECH PRO — FICHA DE BANCADA`,
+    `🔧 GUIA DE OFICINA — FICHA DE BANCADA`,
     `Moto: ${modelo.marca} ${modelo.nome} (${geracao.anosLabel} · ${geracao.nomeGeracao})`,
     `Motor: ${cilindradaLabel(f.cilindradaCc)} · ${f.motor} · ${ALIMENTACAO_LABEL[f.alimentacao]}`,
     `----------------------------------------`,

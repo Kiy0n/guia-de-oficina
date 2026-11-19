@@ -75,7 +75,7 @@ const TRANSICAO_TELA = {
 };
 
 function getDraftKey(modeloId: string, geracaoId: string): string {
-  return `mototech-pro:revisao-ativa:v1:${modeloId}:${geracaoId}`;
+  return `guia-oficina:revisao-ativa:v1:${modeloId}:${geracaoId}`;
 }
 
 function lerRascunhoSalvo(key: string): RascunhoRevisaoSalvo | null {
@@ -349,7 +349,7 @@ export function IniciarRevisaoPage() {
     const dataHoje = new Date().toLocaleDateString('pt-BR');
     const perfilMeta = perfisRevisao.find((p) => p.id === tipoRevisao);
     const linhas: string[] = [
-      `🛠️ *MOTOTECH PRO — RELATÓRIO DE REVISÃO*`,
+      `🛠️ *GUIA DE OFICINA — RELATÓRIO DE REVISÃO*`,
       `🏍️ *Moto:* ${moto.marca} ${moto.modelo.nome} (${moto.geracao.anosLabel} · ${moto.geracao.nomeGeracao})`,
       `📋 *Perfil:* ${perfilMeta?.titulo ?? tipoRevisao}`,
       `📅 *Data:* ${dataHoje} | 📍 *KM:* ${(Number(kmAtual) || 0).toLocaleString('pt-BR')} km`,

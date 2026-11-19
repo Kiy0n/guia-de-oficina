@@ -717,7 +717,7 @@ export function MotoSelectorWizard({ start }: { start: WizardStart }) {
             <span className="rounded-lg bg-primary/15 p-1.5 text-primary">
               <Wrench className="size-5" />
             </span>
-            <span className="font-bold tracking-tight">MotoTech Pro</span>
+            <span className="font-bold tracking-tight">Guia de Oficina</span>
           </div>
           {moto && (
             <Button variant="ghost" size="sm" className="ml-auto" onClick={cancelarTroca}>

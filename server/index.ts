@@ -236,7 +236,7 @@ const api = express.Router();
 api.get('/health', (_req, res) => {
   res.json({
     status: 'ok',
-    app: 'MotoTech Pro',
+    app: 'Guia de Oficina',
     env: IS_PROD ? 'production' : 'development',
     uptime: Math.round(process.uptime()),
     timestamp: new Date().toISOString(),
@@ -416,7 +416,7 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[server] MotoTech Pro API ouvindo em http://0.0.0.0:${PORT} (${IS_PROD ? 'prod' : 'dev'})`);
+  console.log(`[server] Guia de Oficina API ouvindo em http://0.0.0.0:${PORT} (${IS_PROD ? 'prod' : 'dev'})`);
 });
 
 const shutdown = (signal: string) => {

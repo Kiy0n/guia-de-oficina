@@ -1,8 +1,8 @@
 {
-  "name": "mototech-pro",
+  "name": "guia-de-oficina",
   "version": "0.2.0",
   "private": true,
-  "description": "MotoTech Pro — bancada pessoal de manutenção preventiva e corretiva para motos Honda, Yamaha e Suzuki até 190cc.",
+  "description": "Guia de Oficina — bancada pessoal de manutenção preventiva e corretiva para motos Honda, Yamaha e Suzuki até 190cc.",
   "type": "module",
   "engines": {
     "node": ">=22"
