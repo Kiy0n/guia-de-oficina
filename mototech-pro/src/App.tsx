@@ -1,9 +1,12 @@
+import { useEffect } from 'react';
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 
 import { AppShell } from '@/components/AppShell';
 import { MotoSelectorWizard } from '@/components/MotoSelectorWizard';
 import { FerramentasProvider } from '@/context/FerramentasContext';
 import { MotoProvider, useMoto } from '@/context/MotoContext';
+import { PreferenciasProvider, usePreferencias } from '@/context/PreferenciasContext';
+import { ToastProvider } from '@/context/ToastContext';
 
 const VIEW_TRANSITION = {
   duration: 0.32,
@@ -12,8 +15,15 @@ const VIEW_TRANSITION = {
 
 function Router() {
   const { view, moto } = useMoto();
+  const { registrarAcessoMoto } = usePreferencias();
   const isWizard = view.tipo === 'wizard' || !moto;
   const start = view.tipo === 'wizard' ? view.start : { step: 1 as const };
+
+  useEffect(() => {
+    if (moto) {
+      registrarAcessoMoto(moto.modelo.id, moto.geracao.id);
+    }
+  }, [moto, registrarAcessoMoto]);
 
   return (
     <AnimatePresence mode="wait">
@@ -45,11 +55,15 @@ function Router() {
 export default function App() {
   return (
     <MotionConfig reducedMotion="user">
-      <MotoProvider>
-        <FerramentasProvider>
-          <Router />
-        </FerramentasProvider>
-      </MotoProvider>
+      <ToastProvider>
+        <PreferenciasProvider>
+          <MotoProvider>
+            <FerramentasProvider>
+              <Router />
+            </FerramentasProvider>
+          </MotoProvider>
+        </PreferenciasProvider>
+      </ToastProvider>
     </MotionConfig>
   );
 }

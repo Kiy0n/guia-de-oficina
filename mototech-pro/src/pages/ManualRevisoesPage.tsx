@@ -20,6 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { useMotoSelecionada } from '@/context/MotoContext';
+import { useToast } from '@/context/ToastContext';
 import {
   CATEGORIA_ACAO_META,
   DIRETRIZES_TEMPO_USO_SEVERO,
@@ -90,6 +91,7 @@ function montarTextoWhatsApp(
 
 export function ManualRevisoesPage() {
   const { marca, modelo, geracao } = useMotoSelecionada();
+  const { mostrarToast } = useToast();
   const def = SECTIONS.find((s) => s.id === 'manual-revisoes') ?? SECTIONS[1];
 
   const plano = useMemo(() => gerarPlanoRevisoes(modelo, geracao), [modelo, geracao]);
@@ -149,7 +151,18 @@ export function ManualRevisoesPage() {
   };
 
   const limparMarcacoes = () => {
+    const anterior = { ...marcados };
+    const tinhaAlgum = Object.values(anterior).some(Boolean);
     salvarMarcados({});
+    if (tinhaAlgum) {
+      mostrarToast({
+        titulo: `Marcações da revisão ${marcoAtivo.labelKm} limpas`,
+        variante: 'aviso',
+        acaoDesfazer: () => {
+          salvarMarcados(anterior);
+        },
+      });
+    }
   };
 
   const copiarWhatsApp = async () => {
@@ -157,6 +170,11 @@ export function ManualRevisoesPage() {
     try {
       await navigator.clipboard.writeText(texto);
       setCopiado(true);
+      mostrarToast({
+        titulo: 'Checklist de revisão copiado para WhatsApp!',
+        variante: 'sucesso',
+        duracaoMs: 2200,
+      });
       window.setTimeout(() => setCopiado(false), 2400);
     } catch {
       const area = document.createElement('textarea');

@@ -1,6 +1,18 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion, type Variants } from 'framer-motion';
-import { ArrowLeft, Check, ChevronRight, CircleGauge, Search, Undo2, Wrench, X } from 'lucide-react';
+import {
+  ArrowLeft,
+  Check,
+  ChevronRight,
+  CircleGauge,
+  Clock,
+  Eye,
+  Search,
+  Star,
+  Undo2,
+  Wrench,
+  X,
+} from 'lucide-react';
 
 import { SpotlightCard } from '@/components/SpotlightCard';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useMoto, type WizardStart } from '@/context/MotoContext';
+import { usePreferencias } from '@/context/PreferenciasContext';
 import { BRAND_THEME } from '@/lib/brands';
 import { cn } from '@/lib/utils';
 import { CILINDRADA_MAXIMA, MARCAS, type Geracao, type Marca, type Modelo } from '@/types/moto';
@@ -18,6 +31,7 @@ import {
   faixaAnosModelo,
   findModelo,
   getModelosPorMarca,
+  resolverSelecao,
 } from '@/utils/catalog';
 import { ALIMENTACAO_LABEL, CATEGORIA_LABEL, SISTEMA_FREIO_LABEL } from '@/utils/format';
 
@@ -206,6 +220,56 @@ function StepHeader({ title, subtitle, children }: { title: string; subtitle?: s
 // Passo 1 — Fabricante
 // ---------------------------------------------------------------------------
 
+function derivarPistaIdentificacao(modelo: Modelo, g: Geracao): string {
+  const f = g.fichaTecnica;
+  const pistas: string[] = [];
+
+  if (f.alimentacao === 'carburador') {
+    pistas.push('Tem torneirinha de gasolina no tanque (carburador)');
+  } else {
+    pistas.push('Luz da injeção no painel (sem torneirinha de gasolina)');
+  }
+
+  if (f.motor.toLowerCase().includes('ohv') || f.motorDetalhes?.comando?.toLowerCase().includes('vareta')) {
+    pistas.push('Motor vareta (OHV) + vela grossa M12');
+  }
+
+  if (f.freios.sistema === 'CBS') {
+    pistas.push(
+      f.freios.dianteiro === 'disco'
+        ? 'Pinça dianteira com 2 mangueiras (freio CBS)'
+        : 'Freio combinado CBS por cabos',
+    );
+  } else if (f.freios.sistema === 'ABS') {
+    pistas.push('Anel dentado + sensor ABS na roda dianteira');
+  } else if (f.freios.sistema === 'UBS') {
+    pistas.push('Freio unificado UBS (pedal aciona dianteiro)');
+  }
+
+  if (f.eletrica?.lampadaFarol?.toLowerCase().includes('led')) {
+    pistas.push('Farol 100% LED');
+  }
+
+  if (f.partida === 'pedal') {
+    pistas.push('Apenas pedal de partida');
+  } else if (f.partida === 'pedal-eletrica') {
+    pistas.push('Pedal de partida + botão elétrico');
+  }
+
+  if (
+    (modelo.marca === 'Yamaha' || modelo.marca === 'Suzuki') &&
+    f.fluidos?.oleoMotor?.capacidadeTrocaComFiltroL
+  ) {
+    pistas.push('Tampinha redonda lateral com 3 parafusos do filtro de papel');
+  }
+
+  if (modelo.categoria === 'scooter' || f.cambio.tipo === 'cvt') {
+    pistas.push('Transmissão automática CVT (sem marchas)');
+  }
+
+  return pistas.slice(0, 2).join(' · ');
+}
+
 function StepFabricante({
   onMarca,
   onModelo,
@@ -215,8 +279,31 @@ function StepFabricante({
   onModelo: (modelo: Modelo) => void;
   onGeracao: (modelo: Modelo, geracao: Geracao) => void;
 }) {
+  const { recentes, favoritas, toggleFavorita, isFavorita } = usePreferencias();
   const [busca, setBusca] = useState('');
   const resultados = useMemo(() => buscarModelos(busca).slice(0, 8), [busca]);
+
+  const atalhosRapidos = useMemo(() => {
+    const combinados = [...favoritas, ...recentes];
+    const vistos = new Set<string>();
+    const resolvidos: { modelo: Modelo; geracao: Geracao; favorita: boolean }[] = [];
+
+    for (const item of combinados) {
+      const chave = `${item.modeloId}::${item.geracaoId}`;
+      if (vistos.has(chave)) continue;
+      vistos.add(chave);
+      const sel = resolverSelecao(item.modeloId, item.geracaoId);
+      if (!sel) continue;
+      resolvidos.push({
+        modelo: sel.modelo,
+        geracao: sel.geracao,
+        favorita: isFavorita(item.modeloId, item.geracaoId),
+      });
+      if (resolvidos.length >= 4) break;
+    }
+
+    return resolvidos;
+  }, [favoritas, recentes, isFavorita]);
 
   const handleEnter = () => {
     const [primeiro] = resultados;
@@ -228,6 +315,68 @@ function StepFabricante({
 
   return (
     <div className="flex flex-col gap-8">
+      {/* Faixa "Suas Motos / Últimas na Bancada" em 1 clique */}
+      {atalhosRapidos.length > 0 && (
+        <section aria-label="Suas motos e recentes" className="space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-muted-foreground uppercase">
+              <Clock className="size-3.5 text-primary" />
+              Suas Motos · Últimas na Bancada (1 clique)
+            </h3>
+          </div>
+
+          <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+            {atalhosRapidos.map(({ modelo, geracao, favorita }) => {
+              const t = BRAND_THEME[modelo.marca];
+              return (
+                <div
+                  key={`${modelo.id}-${geracao.id}`}
+                  className="group relative flex items-center justify-between gap-2 rounded-xl border bg-card/85 p-3 transition-all hover:border-primary/50 hover:bg-accent/40"
+                >
+                  <button
+                    type="button"
+                    onClick={() => onGeracao(modelo, geracao)}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant={t.badge} className="px-1.5 py-0 text-[10px]">
+                        {modelo.marca}
+                      </Badge>
+                      <span className="font-mono text-xs text-muted-foreground">
+                        {geracao.anosLabel}
+                      </span>
+                    </div>
+                    <p className="mt-1 truncate text-sm font-bold text-foreground group-hover:text-primary">
+                      {modelo.nome}
+                    </p>
+                    <p className="truncate text-[11px] text-muted-foreground">
+                      {geracao.nomeGeracao}
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    data-compact="true"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorita(modelo.id, geracao.id);
+                    }}
+                    title={favorita ? 'Desafixar favorita' : 'Fixar em Minhas Motos'}
+                    aria-label={favorita ? 'Desafixar favorita' : 'Fixar em Minhas Motos'}
+                    className={cn(
+                      'rounded-lg p-1.5 transition-colors hover:bg-accent',
+                      favorita ? 'text-amber-400' : 'text-muted-foreground hover:text-amber-400',
+                    )}
+                  >
+                    <Star className={cn('size-4', favorita && 'fill-current')} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <StepHeader
         title="Qual moto está na bancada?"
         subtitle={`Escolha a fabricante — modelos até ${CILINDRADA_MAXIMA}cc.`}
@@ -490,6 +639,14 @@ function StepGeracao({
                       </li>
                     ))}
                   </ul>
+                  <div className="rounded-lg border border-primary/25 bg-primary/8 px-2.5 py-2 text-xs">
+                    <span className="inline-flex items-center gap-1 font-bold text-primary">
+                      <Eye className="size-3.5 shrink-0" />
+                      Como reconhecer:
+                    </span>{' '}
+                    <span className="text-foreground/90">{derivarPistaIdentificacao(modelo, g)}</span>
+                  </div>
+
                   <div className="mt-auto flex flex-wrap gap-2">
                     <Badge variant="secondary">{ALIMENTACAO_LABEL[ficha.alimentacao]}</Badge>
                     <Badge variant="secondary">Freio {SISTEMA_FREIO_LABEL[ficha.freios.sistema]}</Badge>

@@ -25,6 +25,7 @@ import {
   Wrench,
 } from 'lucide-react';
 
+import { BotaoDitadoVoz } from '@/components/BotaoDitadoVoz';
 import { MotoBlueprintVisual } from '@/components/MotoBlueprintVisual';
 import { SectionHeader } from '@/components/SectionHeader';
 import { SpotlightCard } from '@/components/SpotlightCard';
@@ -42,6 +43,7 @@ import {
 } from '@/components/ui/sheet';
 import { useFerramentas } from '@/context/FerramentasContext';
 import { useMoto, useMotoSelecionada } from '@/context/MotoContext';
+import { useToast } from '@/context/ToastContext';
 import { PROCEDIMENTOS_OFICINA } from '@/data/procedimentos';
 import {
   ACAO_SUGERIDA_LABEL,
@@ -122,6 +124,7 @@ export function IniciarRevisaoPage() {
   const moto = useMotoSelecionada();
   const { enviarParaOrdemServico } = useMoto();
   const { possuiFerramenta, marcarFerramentaPossuida } = useFerramentas();
+  const { mostrarToast } = useToast();
 
   const draftKey = getDraftKey(moto.modelo.id, moto.geracao.id);
   const [rascunhoDetectado, setRascunhoDetectado] = useState<RascunhoRevisaoSalvo | null>(() =>
@@ -191,13 +194,30 @@ export function IniciarRevisaoPage() {
     }
   };
 
-  const descartarRascunho = () => {
+  const descartarRascunho = (comToastDesfazer = false) => {
+    const anterior = rascunhoDetectado;
     try {
       window.localStorage.removeItem(draftKey);
     } catch {
       // ignore
     }
     setRascunhoDetectado(null);
+
+    if (comToastDesfazer && anterior) {
+      mostrarToast({
+        titulo: 'Rascunho de revisão descartado',
+        descricao: 'Você pode recuperar o progresso pausado clicando em Desfazer.',
+        variante: 'aviso',
+        acaoDesfazer: () => {
+          try {
+            window.localStorage.setItem(draftKey, JSON.stringify(anterior));
+          } catch {
+            // ignore
+          }
+          setRascunhoDetectado(anterior);
+        },
+      });
+    }
   };
 
   const iniciarNovaRevisao = () => {
@@ -258,6 +278,41 @@ export function IniciarRevisaoPage() {
       irParaPasso(idx);
     }
   };
+
+  // Atalhos de teclado no modo Execução (Tela 2) quando foco não estiver em campos de texto
+  useEffect(() => {
+    if (etapaTela !== 'executar' || !passoAtual) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName?.toUpperCase();
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) {
+        return;
+      }
+
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        irParaPasso(passoIndex - 1);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        irParaPasso(passoIndex + 1);
+      } else if (e.key >= '1' && e.key <= '6') {
+        const idxStatus = Number(e.key) - 1;
+        const st = ORDEM_STATUS_BOTOES[idxStatus];
+        if (st) {
+          e.preventDefault();
+          atualizarRegistroPasso(passoAtual.id, { status: st });
+        }
+      } else if ((e.key === 'v' || e.key === 'V') && procedimentoRelacionado) {
+        e.preventDefault();
+        setSheetProcAberto((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  });
 
   // Agrupamentos para o Relatório Final
   const resumoRelatorio = useMemo(() => {
@@ -341,6 +396,11 @@ export function IniciarRevisaoPage() {
       document.body.removeChild(area);
     }
     setCopiadoRelatorio(true);
+    mostrarToast({
+      titulo: 'Relatório copiado para WhatsApp!',
+      variante: 'sucesso',
+      duracaoMs: 2400,
+    });
     window.setTimeout(() => setCopiadoRelatorio(false), 2400);
   };
 
@@ -488,7 +548,7 @@ export function IniciarRevisaoPage() {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={descartarRascunho}
+                      onClick={() => descartarRascunho(true)}
                       className="gap-1 text-xs text-destructive hover:text-destructive"
                     >
                       <Trash2 className="size-3.5" />
@@ -837,11 +897,22 @@ export function IniciarRevisaoPage() {
                           </div>
                         )}
 
-                        {/* Campo rápido de observação do mecânico */}
+                        {/* Campo rápido de observação do mecânico + Ditado por Voz */}
                         <div className="space-y-1.5">
-                          <label className="text-xs font-semibold text-muted-foreground">
-                            Observação rápida deste item (opcional):
-                          </label>
+                          <div className="flex items-center justify-between gap-2">
+                            <label className="text-xs font-semibold text-muted-foreground">
+                              Observação rápida deste item (opcional):
+                            </label>
+                            <BotaoDitadoVoz
+                              compacto
+                              onTranscricao={(texto) => {
+                                const atual = registros[passoAtual.id]?.observacao?.trim() ?? '';
+                                atualizarRegistroPasso(passoAtual.id, {
+                                  observacao: atual ? `${atual} ${texto}` : texto,
+                                });
+                              }}
+                            />
+                          </div>
                           <Input
                             value={registros[passoAtual.id]?.observacao ?? ''}
                             onChange={(e) =>
@@ -891,6 +962,13 @@ export function IniciarRevisaoPage() {
                               Finalizar e Gerar Relatório
                             </Button>
                           )}
+                        </div>
+
+                        {/* Dica discreta de atalhos de teclado (apenas desktop) */}
+                        <div className="hidden items-center justify-between gap-2 rounded-lg border border-border/50 bg-background/40 px-3 py-1.5 font-mono text-[11px] text-muted-foreground lg:flex">
+                          <span>Atalhos: ← / → navegar passos</span>
+                          <span>1–6 marcar status</span>
+                          <span>V vídeo/ferramentas</span>
                         </div>
                       </CardContent>
                     </Card>
@@ -1050,11 +1128,24 @@ export function IniciarRevisaoPage() {
                   </p>
                 )}
 
-                {/* Comentário Geral da Revisão */}
+                {/* Comentário Geral da Revisão + Ditado por Voz */}
                 <div className="space-y-1.5 border-t border-border/60 pt-4">
-                  <label className="text-xs font-bold">
-                    Comentário Geral do Mecânico sobre o Estado da Moto (Opcional)
-                  </label>
+                  <div className="flex items-center justify-between gap-2">
+                    <label className="text-xs font-bold">
+                      Comentário Geral do Mecânico sobre o Estado da Moto (Opcional)
+                    </label>
+                    <BotaoDitadoVoz
+                      compacto
+                      className="no-print"
+                      onTranscricao={(texto) => {
+                        const atualizado = comentarioGeral.trim()
+                          ? `${comentarioGeral.trim()} ${texto}`
+                          : texto;
+                        setComentarioGeral(atualizado);
+                        persistirRascunho({ comentarioGeral: atualizado });
+                      }}
+                    />
+                  </div>
                   <textarea
                     rows={3}
                     value={comentarioGeral}

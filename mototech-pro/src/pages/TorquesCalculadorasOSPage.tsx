@@ -25,6 +25,7 @@ import {
   Zap,
 } from 'lucide-react';
 
+import { BotaoDitadoVoz } from '@/components/BotaoDitadoVoz';
 import { SectionHeader } from '@/components/SectionHeader';
 import { SpotlightCard } from '@/components/SpotlightCard';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +34,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMoto, useMotoSelecionada } from '@/context/MotoContext';
+import { useToast } from '@/context/ToastContext';
 import { gerarPlanoRevisoes } from '@/data/revisoes';
 import { SECTIONS } from '@/lib/sections';
 import { cn } from '@/lib/utils';
@@ -225,6 +227,7 @@ function sugerirFusivelEBitola(correnteAmperes: number): {
 export function TorquesCalculadorasOSPage() {
   const moto = useMotoSelecionada();
   const { rascunhoOS, limparRascunhoOS, setSection } = useMoto();
+  const { mostrarToast } = useToast();
   const f = moto.geracao.fichaTecnica;
 
   const [abaAtiva, setAbaAtiva] = useState<string>('torques');
@@ -384,6 +387,11 @@ export function TorquesCalculadorasOSPage() {
 
   useEffect(() => {
     void carregarOrdens();
+    const onBackupRestaurado = () => {
+      void carregarOrdens();
+    };
+    window.addEventListener('mototech:backup-restaurado', onBackupRestaurado);
+    return () => window.removeEventListener('mototech:backup-restaurado', onBackupRestaurado);
   }, [carregarOrdens]);
 
   // Recebe rascunho vindo do Diagnóstico Corretivo ou do Relatório de Revisão
@@ -583,11 +591,15 @@ export function TorquesCalculadorasOSPage() {
       }
 
       await carregarOrdens();
-      setFeedbackMensagem(
-        editandoOsId
-          ? 'Ordem de Serviço atualizada com sucesso em data/oficina.json!'
-          : 'Nova Ordem de Serviço salva com sucesso em data/oficina.json!',
-      );
+      const msg = editandoOsId
+        ? 'Ordem de Serviço atualizada em data/oficina.json!'
+        : 'Nova Ordem de Serviço salva em data/oficina.json!';
+      setFeedbackMensagem(msg);
+      mostrarToast({
+        titulo: editandoOsId ? 'OS atualizada na oficina' : 'OS salva na oficina',
+        descricao: `${moto.marca} ${moto.modelo.nome} (${moto.geracao.anosLabel})`,
+        variante: 'sucesso',
+      });
       setEditandoOsId(null);
     } catch (err) {
       setFeedbackMensagem(
@@ -614,12 +626,41 @@ export function TorquesCalculadorasOSPage() {
   };
 
   const excluirOrdemExistente = async (id: string) => {
+    const osRemovida = ordensSalvas.find((o) => o.id === id);
     try {
       const res = await fetch(`/api/os/${id}`, { method: 'DELETE' });
       if (!res.ok) return;
       setOrdensSalvas((prev) => prev.filter((o) => o.id !== id));
       if (editandoOsId === id) {
         limparFormularioOS();
+      }
+
+      if (osRemovida) {
+        const { id: _id, criadaEm: _criadaEm, ...payloadRestaurar } = osRemovida;
+        mostrarToast({
+          titulo: 'Ordem de Serviço excluída',
+          descricao: `${osRemovida.marca} ${osRemovida.modeloNome} (${osRemovida.dataServico.split('-').reverse().join('/')})`,
+          variante: 'aviso',
+          acaoDesfazer: async () => {
+            try {
+              const r = await fetch('/api/os', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payloadRestaurar),
+              });
+              if (r.ok) {
+                await carregarOrdens();
+                mostrarToast({
+                  titulo: 'Ordem de Serviço restaurada!',
+                  variante: 'sucesso',
+                  duracaoMs: 2200,
+                });
+              }
+            } catch {
+              // ignore
+            }
+          },
+        });
       }
     } catch {
       // ignore
@@ -638,6 +679,12 @@ export function TorquesCalculadorasOSPage() {
       document.execCommand('copy');
       document.body.removeChild(area);
     }
+
+    mostrarToast({
+      titulo: 'Ordem de Serviço copiada para WhatsApp!',
+      variante: 'sucesso',
+      duracaoMs: 2200,
+    });
 
     if (isHistorico && os.id) {
       setCopiadoOsHistoricoId(os.id);
@@ -1435,9 +1482,17 @@ export function TorquesCalculadorasOSPage() {
                 </div>
               </div>
 
-              {/* Observações Técnicas */}
+              {/* Observações Técnicas + Ditado por Voz */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold">Observações Técnicas / Recomendações</label>
+                <div className="flex items-center justify-between gap-2">
+                  <label className="text-xs font-semibold">Observações Técnicas / Recomendações</label>
+                  <BotaoDitadoVoz
+                    compacto
+                    onTranscricao={(texto) =>
+                      setObservacoes((prev) => (prev.trim() ? `${prev.trim()} ${texto}` : texto))
+                    }
+                  />
+                </div>
                 <textarea
                   rows={2}
                   value={observacoes}

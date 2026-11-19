@@ -376,3 +376,72 @@ export async function removerOrdemServico(id: string): Promise<boolean> {
   await operacao;
   return removido;
 }
+
+export async function restaurarOficinaBackup(
+  raw: unknown,
+): Promise<
+  | { ok: true; totalFerramentas: number; totalOS: number; dados: OficinaData }
+  | { ok: false; erro: string }
+> {
+  if (!raw || typeof raw !== 'object') {
+    return { ok: false, erro: 'Arquivo de backup inválido (esperado um objeto JSON).' };
+  }
+
+  const obj = raw as Record<string, unknown>;
+
+  if (
+    !Array.isArray(obj.ferramentasPossuidas) ||
+    !obj.ferramentasPossuidas.every((item) => typeof item === 'string')
+  ) {
+    return {
+      ok: false,
+      erro: 'Campo "ferramentasPossuidas" ausente ou inválido (deve ser array de strings).',
+    };
+  }
+
+  if (!Array.isArray(obj.ordensServico)) {
+    return {
+      ok: false,
+      erro: 'Campo "ordensServico" ausente ou inválido (deve ser array de Ordens de Serviço).',
+    };
+  }
+
+  const ordensValidadas: OrdemServico[] = [];
+  for (let i = 0; i < obj.ordensServico.length; i++) {
+    const item = obj.ordensServico[i];
+    const normalizada = normalizarOrdemSalva(item);
+    if (!normalizada) {
+      return {
+        ok: false,
+        erro: `Ordem de Serviço inválida na posição ${i + 1} do backup.`,
+      };
+    }
+    ordensValidadas.push(normalizada);
+  }
+
+  const ferramentasLimpas = Array.from(
+    new Set(obj.ferramentasPossuidas.map((s) => s.trim()).filter(Boolean)),
+  );
+
+  const novoEstado: OficinaData = {
+    ferramentasPossuidas: ferramentasLimpas,
+    ordensServico: ordenarOrdensMaisRecentes(ordensValidadas),
+  };
+
+  const operacao = writeQueue.then(async () => {
+    await gravarArquivoAtomico(novoEstado);
+  });
+
+  writeQueue = operacao.catch((err) => {
+    console.error('[storage] falha ao restaurar backup em oficina.json:', err);
+  });
+
+  await operacao;
+
+  return {
+    ok: true,
+    totalFerramentas: novoEstado.ferramentasPossuidas.length,
+    totalOS: novoEstado.ordensServico.length,
+    dados: novoEstado,
+  };
+}

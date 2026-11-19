@@ -9,6 +9,7 @@ import {
   lerOficinaData,
   listarOrdensServico,
   removerOrdemServico,
+  restaurarOficinaBackup,
   salvarFerramentasPossuidas,
   validarPayloadOrdemServico,
 } from './storage.js';
@@ -292,6 +293,39 @@ api.delete('/os/:id', async (req, res) => {
   }
 
   res.json({ ok: true, id });
+});
+
+// ---------------------------------------------------------------------------
+// Backup & Restauração em 1 Clique (/app/data/oficina.json)
+// ---------------------------------------------------------------------------
+api.get('/backup', async (_req, res) => {
+  const dados = await lerOficinaData();
+  const hoje = new Date().toISOString().slice(0, 10);
+  const nomeArquivo = `mototech-pro-backup-${hoje}.json`;
+
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="${nomeArquivo}"`);
+  res.json({
+    versao: 1,
+    app: 'MotoTech Pro',
+    exportadoEm: new Date().toISOString(),
+    ferramentasPossuidas: dados.ferramentasPossuidas,
+    ordensServico: dados.ordensServico,
+  });
+});
+
+api.post('/backup/restaurar', async (req, res) => {
+  const resultado = await restaurarOficinaBackup(req.body);
+  if (!resultado.ok) {
+    res.status(400).json({ error: resultado.erro });
+    return;
+  }
+
+  res.json({
+    ok: true,
+    totalFerramentas: resultado.totalFerramentas,
+    totalOS: resultado.totalOS,
+  });
 });
 
 // 404 para rotas de API inexistentes (Express 5: wildcard nomeado)
