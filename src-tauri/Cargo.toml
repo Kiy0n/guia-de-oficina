@@ -1,0 +1,28 @@
+[package]
+name = "guia-de-oficina"
+version = "1.6.0"
+description = "Guia de Oficina — Manual Técnico de Motocicletas"
+authors = ["Guia de Oficina"]
+edition = "2021"
+
+[lib]
+name = "guia_de_oficina_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tiny_http = "0.12"
+unicode-normalization = "0.1"
+percent-encoding = "2"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

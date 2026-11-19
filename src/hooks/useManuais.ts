@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { getApiBaseUrl, prefixApiUrl, resolveApiUrl } from '@/lib/apiBase';
 import type { MotoSelecionada } from '@/types/moto';
 
 export interface ManualPdfItem {
@@ -46,7 +47,8 @@ export async function consultarIndiceManual(
   manualId: string,
   signal?: AbortSignal,
 ): Promise<IndiceManualApi> {
-  const res = await fetch(`/api/manuais/${encodeURIComponent(manualId)}/indice`, {
+  const url = await resolveApiUrl(`/api/manuais/${encodeURIComponent(manualId)}/indice`);
+  const res = await fetch(url, {
     headers: { Accept: 'application/json' },
     signal,
   });
@@ -62,13 +64,13 @@ export async function buscarTextoManual(
   signal?: AbortSignal,
 ): Promise<RespostaBuscaManualApi> {
   const params = new URLSearchParams({ q: query.trim() });
-  const res = await fetch(
+  const url = await resolveApiUrl(
     `/api/manuais/${encodeURIComponent(manualId)}/buscar?${params.toString()}`,
-    {
-      headers: { Accept: 'application/json' },
-      signal,
-    },
   );
+  const res = await fetch(url, {
+    headers: { Accept: 'application/json' },
+    signal,
+  });
   if (!res.ok) {
     throw new Error(`Falha ao buscar no manual PDF (HTTP ${res.status})`);
   }
@@ -80,13 +82,13 @@ export async function lerPaginaTextoManual(
   numeroPagina: number,
   signal?: AbortSignal,
 ): Promise<PaginaTextoManualApi> {
-  const res = await fetch(
+  const url = await resolveApiUrl(
     `/api/manuais/${encodeURIComponent(manualId)}/pagina/${numeroPagina}`,
-    {
-      headers: { Accept: 'application/json' },
-      signal,
-    },
   );
+  const res = await fetch(url, {
+    headers: { Accept: 'application/json' },
+    signal,
+  });
   if (!res.ok) {
     throw new Error(`Falha ao carregar texto da página ${numeroPagina} (HTTP ${res.status})`);
   }
@@ -158,15 +160,24 @@ export function useManuais(filtro?: FiltroManuais) {
       if (anoFim !== undefined) params.set('anoFim', String(anoFim));
 
       const qs = params.toString();
-      const url = qs ? `/api/manuais?${qs}` : '/api/manuais';
-      const res = await fetch(url, { headers: { Accept: 'application/json' } });
+      const baseUrl = await getApiBaseUrl();
+      const path = qs ? `/api/manuais?${qs}` : '/api/manuais';
+      const res = await fetch(prefixApiUrl(baseUrl, path), {
+        headers: { Accept: 'application/json' },
+      });
 
       if (!res.ok) {
         throw new Error(`Falha ao consultar biblioteca de manuais (HTTP ${res.status})`);
       }
 
       const data = (await res.json()) as RespostaManuaisApi;
-      setManuais(Array.isArray(data.manuais) ? data.manuais : []);
+      const lista = Array.isArray(data.manuais)
+        ? data.manuais.map((item) => ({
+            ...item,
+            url: prefixApiUrl(baseUrl, item.url),
+          }))
+        : [];
+      setManuais(lista);
       setTotalBiblioteca(typeof data.totalBiblioteca === 'number' ? data.totalBiblioteca : 0);
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro ao carregar lista de manuais PDF.');

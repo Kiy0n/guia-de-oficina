@@ -36,6 +36,7 @@ import {
   type PaginaTextoManualApi,
   type RespostaBuscaManualApi,
 } from '@/hooks/useManuais';
+import { prefixApiUrl, useApiBaseUrl } from '@/lib/apiBase';
 import { cn } from '@/lib/utils';
 
 const ATALHOS_BANCADA = [
@@ -164,6 +165,7 @@ export function ManualPdfViewer({
 }: ManualPdfViewerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const inputBuscaRef = useRef<HTMLInputElement | null>(null);
+  const apiBaseUrl = useApiBaseUrl();
 
   const [internoId, setInternoId] = useState<string | undefined>(manualSelecionadoId);
   const [inputPagina, setInputPagina] = useState<string>(String(paginaInicial));
@@ -417,8 +419,9 @@ export function ManualPdfViewer({
   }
 
   const emTelaCheia = isFullscreenNativo || telaCheiaModal;
-  const pdfSrc = `${ativo.url}?p=${paginaAplicada}#page=${paginaAplicada}&view=FitH`;
-  const iframeKey = `${ativo.url}#page=${paginaAplicada}-r${reloadTick}`;
+  const resolvedPdfUrl = prefixApiUrl(apiBaseUrl, ativo.url);
+  const pdfSrc = `${resolvedPdfUrl}?p=${paginaAplicada}#page=${paginaAplicada}&view=FitH`;
+  const iframeKey = `${resolvedPdfUrl}#page=${paginaAplicada}-r${reloadTick}`;
 
   return (
     <div
@@ -610,7 +613,7 @@ export function ManualPdfViewer({
               asChild
             >
               <a
-                href={`${ativo.url}#page=${paginaAplicada}`}
+                href={`${resolvedPdfUrl}#page=${paginaAplicada}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Abrir PDF em nova aba do navegador"

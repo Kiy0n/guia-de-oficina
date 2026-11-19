@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { resolveApiUrl } from '@/lib/apiBase';
 
 export type ApiStatus = 'verificando' | 'online' | 'offline';
 
@@ -12,7 +13,9 @@ export function useApiHealth(intervalMs = 30_000): ApiStatus {
     const check = () => {
       controller?.abort();
       controller = new AbortController();
-      fetch('/api/health', { signal: controller.signal, cache: 'no-store' })
+      const signal = controller.signal;
+      void resolveApiUrl('/api/health')
+        .then((url) => fetch(url, { signal, cache: 'no-store' }))
         .then((res) => setStatus(res.ok ? 'online' : 'offline'))
         .catch((err: unknown) => {
           if (!(err instanceof DOMException && err.name === 'AbortError')) setStatus('offline');
