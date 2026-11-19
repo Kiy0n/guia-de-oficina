@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -22,11 +23,14 @@ export interface ToastInput {
   duracaoMs?: number;
   acaoDesfazer?: () => void | Promise<void>;
   labelAcao?: string;
+  /** Chave estável opcional para substituir/atualizar toasts do mesmo grupo (ex.: 'tema', 'modo-bancada'). */
+  dedupeKey?: string;
 }
 
 interface ToastItem extends ToastInput {
   id: string;
   variante: ToastVariante;
+  criadoEmMs: number;
 }
 
 interface ToastContextValue {
@@ -34,37 +38,124 @@ interface ToastContextValue {
   dispensarToast: (id: string) => void;
 }
 
+const ANTI_DUPLICATE_WINDOW_MS = 400;
+
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const toastsRef = useRef<ToastItem[]>([]);
   const timersRef = useRef<Map<string, number>>(new Map());
 
-  const dispensarToast = useCallback((id: string) => {
+  toastsRef.current = toasts;
+
+  const limparTimer = useCallback((id: string) => {
     const timer = timersRef.current.get(id);
     if (timer !== undefined) {
       window.clearTimeout(timer);
       timersRef.current.delete(id);
     }
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  const dispensarToast = useCallback(
+    (id: string) => {
+      limparTimer(id);
+      setToasts((prev) => {
+        const next = prev.filter((t) => t.id !== id);
+        toastsRef.current = next;
+        return next;
+      });
+    },
+    [limparTimer],
+  );
+
+  const agendarAutoFechamento = useCallback(
+    (id: string, duracaoMs: number) => {
+      limparTimer(id);
+      const timer = window.setTimeout(() => {
+        dispensarToast(id);
+      }, duracaoMs);
+      timersRef.current.set(id, timer);
+    },
+    [limparTimer, dispensarToast],
+  );
+
+  // Limpa todos os timers ao desmontar o provider
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach((timer) => window.clearTimeout(timer));
+      timersRef.current.clear();
+    };
   }, []);
 
   const mostrarToast = useCallback(
     (input: ToastInput) => {
-      const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const agora = Date.now();
       const variante = input.variante ?? 'default';
       const duracao = input.duracaoMs ?? (input.acaoDesfazer ? 5200 : 3400);
+      const ativos = toastsRef.current;
 
-      setToasts((prev) => [...prev.slice(-3), { ...input, id, variante }]);
+      // 1) Substituição por dedupeKey (evita empilhar toggles rápidos como Sol <-> Oficina)
+      if (input.dedupeKey) {
+        const existenteChave = ativos.find((t) => t.dedupeKey === input.dedupeKey);
+        if (existenteChave) {
+          const atualizado: ToastItem = {
+            ...input,
+            id: existenteChave.id,
+            variante,
+            criadoEmMs: agora,
+          };
+          const proximos = ativos.map((t) => (t.id === existenteChave.id ? atualizado : t));
+          toastsRef.current = proximos;
+          setToasts(proximos);
+          agendarAutoFechamento(existenteChave.id, duracao);
+          return existenteChave.id;
+        }
+      }
 
-      const timer = window.setTimeout(() => {
-        dispensarToast(id);
-      }, duracao);
-      timersRef.current.set(id, timer);
+      // 2) Proteção automática anti-duplicata dentro de 400ms para toasts idênticos
+      const duplicadoRecente = ativos.find(
+        (t) =>
+          t.titulo === input.titulo &&
+          (t.descricao ?? '') === (input.descricao ?? '') &&
+          t.variante === variante &&
+          agora - t.criadoEmMs <= ANTI_DUPLICATE_WINDOW_MS,
+      );
+
+      if (duplicadoRecente) {
+        const atualizado: ToastItem = {
+          ...duplicadoRecente,
+          criadoEmMs: agora,
+        };
+        const proximos = ativos.map((t) => (t.id === duplicadoRecente.id ? atualizado : t));
+        toastsRef.current = proximos;
+        setToasts(proximos);
+        agendarAutoFechamento(duplicadoRecente.id, duracao);
+        return duplicadoRecente.id;
+      }
+
+      // 3) Novo toast (mantendo no máximo 4 visíveis; limpa timer do que sair)
+      const id = `toast-${agora}-${Math.random().toString(36).slice(2, 7)}`;
+      const novo: ToastItem = {
+        ...input,
+        id,
+        variante,
+        criadoEmMs: agora,
+      };
+
+      const removidosPorLimite = ativos.length >= 4 ? ativos.slice(0, ativos.length - 3) : [];
+      for (const r of removidosPorLimite) {
+        limparTimer(r.id);
+      }
+
+      const proximos = [...ativos.slice(-3), novo];
+      toastsRef.current = proximos;
+      setToasts(proximos);
+      agendarAutoFechamento(id, duracao);
 
       return id;
     },
-    [dispensarToast],
+    [agendarAutoFechamento, limparTimer],
   );
 
   const value = useMemo<ToastContextValue>(
@@ -76,7 +167,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
 
-      {/* Container flutuante de Toasts (acima da barra mobile em telas pequenas) */}
+      {/* Container único de Toasts (acima da barra mobile em telas pequenas) */}
       <div
         aria-live="polite"
         className="no-print pointer-events-none fixed right-3 bottom-20 z-50 flex w-[calc(100vw-1.5rem)] max-w-sm flex-col gap-2 md:right-5 md:bottom-5"
@@ -129,6 +220,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                     <div className="mt-2">
                       <Button
                         type="button"
+                        data-compact="true"
                         variant="secondary"
                         size="sm"
                         onClick={() => {
@@ -146,6 +238,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
                 <button
                   type="button"
+                  data-compact="true"
                   onClick={() => dispensarToast(toast.id)}
                   aria-label="Fechar notificação"
                   className="rounded-md p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground"

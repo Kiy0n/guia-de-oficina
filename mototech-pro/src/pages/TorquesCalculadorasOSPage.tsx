@@ -596,6 +596,7 @@ export function TorquesCalculadorasOSPage() {
         : 'Nova Ordem de Serviço salva em data/oficina.json!';
       setFeedbackMensagem(msg);
       mostrarToast({
+        dedupeKey: 'os-salvar',
         titulo: editandoOsId ? 'OS atualizada na oficina' : 'OS salva na oficina',
         descricao: `${moto.marca} ${moto.modelo.nome} (${moto.geracao.anosLabel})`,
         variante: 'sucesso',
@@ -638,6 +639,7 @@ export function TorquesCalculadorasOSPage() {
       if (osRemovida) {
         const { id: _id, criadaEm: _criadaEm, ...payloadRestaurar } = osRemovida;
         mostrarToast({
+          dedupeKey: `os-excluir-${id}`,
           titulo: 'Ordem de Serviço excluída',
           descricao: `${osRemovida.marca} ${osRemovida.modeloNome} (${osRemovida.dataServico.split('-').reverse().join('/')})`,
           variante: 'aviso',
@@ -651,6 +653,7 @@ export function TorquesCalculadorasOSPage() {
               if (r.ok) {
                 await carregarOrdens();
                 mostrarToast({
+                  dedupeKey: `os-restaurada-${id}`,
                   titulo: 'Ordem de Serviço restaurada!',
                   variante: 'sucesso',
                   duracaoMs: 2200,
@@ -681,6 +684,7 @@ export function TorquesCalculadorasOSPage() {
     }
 
     mostrarToast({
+      dedupeKey: 'os-copiar-whatsapp',
       titulo: 'Ordem de Serviço copiada para WhatsApp!',
       variante: 'sucesso',
       duracaoMs: 2200,

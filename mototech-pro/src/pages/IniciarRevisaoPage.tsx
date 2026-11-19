@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertCircle,
@@ -137,6 +137,8 @@ export function IniciarRevisaoPage() {
   const [apelidoOuPlaca, setApelidoOuPlaca] = useState<string>('');
   const [passoIndex, setPassoIndex] = useState<number>(0);
   const [registros, setRegistros] = useState<Record<string, RegistroFeedbackPasso>>({});
+  const registrosRef = useRef<Record<string, RegistroFeedbackPasso>>(registros);
+  registrosRef.current = registros;
   const [comentarioGeral, setComentarioGeral] = useState<string>('');
   const [copiadoRelatorio, setCopiadoRelatorio] = useState<boolean>(false);
 
@@ -205,6 +207,7 @@ export function IniciarRevisaoPage() {
 
     if (comToastDesfazer && anterior) {
       mostrarToast({
+        dedupeKey: 'descartar-rascunho-revisao',
         titulo: 'Rascunho de revisão descartado',
         descricao: 'Você pode recuperar o progresso pausado clicando em Desfazer.',
         variante: 'aviso',
@@ -255,13 +258,13 @@ export function IniciarRevisaoPage() {
     passoId: string,
     parcial: Partial<RegistroFeedbackPasso>,
   ) => {
-    setRegistros((prev) => {
-      const atual = prev[passoId] ?? { status: 'checado_ok' as StatusFeedbackPasso };
-      const atualizado: RegistroFeedbackPasso = { ...atual, ...parcial };
-      const proximo = { ...prev, [passoId]: atualizado };
-      persistirRascunho({ registros: proximo });
-      return proximo;
-    });
+    const prev = registrosRef.current;
+    const atual = prev[passoId] ?? { status: 'checado_ok' as StatusFeedbackPasso };
+    const atualizado: RegistroFeedbackPasso = { ...atual, ...parcial };
+    const proximo = { ...prev, [passoId]: atualizado };
+    registrosRef.current = proximo;
+    setRegistros(proximo);
+    persistirRascunho({ registros: proximo });
   };
 
   const irParaPasso = (novoIdx: number) => {
@@ -397,6 +400,7 @@ export function IniciarRevisaoPage() {
     }
     setCopiadoRelatorio(true);
     mostrarToast({
+      dedupeKey: 'copiar-relatorio-revisao',
       titulo: 'Relatório copiado para WhatsApp!',
       variante: 'sucesso',
       duracaoMs: 2400,

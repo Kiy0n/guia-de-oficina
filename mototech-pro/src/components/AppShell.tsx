@@ -115,12 +115,14 @@ export function AppShell() {
       URL.revokeObjectURL(url);
 
       mostrarToast({
+        dedupeKey: 'backup-oficina',
         titulo: 'Backup baixado com sucesso!',
         descricao: `Arquivo mototech-pro-backup-${hoje}.json salvo no seu dispositivo.`,
         variante: 'sucesso',
       });
     } catch {
       mostrarToast({
+        dedupeKey: 'backup-oficina',
         titulo: 'Não foi possível baixar o backup',
         descricao: 'Verifique se o servidor Express local está ativo.',
         variante: 'erro',
@@ -169,6 +171,7 @@ export function AppShell() {
       window.dispatchEvent(new CustomEvent('mototech:backup-restaurado'));
 
       mostrarToast({
+        dedupeKey: 'backup-oficina',
         titulo: 'Backup restaurado com sucesso!',
         descricao: `${data.totalFerramentas ?? 0} ferramentas e ${data.totalOS ?? 0} Ordens de Serviço carregadas.`,
         variante: 'sucesso',
@@ -176,6 +179,7 @@ export function AppShell() {
       });
     } catch (err) {
       mostrarToast({
+        dedupeKey: 'backup-oficina',
         titulo: 'Falha ao restaurar backup',
         descricao:
           err instanceof Error ? err.message : 'Verifique se o arquivo JSON é um backup válido.',

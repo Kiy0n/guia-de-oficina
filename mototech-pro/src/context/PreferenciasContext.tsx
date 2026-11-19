@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -97,6 +98,8 @@ function lerPreferencias(): PreferenciasPersistidas {
 export function PreferenciasProvider({ children }: { children: ReactNode }) {
   const { mostrarToast } = useToast();
   const [prefs, setPrefs] = useState<PreferenciasPersistidas>(lerPreferencias);
+  const prefsRef = useRef<PreferenciasPersistidas>(prefs);
+  prefsRef.current = prefs;
 
   const { suportado, ativoNoNavegador, motivoIndisponivel } = useWakeLock(
     prefs.manterTelaAcesa,
@@ -135,58 +138,73 @@ export function PreferenciasProvider({ children }: { children: ReactNode }) {
   }, [prefs.tema, prefs.modoBancada]);
 
   const alternarTema = useCallback(() => {
-    setPrefs((prev) => {
-      const proximo: TemaBancada = prev.tema === 'oficina' ? 'sol' : 'oficina';
-      mostrarToast({
-        titulo:
-          proximo === 'sol'
-            ? 'Modo Sol ativado (Alto Contraste)'
-            : 'Modo Oficina ativado (Tema Escuro)',
-        variante: 'default',
-        duracaoMs: 2200,
-      });
-      return { ...prev, tema: proximo };
+    const atual = prefsRef.current;
+    const proximo: TemaBancada = atual.tema === 'oficina' ? 'sol' : 'oficina';
+    const atualizado: PreferenciasPersistidas = { ...atual, tema: proximo };
+    prefsRef.current = atualizado;
+    setPrefs(atualizado);
+
+    mostrarToast({
+      dedupeKey: 'tema',
+      titulo:
+        proximo === 'sol'
+          ? 'Modo Sol ativado (Alto Contraste)'
+          : 'Modo Oficina ativado (Tema Escuro)',
+      variante: 'default',
+      duracaoMs: 2200,
     });
   }, [mostrarToast]);
 
   const alternarModoBancada = useCallback(() => {
-    setPrefs((prev) => {
-      const proximo = !prev.modoBancada;
-      mostrarToast({
-        titulo: proximo ? 'Modo Bancada (A+) ativado' : 'Modo Bancada desativado',
-        descricao: proximo
-          ? 'Botões maiores (48px+) e valores técnicos ampliados para leitura à distância.'
-          : 'Layout padrão restaurado.',
-        variante: 'default',
-        duracaoMs: 2600,
-      });
-      return { ...prev, modoBancada: proximo };
+    const atual = prefsRef.current;
+    const proximo = !atual.modoBancada;
+    const atualizado: PreferenciasPersistidas = { ...atual, modoBancada: proximo };
+    prefsRef.current = atualizado;
+    setPrefs(atualizado);
+
+    mostrarToast({
+      dedupeKey: 'modo-bancada',
+      titulo: proximo ? 'Modo Bancada (A+) ativado' : 'Modo Bancada desativado',
+      descricao: proximo
+        ? 'Botões maiores (48px+) e valores técnicos ampliados para leitura à distância.'
+        : 'Layout padrão restaurado.',
+      variante: 'default',
+      duracaoMs: 2600,
     });
   }, [mostrarToast]);
 
   const alternarTelaAcesa = useCallback(() => {
-    setPrefs((prev) => {
-      const proximo = !prev.manterTelaAcesa;
-      if (proximo && !suportado) {
-        mostrarToast({
-          titulo: 'Tela Acesa indisponível neste navegador',
-          descricao:
-            'A API Wake Lock exige localhost ou HTTPS (em HTTP na rede local, ajuste o tempo de tela nas configurações do celular).',
-          variante: 'aviso',
-          duracaoMs: 4500,
-        });
-        return { ...prev, manterTelaAcesa: false };
-      }
+    const atual = prefsRef.current;
+    const proximo = !atual.manterTelaAcesa;
+
+    if (proximo && !suportado) {
+      const atualizado: PreferenciasPersistidas = { ...atual, manterTelaAcesa: false };
+      prefsRef.current = atualizado;
+      setPrefs(atualizado);
 
       mostrarToast({
-        titulo: proximo ? 'Tela Acesa ativada' : 'Tela Acesa desativada',
-        descricao: proximo
-          ? 'A tela permanecerá ligada enquanto você consulta a bancada.'
-          : 'Bloqueio automático de tela liberado.',
-        variante: 'sucesso',
-        duracaoMs: 2400,
+        dedupeKey: 'wake-lock',
+        titulo: 'Tela Acesa indisponível neste navegador',
+        descricao:
+          'A API Wake Lock exige localhost ou HTTPS (em HTTP na rede local, ajuste o tempo de tela nas configurações do celular).',
+        variante: 'aviso',
+        duracaoMs: 4500,
       });
-      return { ...prev, manterTelaAcesa: proximo };
+      return;
+    }
+
+    const atualizado: PreferenciasPersistidas = { ...atual, manterTelaAcesa: proximo };
+    prefsRef.current = atualizado;
+    setPrefs(atualizado);
+
+    mostrarToast({
+      dedupeKey: 'wake-lock',
+      titulo: proximo ? 'Tela Acesa ativada' : 'Tela Acesa desativada',
+      descricao: proximo
+        ? 'A tela permanecerá ligada enquanto você consulta a bancada.'
+        : 'Bloqueio automático de tela liberado.',
+      variante: 'sucesso',
+      duracaoMs: 2400,
     });
   }, [suportado, mostrarToast]);
 
@@ -209,26 +227,28 @@ export function PreferenciasProvider({ children }: { children: ReactNode }) {
 
   const toggleFavorita = useCallback(
     (modeloId: string, geracaoId: string) => {
-      setPrefs((prev) => {
-        const existe = prev.favoritas.some(
-          (f) => f.modeloId === modeloId && f.geracaoId === geracaoId,
-        );
-        const novas = existe
-          ? prev.favoritas.filter(
-              (f) => !(f.modeloId === modeloId && f.geracaoId === geracaoId),
-            )
-          : [
-              { modeloId, geracaoId, ultimoAcesso: new Date().toISOString() },
-              ...prev.favoritas,
-            ].slice(0, 8);
+      const atual = prefsRef.current;
+      const existe = atual.favoritas.some(
+        (f) => f.modeloId === modeloId && f.geracaoId === geracaoId,
+      );
+      const novas = existe
+        ? atual.favoritas.filter(
+            (f) => !(f.modeloId === modeloId && f.geracaoId === geracaoId),
+          )
+        : [
+            { modeloId, geracaoId, ultimoAcesso: new Date().toISOString() },
+            ...atual.favoritas,
+          ].slice(0, 8);
 
-        mostrarToast({
-          titulo: existe ? 'Removida das suas motos favoritas' : 'Moto fixada em Minhas Motos ⭐',
-          variante: existe ? 'default' : 'sucesso',
-          duracaoMs: 2200,
-        });
+      const atualizado: PreferenciasPersistidas = { ...atual, favoritas: novas };
+      prefsRef.current = atualizado;
+      setPrefs(atualizado);
 
-        return { ...prev, favoritas: novas };
+      mostrarToast({
+        dedupeKey: 'favorita',
+        titulo: existe ? 'Removida das suas motos favoritas' : 'Moto fixada em Minhas Motos ⭐',
+        variante: existe ? 'default' : 'sucesso',
+        duracaoMs: 2200,
       });
     },
     [mostrarToast],

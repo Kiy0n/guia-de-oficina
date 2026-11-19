@@ -156,6 +156,7 @@ export function ManualRevisoesPage() {
     salvarMarcados({});
     if (tinhaAlgum) {
       mostrarToast({
+        dedupeKey: 'limpar-checklist-revisao',
         titulo: `Marcações da revisão ${marcoAtivo.labelKm} limpas`,
         variante: 'aviso',
         acaoDesfazer: () => {
@@ -171,6 +172,7 @@ export function ManualRevisoesPage() {
       await navigator.clipboard.writeText(texto);
       setCopiado(true);
       mostrarToast({
+        dedupeKey: 'copiar-checklist-revisao',
         titulo: 'Checklist de revisão copiado para WhatsApp!',
         variante: 'sucesso',
         duracaoMs: 2200,
