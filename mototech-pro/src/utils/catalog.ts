@@ -2,7 +2,9 @@ import { CATALOGO } from '@/data/catalog';
 import type { Geracao, Marca, Modelo, MotoSelecionada } from '@/types/moto';
 
 export function getModelosPorMarca(marca: Marca): Modelo[] {
-  return CATALOGO.filter((m) => m.marca === marca);
+  return CATALOGO.filter((m) => m.marca === marca).sort((a, b) =>
+    a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true, sensitivity: 'base' }),
+  );
 }
 
 export function contarModelos(marca: Marca): number {

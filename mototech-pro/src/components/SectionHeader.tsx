@@ -16,7 +16,9 @@ export function SectionHeader({ section, children }: { section: SectionDef; chil
   const Icon = section.icon;
 
   // Ordena da mais recente para a mais antiga para acesso imediato na bancada
-  const geracoesOrdenadas = [...modelo.geracoes].sort((a, b) => b.anoInicio - a.anoInicio);
+  const geracoesOrdenadas = [...modelo.geracoes].sort(
+    (a, b) => a.anoInicio - b.anoInicio || a.anoFim - b.anoFim,
+  );
 
   return (
     <div className="flex flex-col gap-4 border-b pb-6">

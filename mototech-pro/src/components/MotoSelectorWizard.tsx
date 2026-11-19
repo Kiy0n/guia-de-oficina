@@ -132,10 +132,7 @@ function Stepper({ current, onGoTo }: { current: Step; onGoTo: (step: Step) => v
                   )}
                   {done ? <Check className="size-4" /> : step}
                 </span>
-                <span className="relative z-10 truncate">
-                  <span className="hidden sm:inline">{step}. </span>
-                  {label}
-                </span>
+                <span className="relative z-10 truncate">{label}</span>
               </button>
               {i < STEPS.length - 1 && (
                 <span className="relative h-px flex-1 overflow-hidden bg-border" aria-hidden>
@@ -578,8 +575,10 @@ function StepGeracao({
   onGeracao: (geracao: Geracao) => void;
 }) {
   const theme = BRAND_THEME[modelo.marca];
-  // Mais recente primeiro: é o caso mais comum na bancada.
-  const geracoes = [...modelo.geracoes].sort((a, b) => b.anoInicio - a.anoInicio);
+  // Ordem cronológica: do ano mais antigo para o mais recente.
+  const geracoes = [...modelo.geracoes].sort(
+    (a, b) => a.anoInicio - b.anoInicio || a.anoFim - b.anoFim,
+  );
 
   return (
     <div className="flex flex-col gap-6">
