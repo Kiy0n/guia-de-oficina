@@ -23,43 +23,166 @@ const TORQUES_CG160_BROS_XRE: TorqueAperto[] = [
   torque('Parafusos das mesas da suspensão (inferior / superior)', 32, 'suspensao'),
 ];
 
-const TORQUES_CG150: TorqueAperto[] = [
-  torque('Bujão de drenagem do óleo do motor', 30, 'motor', 'Faixa manual 2004: 25–34 N·m (2,5–3,5 kgf·m) | Manual 2009+: 30 N·m (3,1 kgf·m) • Arruela 12 mm'),
-  torque('Vela de ignição (NGK CPR8EA-9)', 16, 'motor', 'Rosca M10 — encostar à mão antes de aplicar torque'),
-  torque('Parafusos da tampa do cabeçote', 10, 'motor'),
-  torque('Contratuerca de regulagem de válvula', 14, 'motor'),
-  torque('Porca castelo do filtro centrífugo', 64, 'motor'),
-  torque('Porca do eixo dianteiro', 62, 'chassi', 'Manual oficial: 62 N·m (6,3 kgf·m) / faixa 54–69 N·m'),
-  torque('Porca do eixo traseiro', 88, 'chassi', 'Manual oficial: 88 N·m (9,0 kgf·m) / faixa 78–98 N·m'),
-  torque('Porcas da coroa traseira', 64, 'chassi'),
-  torque('Porca do braço limitador do freio traseiro', 22, 'freios', 'Manual oficial: 22 N·m (2,2 kgf·m) + contrapino novo'),
-  torque('Parafusos da pinça de freio dianteira (ESD/EX)', 30, 'freios', 'Trava-rosca médio'),
-  torque('Porca da mesa superior (coluna de direção)', 74, 'suspensao'),
+const TORQUES_CG150_CARB: TorqueAperto[] = [
+  torque(
+    'Bujão de drenagem do óleo do motor',
+    30,
+    'motor',
+    'Faixa oficial: 25 – 34 N·m (2,5 – 3,5 kgf·m) • Manual 2004 pág. 63 (PDF pág. 68) / Manual 2008 pág. 6-7 (PDF pág. 53)',
+  ),
+  torque(
+    'Porca do eixo dianteiro',
+    62,
+    'chassi',
+    'Faixa oficial: 54 – 69 N·m (5,4 – 6,9 kgf·m em 2004 págs. 76/78 [PDF 81/83]; 5,5 – 7,0 kgf·m em 2008 págs. 6-25/6-27 [PDF 71/73])',
+  ),
+  torque(
+    'Porca do eixo traseiro',
+    88,
+    'chassi',
+    'Faixa oficial: 78 – 98 N·m (7,8 – 9,8 kgf·m em 2004 págs. 69/79 [PDF 74/84]; 8,0 – 10 kgf·m em 2008 págs. 6-14/6-28 [PDF 60/74])',
+  ),
+];
+
+const TORQUES_CG150_INJ: TorqueAperto[] = [
+  torque(
+    'Parafuso de drenagem do óleo do motor',
+    30,
+    'motor',
+    '30 N·m (3,1 kgf·m) • Manuais 2009–2011 pág. 6-7 e Manual 2014 págs. 55 e 110 (PDF págs. 67 e 122)',
+  ),
+  torque(
+    'Parafusos da tampa do filtro de ar',
+    1.2,
+    'motor',
+    '1,2 N·m (0,1 kgf·m) • Manuais 2011 Fan e 2011 Titan pág. 6-5 (PDF pág. 47)',
+  ),
+  torque(
+    'Porca do eixo dianteiro',
+    62,
+    'chassi',
+    '62 N·m (6,3 kgf·m) nos Manuais 2009–2011 (págs. 6-22 a 6-26) | 59 N·m (6,0 kgf·m) no Manual 2014 págs. 76 e 110 (PDF págs. 88 e 122)',
+  ),
+  torque(
+    'Porca do eixo traseiro',
+    88,
+    'chassi',
+    '88 N·m (9,0 kgf·m) • Manuais 2009–2011 (págs. 6-12/6-13 e 6-23/6-27) e Manual 2014 págs. 61, 78 e 110 (PDF págs. 73, 90 e 122)',
+  ),
+  torque(
+    'Porcas superiores dos amortecedores traseiros (fixação bagageiro)',
+    34,
+    'suspensao',
+    '34 N·m (3,5 kgf·m) • Manual 2009 pág. 5-8 (PDF pág. 30)',
+  ),
+  torque(
+    'Parafusos das alças traseiras (fixação bagageiro)',
+    42,
+    'chassi',
+    '42 N·m (4,3 kgf·m) • Manual 2009 pág. 5-8 (PDF pág. 30)',
+  ),
 ];
 
 const TORQUES_CG125_OHV: TorqueAperto[] = [
-  torque('Tampa do filtro de tela / dreno de óleo (36 mm)', 15, 'motor', 'Manual CG 125 Titan/Cargo 2000 pág. 41: 15 N·m (1,5 kgf·m) • Conferir O-ring'),
-  torque('Bujão de drenagem do óleo (carcaça Fan 2005–2008)', 24, 'motor', 'Arruela de vedação 12 mm'),
-  torque('Vela de ignição (NGK DP8EA-9 — Rosca M12)', 18, 'motor'),
-  torque('Parafusos da tampa de válvulas', 10, 'motor'),
-  torque('Contratuerca do regulador de válvula (OHV)', 14, 'motor'),
-  torque('Porca castelo do filtro centrífugo', 54, 'motor'),
-  torque('Porca do eixo dianteiro', 63, 'chassi', 'Manual CG 125 2000 pág. 71: 63 N·m (6,3 kgf·m)'),
-  torque('Porca do eixo traseiro', 90, 'chassi', 'Manual CG 125 2000 pág. 58/71: 90 N·m (9,0 kgf·m)'),
-  torque('Porcas da coroa de transmissão', 54, 'chassi'),
-  torque('Porca do braço de ancoragem do freio traseiro', 22, 'freios', 'Manual CG 125 2000 pág. 72: 22 N·m (2,2 kgf·m)'),
+  torque(
+    'Bujão de drenagem / tampa do filtro de tela de óleo',
+    15,
+    'motor',
+    '15 N·m (1,5 kgf·m) • Manual 2000 pág. 41 (PDF pág. 48) e Manual 2008 pág. 6-7 (PDF pág. 39) • Conferir anel de vedação',
+  ),
+  torque(
+    'Copo do filtro de combustível (registro)',
+    4,
+    'motor',
+    '4 N·m (0,4 kg·m) • Manual 2000 pág. 47 (PDF pág. 54)',
+  ),
+  torque(
+    'Contraporca do parafuso regulador de válvula (OHV)',
+    14,
+    'motor',
+    '14 N·m (1,4 kgf·m) • Manual 2008 pág. 6-9 (PDF pág. 41)',
+  ),
+  torque(
+    'Parafusos C da tampa do cabeçote (válvulas)',
+    12,
+    'motor',
+    '12 N·m (1,2 kgf·m) • Manual 2008 pág. 6-10 (PDF pág. 42)',
+  ),
+  torque(
+    'Parafusos A e B da válvula/tubo de sucção de ar (PAIR)',
+    12,
+    'motor',
+    '12 N·m (1,2 kgf·m) • Manual 2008 pág. 6-10 (PDF pág. 42)',
+  ),
+  torque(
+    'Tampa do orifício da árvore de manivelas',
+    15,
+    'motor',
+    '15 N·m (1,5 kgf·m) • Manual 2008 pág. 6-10 (PDF pág. 42)',
+  ),
+  torque(
+    'Porca do eixo dianteiro',
+    63,
+    'chassi',
+    '63 N·m (6,3 kg·m) no Manual 2000 pág. 71 (PDF pág. 78) | 62 N·m (6,3 kgf·m) no Manual 2008 pág. 6-21 (PDF pág. 53)',
+  ),
+  torque(
+    'Porca do eixo traseiro',
+    90,
+    'chassi',
+    '90 N·m (9,0 kg·m) no Manual 2000 págs. 58 e 72 (PDF págs. 65 e 80) | 88 N·m (9,0 kgf·m) no Manual 2008 págs. 6-14 e 6-23 (PDF págs. 46 e 55)',
+  ),
+  torque(
+    'Porca do braço limitador / ancoragem do freio traseiro',
+    22,
+    'freios',
+    '22 N·m (2,2 kgf·m) + cupilha nova • Manual 2000 pág. 72 (PDF pág. 80) e Manual 2008 pág. 6-23 (PDF pág. 55)',
+  ),
 ];
 
 const TORQUES_CG125_OHC: TorqueAperto[] = [
-  torque('Bujão de drenagem do óleo do motor', 30, 'motor', 'Manual CG 125 Fan/Cargo 2011 pág. 6-8: 30 N·m (3,1 kgf·m) • Arruela 12 mm'),
-  torque('Vela de ignição (NGK CPR8EA-9 — Rosca M10)', 16, 'motor'),
-  torque('Parafusos da tampa de válvulas', 10, 'motor'),
-  torque('Contratuerca do regulador de válvula (OHC)', 14, 'motor'),
-  torque('Porca castelo do filtro centrífugo', 64, 'motor'),
-  torque('Porca do eixo dianteiro', 62, 'chassi', 'Manual CG 125 2011 pág. 6-24: 62 N·m (6,3 kgf·m)'),
-  torque('Porca do eixo traseiro', 88, 'chassi', 'Manual CG 125 2011 pág. 6-15: 88 N·m (9,0 kgf·m)'),
-  torque('Porcas da coroa de transmissão', 64, 'chassi'),
-  torque('Porca do braço limitador do freio traseiro', 22, 'freios', 'Manual CG 125 2011 pág. 6-25: 22 N·m (2,2 kgf·m)'),
+  torque(
+    'Parafuso de drenagem do óleo do motor',
+    30,
+    'motor',
+    '30 N·m (3,1 kgf·m) • Manual 2011 pág. 6-8 (PDF pág. 48) e Manual 2014 págs. 58 e 118 (PDF págs. 70 e 130)',
+  ),
+  torque(
+    'Porca do eixo dianteiro',
+    62,
+    'chassi',
+    '62 N·m (6,3 kgf·m) no Manual 2011 pág. 6-24 (PDF pág. 64) | 59 N·m (6,0 kgf·m) no Manual 2014 págs. 80, 81 e 118 (PDF págs. 92, 93 e 130)',
+  ),
+  torque(
+    'Porca do eixo traseiro',
+    88,
+    'chassi',
+    '88 N·m (9,0 kgf·m) • Manual 2011 págs. 6-15 e 6-25 (PDF págs. 55 e 65) e Manual 2014 págs. 66, 83 e 118 (PDF págs. 78, 95 e 130)',
+  ),
+  torque(
+    'Porca do braço limitador do freio traseiro',
+    22,
+    'freios',
+    '22 N·m (2,2 kgf·m) + cupilha nova • Manual 2011 pág. 6-25 (PDF pág. 65) e Manual 2014 págs. 83 e 118 (PDF págs. 95 e 130)',
+  ),
+  torque(
+    'Porcas superiores dos amortecedores traseiros (fixação bagageiro)',
+    34,
+    'suspensao',
+    '34 N·m (3,5 kgf·m) • Manual 2011 pág. 5-8 (PDF pág. 28)',
+  ),
+  torque(
+    'Parafusos das alças traseiras (fixação bagageiro)',
+    42,
+    'chassi',
+    '42 N·m (4,3 kgf·m) • Manual 2011 pág. 5-8 (PDF pág. 28)',
+  ),
+  torque(
+    'Parafuso da tampa lateral direita',
+    1.5,
+    'chassi',
+    '1,5 N·m (0,2 kgf·m) • Manual 2011 pág. 4-3 (PDF pág. 17)',
+  ),
 ];
 
 const TORQUES_CUB_BIZ_POP: TorqueAperto[] = [
@@ -165,7 +288,7 @@ const cg160Base: FichaTecnica = {
 };
 
 const cg150Base: FichaTecnica = {
-  versaoReferencia: 'Titan ES / ESD',
+  versaoReferencia: 'Titan KS / ES / ESD / Job / Sport',
   cilindradaCc: 149.2,
   motor: MOTOR_OHC_2V,
   alimentacao: 'carburador',
@@ -176,68 +299,79 @@ const cg150Base: FichaTecnica = {
   freios: { dianteiro: 'disco', traseiro: 'tambor', sistema: 'convencional' },
   pesoSecoKg: 118,
   motorDetalhes: {
-    diametroCursoMm: { diametro: 57.3, curso: 57.84 },
+    diametroCursoMm: { diametro: 57.3, curso: 57.8 },
     taxaCompressao: '9,5:1',
-    potencia: '14,2 cv @ 8.000 rpm',
-    torque: '1,35 kgf·m @ 6.500 rpm',
+    potencia: '14,2 cv @ 8.000 rpm (Titan KS/ES/ESD • Job) | 15,3 cv @ 8.500 rpm (CG 150 Sport)',
+    torque: '1,35 kgf·m @ 6.500 rpm (Titan KS/ES/ESD • Job) | 1,41 kgf·m @ 7.000 rpm (CG 150 Sport)',
     marchaLentaRpm: faixaRpm(1300, 1500, '1.400 ± 100 rpm'),
-    comando: 'OHC (corrente de comando com balancins roletados)',
-    filtroOleo: 'Filtro centrífugo + tela metálica inferior (limpar a cada 12.000 km)',
+    comando: 'OHC (acionado por corrente, 2 válvulas)',
+    filtroOleo: 'Filtro centrífugo de óleo + tela do filtro de óleo (limpar a cada 12.000 km)',
     alimentacaoDetalhe:
-      'Carburador Keihin PD22 (pistão a vácuo) • Giclê alta #115 / baixa #38 • Parafuso mistura: 1 e 7/8 voltas',
+      'Carburador (gasolina comum) • Marcha lenta: 1.400 ± 100 rpm • Giclagem e regulagem interna: aguardam confirmação no Manual de Serviço',
   },
   fluidos: {
     oleoMotor: {
-      especificacao: 'SAE 10W-30 Semissintético (API SL / JASO MA)',
+      especificacao: 'MOBIL SUPER MOTO 4T MULTIVISCOSO SAE 20W-50 API-SF (proibido adicionar aditivos ao óleo)',
       capacidadeTrocaL: 1.0,
       capacidadeTotalL: 1.2,
-      observacao: 'Originalmente lançada com 20W-50 mineral até 2010; boletim Honda unificou 10W-30 semissintético',
+      observacao:
+        '1,0 L após drenagem | 1,2 L após desmontagem do motor (Manuais 2004 pág. 62/102 e 2008 pág. 6-6/10-2)',
     },
     tanqueL: 14.0,
     reservaL: 2.0,
-    fluidoFreio: 'DOT 4 (versões ESD/Sport) / Tambor nas versões KS/ES',
+    fluidoFreio: 'Mobil Brake Fluid DOT 3 ou DOT 4 (Titan ESD e Sport) / Tambor mecânico (Titan KS/ES e Job)',
     fluidoBengala: {
-      especificacao: 'Fluido ATF / Fork Oil 10W',
+      especificacao: 'Óleo para suspensão dianteira (viscosidade/nível em mm aguardam Manual de Serviço)',
       volumePorCanelaMl: 141.5,
-      nivelMm: 152,
-      observacao: '141,5 cm³ (ml) por canela nas versões Titan/Job/Fan | 137,5 cm³ na CG 150 Sport (Manual 2004 pág. 102)',
+      observacao:
+        '141,5 cm³ por amortecedor (Titan KS/ES/ESD e Job) | 137,5 cm³ (CG 150 Sport) • Manuais 2004 pág. 102 e 2008 pág. 10-2',
     },
   },
   folgas: {
-    valvulaAdmissaoMm: faixaMm(0.06, 0.1, '0,08 ± 0,02 mm'),
-    valvulaEscapeMm: faixaMm(0.1, 0.14, '0,12 ± 0,02 mm'),
+    valvulaAdmissaoMm: faixaMm(0.08, 0.08, '0,08 mm (motor frio no PMS de compressão)'),
+    valvulaEscapeMm: faixaMm(0.12, 0.12, '0,12 mm (motor frio no PMS de compressão)'),
     folgaCorrenteMm: faixaMm(20, 30, '20 – 30 mm'),
-    folgaManeteEmbreagemMm: faixaMm(10, 20, '10 – 20 mm'),
+    folgaManeteEmbreagemMm: faixaMm(10, 20, '10 – 20 mm (e freio dianteiro a tambor KS/ES/Job: 10 – 20 mm)'),
     folgaPedalFreioMm: faixaMm(20, 30, '20 – 30 mm'),
-    folgaAceleradorMm: faixaMm(2, 6, '2 – 6 mm'),
+    folgaAceleradorMm: faixaMm(3, 5, '3 – 5 mm (medida no flange da manopla • Manuais 2004 pág. 66 e 2008 pág. 6-11)'),
   },
   eletrica: {
     vela: {
       modelo: 'NGK CPR8EA-9',
-      iridiumAlternativa: 'NGK CPR8EAIX-9',
+      alternativas: ['NGK CPR9EA-9 (Opcional)'],
       folgaEletrodoMm: faixaMm(0.8, 0.9, '0,8 – 0,9 mm'),
     },
     bateria: {
-      modelo: 'Yuasa YTX5L-BS / Heliar HTZ6L',
+      modelo: '12 V – 4 Ah (Titan KS / Job) | 12 V – 6 Ah (Titan ES/ESD e Sport em 2004) | 12 V – 5 Ah (Titan ES/ESD e Sport em 2008)',
       tensaoV: 12,
       capacidadeAh: 5,
-      tensaoCargaV: '13,5V – 14,8V @ 5.000 rpm',
+      tensaoCargaV: 'Alternador: 0,068 kW / 5.000 rpm • Ignição CDI',
     },
     fusivelPrincipalA: 15,
-    fusiveisSecundarios: '10A (circuito auxiliar)',
-    lampadaFarol: 'HS1 / H4 12V 35/35W',
+    fusiveisSecundarios: '5 A, 10 A',
+    lampadaFarol: '12 V – 35/35 W (Lanterna/freio: 12 V – 21/5 W • Sinaleiras: 12 V – 16 W x 4)',
   },
   pneus: {
-    dianteiro: { medida: '80/100-18 M/C 47P', pressaoPsi: 25, pressaoComGarupaPsi: 25, tipo: 'Com câmara' },
-    traseiro: { medida: '90/90-18 M/C 57P', pressaoPsi: 29, pressaoComGarupaPsi: 33, tipo: 'Com câmara' },
+    dianteiro: {
+      medida: '80/100 – 18M/C 47P',
+      pressaoPsi: 25,
+      pressaoComGarupaPsi: 25,
+      tipo: 'Com câmara: 25 psi (Titan/Job — Pirelli City Demon) | Sem câmara: 29 psi (CG 150 Sport — Pirelli MT75)',
+    },
+    traseiro: {
+      medida: '90/90 – 18M/C 57P (Titan/Job) | 110/80 – 17M/C 57P (Sport)',
+      pressaoPsi: 29,
+      pressaoComGarupaPsi: 33,
+      tipo: 'Com câmara Tuffup (Titan/Job) | Sem câmara aro 17 (Sport) • 29 psi só piloto / 33 psi com passageiro (Job c/ carga: 29 psi)',
+    },
   },
   transmissaoFinal: {
     tipo: 'corrente',
-    corrente: '428H x 118L',
+    corrente: 'DID 428H (lubrificante: óleo para transmissão SAE 80 ou 90)',
     pinhaoDentes: 16,
     coroaDentes: 43,
   },
-  torques: TORQUES_CG150,
+  torques: TORQUES_CG150_CARB,
 };
 
 const bros160Base: FichaTecnica = {
@@ -713,63 +847,140 @@ export const HONDA: Modelo[] = [
         anoFim: 2008,
         nomeGeracao: 'Carburada',
         versoes: ['Titan KS', 'Titan ES', 'Titan ESD', 'Job', 'Sport'],
-        destaques: ['Motor 149,2cc OHC', 'Carburador Keihin PD22 (gasolina)', 'Partida pedal + elétrica (ES/ESD)'],
+        destaques: [
+          'Motor 149,2 cm³ OHC (14,2 cv Titan/Job | 15,3 cv Sport)',
+          'Carburador a gasolina (marcha lenta 1.400 ± 100 rpm)',
+          'Partida a pedal (KS/Job) e elétrica (ES/ESD/Sport)',
+        ],
         alertasBancada: [
-          'Folga de válvulas da CG 150 é Adm 0,08 mm / Esc 0,12 mm (não usar 0,24 mm da 160 para não bater comando).',
-          'No carburador Keihin PD22, verificar o diafragma da válvula de corte de ar (air-cut) lateral quando a moto pipocar na desaceleração.',
-          'Acionador da corrente de comando perde pressão de mola com o tempo — testar travamento da catraca antes de montar.',
-          'Limpar filtro centrífugo e peneira inferior a cada 12.000 km; trocar junta da tampa direita.',
+          'Folga de válvulas (motor frio no PMS de compressão): Adm 0,08 mm / Esc 0,12 mm (Manuais 2004 pág. 65/103 e 2008 pág. 10-2).',
+          'Diferenças exclusivas da CG 150 Sport nos manuais 2004 e 2008: potência 15,3 cv @ 8.500 rpm (vs 14,2 cv @ 8.000 rpm), torque 1,41 kgf·m @ 7.000 rpm (vs 1,35 kgf·m @ 6.500 rpm), redução final 2,800 (vs 2,687 Titan/Job), bengala com 137,5 cm³ por canela (vs 141,5 cm³ Titan/Job) e pneus SEM câmara Pirelli MT75 com traseiro aro 17 (110/80-17M/C 57P) e dianteiro calibrado com 29 psi (vs 25 psi nas Titan/Job com câmara).',
+          'Óleo especificado nos manuais 2004 e 2008: MOBIL SUPER MOTO 4T MULTIVISCOSO SAE 20W-50 API-SF (proibido adicionar aditivos) • 1,0 L após drenagem / 1,2 L após desmontagem.',
+          'Folga da manopla do acelerador nos manuais 2004 (pág. 66) e 2008 (pág. 6-11) é de 3 – 5 mm (e não 2 – 6 mm).',
+          'Bateria mudou entre 2004 e 2008 nas versões com partida elétrica (ES/ESD/Sport): 12 V – 6 Ah no manual 2004 (pág. 106) e 12 V – 5 Ah no manual 2008 (pág. 10-4); versões KS/Job usam 12 V – 4 Ah. Peso seco: 118 kg (KS), 119 kg (ES/Job), 119 kg (2004 ESD) / 121 kg (2008 ESD), 116 kg (2004 Sport) / 117 kg (2008 Sport).',
         ],
         auditoria: {
           status: 'verificado_manual',
           ultimaRevisao: '2026-11-19',
           fonte:
-            'Manuais Oficiais Honda: CG 150 Titan, Sport e Job 2004.pdf (D2203-MAN-0408, págs. 62–69, 76–78 e 102–105) e CG 150 Titan, Sport e Job 2008.pdf',
+            'CG 150 Titan, Sport e Job 2004.pdf (D2203-MAN-0408 — págs. 25–35, 58–83 e 100–106 [PDF págs. 30–40, 63–88, 105–111 e 160]) e CG 150 Titan, Sport e Job 2008.pdf (D2203-MAN-0605 — págs. 6-1 a 6-31 e 10-1 a 10-5 [PDF págs. 47–77, 93–97 e 171])',
           notas:
-            'Conferido com PDF local: óleo 1,0 L drenagem / 1,2 L desmontagem; bujão 25–34 N·m (30 N·m); válvulas Adm 0,08 mm / Esc 0,12 mm; bengala 141,5 cm³ (137,5 cm³ Sport); eixo diant. 62 N·m e tras. 88 N·m.',
+            'Auditado 100% nos 2 PDFs locais: óleo SAE 20W-50 API-SF (1,0 L drenagem / 1,2 L desmontagem); bujão de óleo 25–34 N·m (2,5–3,5 kgf·m); válvulas Adm 0,08 mm / Esc 0,12 mm; vela NGK CPR8EA-9 (opcional CPR9EA-9), folga 0,8–0,9 mm (aperto manual + 1/2 volta + 1/8 volta nova; 1/8 volta usada); bengala 141,5 cm³ (Titan/Job) e 137,5 cm³ (Sport); eixo diant. 54–69 N·m e eixo tras. 78–98 N·m. Pendências que aguardam Manual de Serviço: modelo/giclagem do carburador, viscosidade/nível (mm) do óleo de bengala, número exato de dentes/elos da relação (manual informa redução final 2,687 Titan/Job e 2,800 Sport com corrente DID 428H) e torques internos (vela em N·m, tampa do cabeçote, contraporca de válvula, filtro centrífugo, coroa, pinça de freio e mesa/coluna de direção).',
         },
         fichaTecnica: cg150Base,
       }),
       geracao('honda-cg-150', {
         anoInicio: 2009,
         anoFim: 2015,
-        nomeGeracao: 'Mix / Flex Injetada',
-        versoes: ['Titan Mix', 'Titan EX', 'Fan ESi', 'Fan ESDi', 'Cargo'],
-        destaques: ['Injeção eletrônica PGM-FI', 'Motor Flex (Mix/FlexOne)', 'CBS nas versões EX 2014–2015'],
+        nomeGeracao: 'PGM-FI (2009 Gasolina / 2010–2015 Mix & Flex)',
+        versoes: ['Titan KS', 'Titan ES', 'Titan ESD', 'Titan EX', 'Titan Mix', 'Fan ESi', 'Fan ESDi', 'Cargo'],
+        destaques: [
+          'Injeção eletrônica PGM-FI (Gasolina em 2009 | Mix/Flex a partir de 2010)',
+          'Tanque de 16,1 litros',
+          'Folga da corrente 15 – 25 mm (DID 428MX-118RB / RK 428SB-118RJ)',
+        ],
         alertasBancada: [
-          'Nas CG 150 Mix (2009–2010), o sistema exige mínimo de 20% de gasolina no tanque para partida a frio abaixo de 15 °C (não tem tanquinho auxiliar).',
-          'Reset de TPS/ECM obrigatório após limpeza de corpo de borboleta (TBI) ou troca de combustível puro gasolina ↔ etanol.',
-          'Filtro de combustível externo fica junto à bomba/chassi — substituir a cada 12.000 km para não forçar o refil da bomba (2,9 bar).',
-          'Folga de válvulas permanece Adm 0,08 ± 0,02 mm e Esc 0,12 ± 0,02 mm com motor totalmente frio.',
+          'Atenção ao ano 2009 (CG 150 Titan 2009.pdf pág. 10-2): é injetada PGM-FI exclusivamente a GASOLINA (14,2 cv @ 8.500 rpm e 1,32 kgf·m @ 7.000 rpm). A partir de 2010 (Titan MIX / Flex) passa a aceitar gasolina e etanol (14,2 cv G / 14,3 cv E @ 8.500 rpm; 1,32 kgf·m G / 1,45 kgf·m E @ 6.500 rpm).',
+          'Mudança oficial de óleo e filtro de ar na linha 2011: Manuais 2009 e 2010 especificam Mobil Super Moto 4T SAE 20W-50 API-SF e filtro de ar seco (limpar a cada 4.000 km, trocar a cada 12.000 km); Manuais 2011 e 2014 especificam Óleo Genuíno Honda SAE 10W-30 API SJ (ou superior) JASO MA e filtro de ar do tipo viscoso/úmido (NUNCA limpar com ar comprimido; trocar a cada 12.000 km no manual 2011 e a cada 16.000 km no manual 2014).',
+          'Volume de fluido da suspensão dianteira por canela varia conforme o ano no manual: 141,5 cm³ (Manuais 2009 e 2010), 142 cm³ (Manuais 2011 Fan e 2011 Titan) e 139,0 ± 2,5 cm³ com troca a cada 16.000 km (Manual 2014 pág. 68 / PDF pág. 80).',
+          'Torque da porca do eixo dianteiro mudou de 62 N·m (6,3 kgf·m) nos manuais 2009–2011 para 59 N·m (6,0 kgf·m) no manual 2014 (págs. 76 e 110); folga do pedal do freio traseiro mudou de 15 – 25 mm (2009–2011) para 20 – 30 mm (2014 pág. 56).',
+          'Nas versões Mix/Flex (2010–2014), se o motor morrer por pane seca, reabastecer com no mínimo 1 litro de gasolina e 1 litro de etanol (50%/50%) antes da partida.',
         ],
         auditoria: {
           status: 'verificado_manual',
           ultimaRevisao: '2026-11-19',
           fonte:
-            'Manuais Oficiais Honda: CG 150 Titan 2009.pdf (D2203-MAN-0669, págs. 6-7 a 6-24 e 10-1 a 10-4), CG 150 Titan 2010.pdf, CG 150 Fan/Titan 2011.pdf e CG 150 Titan 2014.pdf',
+            'CG 150 Titan 2009.pdf (D2203-MAN-0669 — págs. 5-8, 6-1 a 6-28 e 10-1 a 10-5 [PDF págs. 30, 41–68, 85–89 e 163]), CG 150 Titan 2010.pdf (D2203-MAN-0711 — págs. 6-1 a 6-30 e 10-1 a 10-5 [PDF págs. 47–76, 93–97 e 172]), CG 150 Fan 2011.pdf (D2203-MAN-0737 — págs. 6-1 a 6-28 e 10-1 a 10-5 [PDF págs. 43–70, 85–89 e 164]), CG 150 Titan 2011.pdf (D2203-MAN-0758 — págs. 6-1 a 6-27 e 10-1 a 10-5 [PDF págs. 43–69, 85–89 e 164]) e CG 150 Titan 2014.pdf (D2203-MAN-0945 — págs. 36–83 e 105–110 [PDF págs. 48–95, 117–122 e 203])',
           notas:
-            'Conferido com 5 PDFs locais: óleo SAE 10W-30 JASO MA (1,0 L drenagem / 1,2 L desmontagem); bujão 30 N·m (3,1 kgf·m); válvulas Adm 0,08 mm / Esc 0,12 mm; corrente 15–25 mm; bengala 141,5 cm³.',
+            'Auditado 100% nos 5 PDFs locais: óleo SAE 20W-50 API-SF (2009–2010) / SAE 10W-30 API SJ JASO MA (2011–2014), 1,0 L após drenagem e 1,2 L após desmontagem; bujão de dreno 30 N·m (3,1 kgf·m); válvulas Adm 0,08 mm / Esc 0,12 mm; vela NGK CPR8EA-9 (opcional CPR9EA-9), folga 0,80–0,90 mm; relação 16x43 (2,687) com corrente 118 elos (DID 428MX-118RB ou RK 428SB-118RJ) e folga 15–25 mm; bengala 141,5 cm³ (2009–2010) / 142 cm³ (2011) / 139,0 ± 2,5 cm³ (2014); eixo diant. 62 N·m (2009–2011) / 59 N·m (2014) e eixo tras. 88 N·m. Pendências que aguardam Manual de Serviço: pressão da bomba de combustível PGM-FI, nível de óleo da bengala em mm e torques internos (vela em N·m, tampa do cabeçote, contraporca de válvula, filtro centrífugo, coroa, pinça de freio e coluna de direção).',
         },
         fichaTecnica: {
           ...cg150Base,
-          versaoReferencia: 'Titan Mix / EX ESD',
+          versaoReferencia: 'Titan KS/ES/ESD/EX • Titan MIX • Fan ESi/ESDi',
           alimentacao: 'injecao',
           combustivel: 'flex',
+          pesoSecoKg: 116,
           motorDetalhes: {
             ...cg150Base.motorDetalhes,
-            potencia: '14,2 cv (gasolina) / 14,3 cv (etanol) @ 8.500 rpm',
-            torque: '1,32 kgf·m (G) / 1,45 kgf·m (E) @ 6.500 rpm',
-            alimentacaoDetalhe: 'Injeção PGM-FI Mix/Flex • Pressão da bomba: 2,9 – 3,0 bar (294 kPa)',
+            diametroCursoMm: { diametro: 57.3, curso: 57.84 },
+            potencia:
+              '14,2 cv @ 8.500 rpm (2009 Gasolina) | 14,2 cv (gasolina) / 14,3 cv (etanol/álcool) @ 8.500 rpm (2010–2014 Mix/Flex)',
+            torque:
+              '1,32 kgf·m @ 7.000 rpm (2009 Gasolina) | 1,32 kgf·m (gasolina) / 1,45 kgf·m (etanol/álcool) @ 6.500 rpm (2010–2014 Mix/Flex)',
+            alimentacaoDetalhe:
+              'Injeção eletrônica PGM-FI (somente gasolina em 2009; Mix/Flex gasolina e etanol a partir de 2010) • Marcha lenta: 1.400 ± 100 rpm • Pressão da bomba de combustível: aguarda confirmação no Manual de Serviço',
           },
           fluidos: {
             ...cg150Base.fluidos,
+            oleoMotor: {
+              especificacao:
+                '2009–2010: MOBIL SUPER MOTO 4T SAE 20W-50 API-SF | 2011–2014: ÓLEO GENUÍNO HONDA SAE 10W-30 API SJ (ou superior) JASO MA (sem aditivos)',
+              capacidadeTrocaL: 1.0,
+              capacidadeTotalL: 1.2,
+              observacao:
+                '1,0 L após drenagem | 1,2 L após desmontagem do motor (confirmado nos 5 manuais 2009, 2010, 2011 Fan, 2011 Titan e 2014 Titan)',
+            },
             tanqueL: 16.1,
             reservaL: 4.2,
+            fluidoFreio:
+              'Mobil Brake Fluid DOT 3 ou DOT 4 (2009 ESD) | Mobil Super Moto Brake Fluid DOT 4 (2010–2014 ESD/EX/ESDi) | Tambor mecânico (KS/ES/ESi)',
+            fluidoBengala: {
+              especificacao: 'Fluido para suspensão Honda (trocar a cada 16.000 km conforme Manual 2014 pág. 37 e 68)',
+              volumePorCanelaMl: 141.5,
+              observacao:
+                '141,5 cm³ (Manuais 2009 pág. 10-2 e 2010 pág. 10-1) | 142 cm³ (Manuais 2011 Fan e 2011 Titan pág. 10-1) | 139,0 ± 2,5 cm³ (Manual 2014 pág. 68 / PDF pág. 80)',
+            },
           },
           folgas: {
             ...cg150Base.folgas,
-            folgaCorrenteMm: faixaMm(15, 25, '15 – 25 mm'),
+            folgaCorrenteMm: faixaMm(15, 25, '15 – 25 mm (limite máximo 50 mm)'),
+            folgaPedalFreioMm: faixaMm(
+              15,
+              30,
+              '15 – 25 mm (Manuais 2009, 2010 e 2011 pág. 6-18/6-19) | 20 – 30 mm (Manual 2014 pág. 56 / PDF pág. 68)',
+            ),
+            folgaAceleradorMm: faixaMm(2, 6, '2 – 6 mm (medida no flange da manopla)'),
           },
+          eletrica: {
+            vela: {
+              modelo: 'NGK CPR8EA-9',
+              alternativas: ['NGK CPR9EA-9 (Opcional)'],
+              folgaEletrodoMm: faixaMm(0.8, 0.9, '0,8 – 0,9 mm (0,80 – 0,90 mm)'),
+            },
+            bateria: {
+              modelo: '12 V – 5 Ah (DTZ6 em 2014; ES/ESD/EX/Fan ESi/ESDi) | 12 V – 4 Ah (Titan KS 2009 e 2010)',
+              tensaoV: 12,
+              capacidadeAh: 5,
+              tensaoCargaV:
+                'Alternador: 0,13 kW / 5.000 rpm (2009–2011) | 0,193 kW / 5.000 rpm (2014 pág. 110) • Ignição Eletrônica',
+            },
+            fusivelPrincipalA: 15,
+            fusiveisSecundarios: '10 A',
+            lampadaFarol:
+              '12 V – 35/35 W (Lanterna/freio: 12 V – 5/21 W • Sinaleiras: 12 V – 16 W x 4 [2009–2011] / 12 V – 10 W x 4 + luz de placa 12 V – 5 W [2014])',
+          },
+          pneus: {
+            dianteiro: {
+              medida: '80/100 – 18M/C 47P',
+              pressaoPsi: 25,
+              pressaoComGarupaPsi: 25,
+              tipo: 'Com câmara (KS/ES/ESD/Fan) | Sem câmara (Titan EX) • 25 psi (175 kPa / 1,75 kgf/cm²) • Sulco mín. 1,5 mm',
+            },
+            traseiro: {
+              medida: '90/90 – 18M/C 57P (REINF 57P em 2014)',
+              pressaoPsi: 29,
+              pressaoComGarupaPsi: 33,
+              tipo: 'Com câmara (KS/ES/ESD/Fan) | Sem câmara (Titan EX) • 29 psi (200 kPa) só piloto / 33 psi (225 kPa) com passageiro • Sulco mín. 2,0 mm',
+            },
+          },
+          transmissaoFinal: {
+            tipo: 'corrente',
+            corrente:
+              'DID 428MX – 118RB ou RK 428SB – 118RJ (118 elos • lubrificante: óleo para transmissão SAE 80 ou 90)',
+            pinhaoDentes: 16,
+            coroaDentes: 43,
+          },
+          torques: TORQUES_CG150_INJ,
         },
       }),
     ],
@@ -784,30 +995,31 @@ export const HONDA: Modelo[] = [
       geracao('honda-cg-125', {
         anoInicio: 2000,
         anoFim: 2008,
-        nomeGeracao: 'Titan / Fan OHV (Motor Vareta)',
-        versoes: ['Titan KS', 'Titan ES', 'Titan KSE', 'Fan 125 (2005–2008)', 'Cargo'],
+        nomeGeracao: 'Titan / Cargo / Fan OHV (Motor Vareta)',
+        versoes: ['Titan KS', 'Titan ES', 'Titan KSE', 'Cargo', 'Fan 125 (2005–2008)'],
         destaques: [
-          'Motor 124,9cc OHV comando por varetas (sem corrente de comando)',
-          'Carburador Keihin PD22 (gasolina)',
-          'Folga de válvulas simétrica 0,08 / 0,08 mm',
+          'Motor 124,1 cm³ OHV comando por vareta',
+          'Folga de válvulas simétrica: Adm 0,08 mm / Esc 0,08 mm (motor frio)',
+          'Bujão do filtro de tela de óleo com torque de 15 N·m (1,5 kgf·m)',
         ],
         alertasBancada: [
-          'Motor OHV (Vareta): TANTO admissão QUANTO escape usam 0,08 ± 0,02 mm — diferente do motor OHC 2009+ que usa 0,12 mm no escape.',
-          'Vela de rosca grossa M12 (NGK DP8EA-9) — não confundir com a CPR8EA-9 (M10) da linha OHC 2009+.',
-          'Ao desmontar cabeçote, não inverter as varetas e conferir o desgaste dos pinos e buchas dos balancins.',
-          'Na Titan 2000–2004 a bengala leva 82,5 cm³ (ml) de ATF por canela (pág. 82); na Fan 125 2005–2008 leva 72 cm³.',
+          'Motor OHV (Vareta 124,1 cm³): TANTO admissão QUANTO escape usam 0,08 mm com motor frio — diferente do motor OHC 2009+ que usa 0,12 mm no escape.',
+          'Diferença crítica de volume de óleo do motor entre 2000 e 2008 (ambos SAE 20W-50 API-SF sem aditivos): na CG 125 Titan/Cargo 2000 (págs. 40 e 82) são 0,80 L na troca e 1,0 L total; na CG 125 Fan 2008 (págs. 6-7 e 10-1) passou para 0,9 L após drenagem e 1,1 L após desmontagem!',
+          'Fluido da suspensão dianteira (ATF): 82,5 cm³ por amortecedor na Titan/Cargo 2000 (pág. 68 e 82, troca a cada 9.000 km ou 1 ano) e 75,5 cm³ na CG 125 Fan 2008 (pág. 10-1).',
+          'Diferenças entre Titan/Cargo 2000 e Fan 2008 confirmadas nos manuais: marcha lenta 1.400 ± 100 rpm (2000 pág. 49/83) vs 1.500 ± 100 rpm (2008 pág. 6-12/10-2); vela NGK DP8EA-9 (2000 pág. 53/83) vs NGK DPR8EA-9 / opcional DPR9EA-9 (2008 pág. 6-8/10-2); relação final 3,071 [43/14] com folga de corrente 15 ~ 25 mm (2000 pág. 57/83) vs redução final 3,142 com corrente DID 428H e folga 10 – 20 mm (2008 pág. 6-13/10-3).',
+          'Medida do pneu dianteiro em ambos os manuais (2000 pág. 23/83 e 2008 pág. 6-19/10-2) é 2.75-18 42P (e não 80/100-18); calibragem traseira é 28 psi só piloto / 32 psi com passageiro (2000) e 29 psi só piloto / 33 psi com passageiro (2008).',
         ],
         auditoria: {
           status: 'verificado_manual',
           ultimaRevisao: '2026-11-19',
           fonte:
-            'Manuais Oficiais Honda: CG 125 Titan e Cargo 2000.pdf (D2203-MAN-0176, págs. 40–43, 53–58, 68–72 e 82–83) e CG 125 Fan 2008.pdf',
+            'CG 125 Titan e Cargo 2000.pdf (D2203-MAN-0176 — págs. 21–23, 36–72 e 82–84 [PDF págs. 28–30, 43–80, 89–91 e 94]) e CG 125 Fan 2008.pdf (D2203-MAN-0604 — págs. 6-1 a 6-26, 9-4 e 10-1 a 10-3 [PDF págs. 33–58, 70–73 e 147])',
           notas:
-            'Conferido com 2 PDFs locais: válvulas OHV Adm 0,08 mm / Esc 0,08 mm; óleo 0,80 L na troca (1,0 L total); tampa do filtro de tela 15 N·m; relação 14x43 (3,071); eixo diant. 63 N·m e tras. 90 N·m; bengala 82,5 cm³.',
+            'Auditado 100% nos 2 PDFs locais: cilindrada 124,1 cm³ (56,5 x 49,5 mm); óleo Mobil Super Moto 4T SAE 20W-50 API-SF (2000: 0,80 L troca / 1,0 L total; 2008: 0,9 L drenagem / 1,1 L desmontagem); tampa do filtro de tela / bujão de drenagem 15 N·m (1,5 kgf·m); válvulas OHV Adm 0,08 mm / Esc 0,08 mm (contraporca 14 N·m, parafusos C da tampa do cabeçote 12 N·m, parafusos A/B PAIR 12 N·m, tampa do orifício do virabrequim 15 N·m); bengala ATF 82,5 cm³ (2000) e 75,5 cm³ (2008); eixo diant. 63 N·m (2000) / 62 N·m (2008), eixo tras. 90 N·m (2000) / 88 N·m (2008) e braço do freio tras. 22 N·m. Pendências que aguardam Manual de Serviço: modelo/giclagem do carburador, nível de óleo da bengala em mm, quantidade de elos da corrente e torques internos (vela em N·m, porca castelo do filtro centrífugo, coroa e coluna de direção).',
         },
         fichaTecnica: {
-          versaoReferencia: 'Titan KS / Fan 125',
-          cilindradaCc: 124.9,
+          versaoReferencia: 'Titan / Cargo (2000) • Fan 125 (2008)',
+          cilindradaCc: 124.1,
           motor: MOTOR_OHV_2V,
           alimentacao: 'carburador',
           combustivel: 'gasolina',
@@ -815,64 +1027,93 @@ export const HONDA: Modelo[] = [
           partida: 'pedal',
           cambio: { tipo: 'manual', marchas: 5 },
           freios: { dianteiro: 'tambor', traseiro: 'tambor', sistema: 'convencional' },
-          pesoSecoKg: 109,
+          pesoSecoKg: 108.9,
           motorDetalhes: {
             diametroCursoMm: { diametro: 56.5, curso: 49.5 },
-            taxaCompressao: '9,0:1',
-            potencia: '12,5 cv @ 8.250 rpm',
-            torque: '1,02 kgf·m @ 7.000 rpm',
-            marchaLentaRpm: faixaRpm(1300, 1500, '1.400 ± 100 rpm'),
-            comando: 'OHV (comando baixo no bloco acionado por engrenagem e varetas)',
-            filtroOleo: 'Filtro centrífugo + tela metálica (limpeza a cada 12.000 km)',
+            taxaCompressao: '9,2:1 (Titan/Cargo 2000 pág. 82) | 9,5:1 (Fan 2008 pág. 10-2)',
+            potencia: '12,5 CV @ 9.000 rpm JIS (Titan/Cargo 2000 pág. 82) | 12,5 cv @ 8.250 rpm (Fan 2008 pág. 10-2)',
+            torque: '1,00 kgf·m @ 7.500 rpm (Titan/Cargo 2000 pág. 82) | 1,02 kgf·m @ 7.000 rpm (Fan 2008 pág. 10-2)',
+            marchaLentaRpm: faixaRpm(
+              1300,
+              1600,
+              '1.400 ± 100 rpm (Manual 2000 pág. 49/83) | 1.500 ± 100 rpm (Manual 2008 pág. 6-12/10-2)',
+            ),
+            comando: 'OHV (4 tempos, arrefecido a ar, comando de válvulas por vareta)',
+            filtroOleo:
+              'Tela do filtro de óleo (bujão 15 N·m) + filtro centrífugo de óleo (limpar a cada 6.000 km no manual 2000 / a cada 12.000 km no manual 2008)',
             alimentacaoDetalhe:
-              'Carburador Keihin PD22 • Giclê principal #102 / baixa #38 • Parafuso mistura: 2 voltas',
+              'Carburador (gasolina) • Marcha lenta: 1.400 ± 100 rpm (2000) / 1.500 ± 100 rpm (2008) • Modelo e giclagem: aguardam confirmação no Manual de Serviço',
           },
           fluidos: {
             oleoMotor: {
-              especificacao: 'SAE 20W-50 Mineral (API SF/SL) ou 10W-30 Semissintético (JASO MA)',
+              especificacao: 'MOBIL SUPER MOTO 4T MULTIVISCOSO SAE 20W-50 API-SF (proibido adicionar aditivos ao óleo)',
               capacidadeTrocaL: 0.8,
               capacidadeTotalL: 1.0,
-              observacao: '0,80 L na troca periódica | 1,0 L após desmontagem (Manual CG 125 2000 págs. 40 e 82)',
+              observacao:
+                'Manual 2000 (págs. 40 e 82): 0,80 L para troca / 1,0 L total | Manual 2008 (págs. 6-7 e 10-1): 0,9 L após drenagem / 1,1 L após desmontagem do motor',
             },
-            tanqueL: 13.0,
+            tanqueL: 13.5,
             reservaL: 2.0,
-            fluidoFreio: 'Não utiliza (freios a tambor mecânico)',
+            fluidoFreio: 'Não utiliza (freios dianteiro e traseiro a tambor — sapatas de expansão interna)',
             fluidoBengala: {
-              especificacao: 'Fluido ATF',
+              especificacao: 'Fluido para Transmissão Automática - ATF (Manual 2000 pág. 68: trocar a cada 9.000 km ou 1 ano)',
               volumePorCanelaMl: 82.5,
-              observacao: '82,5 cm³ (ml) na Titan/Cargo 2000–2004 (pág. 82) | 72 cm³ na Fan 125 2005–2008',
+              observacao:
+                '82,5 cm³ para cada amortecedor (Manual 2000 págs. 68 e 82) | 75,5 cm³ (Manual Fan 2008 pág. 10-1)',
             },
           },
           folgas: {
-            valvulaAdmissaoMm: faixaMm(0.06, 0.1, '0,08 ± 0,02 mm'),
-            valvulaEscapeMm: faixaMm(0.06, 0.1, '0,08 ± 0,02 mm'),
-            folgaCorrenteMm: faixaMm(15, 25, '15 – 25 mm'),
-            folgaManeteEmbreagemMm: faixaMm(10, 20, '10 – 20 mm'),
-            folgaPedalFreioMm: faixaMm(20, 30, '20 – 30 mm'),
-            folgaAceleradorMm: faixaMm(2, 6, '2 – 6 mm'),
+            valvulaAdmissaoMm: faixaMm(0.08, 0.08, '0,08 mm (motor frio no PMS de compressão)'),
+            valvulaEscapeMm: faixaMm(0.08, 0.08, '0,08 mm (motor frio no PMS de compressão)'),
+            folgaCorrenteMm: faixaMm(
+              10,
+              25,
+              '15 ~ 25 mm no cavalete central (Manual 2000 pág. 57/83) | 10 – 20 mm no cavalete lateral (Manual 2008 pág. 6-13; limite 50 mm)',
+            ),
+            folgaManeteEmbreagemMm: faixaMm(
+              10,
+              20,
+              '10 – 20 mm (alavanca do freio dianteiro a tambor também 10 – 20 mm • Manual 2008 pág. 6-17)',
+            ),
+            folgaPedalFreioMm: faixaMm(20, 30, '20 – 30 mm (Manuais 2000 pág. 62 e 2008 pág. 6-18)'),
+            folgaAceleradorMm: faixaMm(2, 6, '2 – 6 mm (medida no flange da manopla • Manuais 2000 pág. 48 e 2008 pág. 6-11)'),
           },
           eletrica: {
             vela: {
-              modelo: 'NGK DP8EA-9 (Rosca M12)',
-              alternativas: ['NGK DPR8EA-9'],
+              modelo: 'NGK DP8EA-9 (Manual 2000 pág. 53/83) | NGK DPR8EA-9 (Manual 2008 pág. 6-8/10-2)',
+              alternativas: ['NGK DPR9EA-9 (Opcional — Manual 2008 pág. 6-8/10-2)'],
               folgaEletrodoMm: faixaMm(0.8, 0.9, '0,8 – 0,9 mm'),
             },
             bateria: {
-              modelo: 'Yuasa YB2.5L-C (KS) / YTX5L-BS (ES)',
+              modelo: '12 V – 2,5 Ah com eletrólito (Manual 2000 pág. 66/84) | 12 V – 4 Ah selada (Manual 2008 pág. 6-23/10-3)',
               tensaoV: 12,
-              capacidadeAh: 5,
-              tensaoCargaV: '13,5V – 14,8V @ 5.000 rpm',
+              capacidadeAh: 4,
+              tensaoCargaV:
+                'Alternador: 0,096 kW / 5.000 rpm (Manual 2000 pág. 84) | 0,088 kW / 5.000 rpm (Manual 2008 pág. 10-3) • Ignição CDI',
             },
             fusivelPrincipalA: 10,
-            lampadaFarol: '12V 35/35W',
+            fusiveisSecundarios: 'Nenhum no Manual 2000 (pág. 67/84) | 7 A no Manual 2008 (pág. 6-26 e 10-3)',
+            lampadaFarol:
+              '12 V – 35/35 W (Lanterna/freio: 12 V – 5/21 W • Sinaleiras: 12 V – 10 W x 4 [2000] / 12 V – 16 W x 4 [2008])',
           },
           pneus: {
-            dianteiro: { medida: '80/100-18 M/C 47P', pressaoPsi: 25, pressaoComGarupaPsi: 25, tipo: 'Com câmara' },
-            traseiro: { medida: '90/90-18 M/C 57P', pressaoPsi: 29, pressaoComGarupaPsi: 36, tipo: 'Com câmara' },
+            dianteiro: {
+              medida: '2.75 – 18 42P (2000: Pirelli MT39 Mandrake | 2008: 2,75 – 18 M/C 42P Pirelli City Demon)',
+              pressaoPsi: 25,
+              pressaoComGarupaPsi: 25,
+              tipo: 'Com câmara • 25 psi (1,75 kgf/cm² / 175 kPa) só piloto e piloto + passageiro (Cargo: somente piloto) • Sulco mín. 1,5 mm',
+            },
+            traseiro: {
+              medida: '90/90 – 18 57P (2000: Pirelli MT15 Mandrake | 2008: 90/90 – 18 M/C 57P Pirelli City Demon)',
+              pressaoPsi: 29,
+              pressaoComGarupaPsi: 33,
+              tipo: 'Com câmara • Manual 2000 (pág. 23/83): 28 psi (2,00 kg/cm²) só piloto / 32 psi (2,25 kg/cm²) com passageiro | Manual 2008 (pág. 6-19/10-2): 29 psi (200 kPa) só piloto / 33 psi (225 kPa) com passageiro • Sulco mín. 2,0 mm',
+            },
           },
           transmissaoFinal: {
             tipo: 'corrente',
-            corrente: 'DID 428M / 428H x 116L',
+            corrente:
+              'DID 428H (Manual 2008 pág. 6-15 • Lubrificante: óleo SAE 80-90) • Redução final: 3,071 (43/14 no Manual 2000 pág. 83) | 3,142 (Manual 2008 pág. 10-3)',
             pinhaoDentes: 14,
             coroaDentes: 43,
           },
@@ -882,29 +1123,30 @@ export const HONDA: Modelo[] = [
       geracao('honda-cg-125', {
         anoInicio: 2009,
         anoFim: 2018,
-        nomeGeracao: 'Fan 125 OHC (KS / ES / ESD / i)',
-        versoes: ['Fan KS', 'Fan ES', 'Fan ESD', 'Fan 125i', 'Cargo'],
+        nomeGeracao: 'Fan / Cargo 125 OHC (KS / ES / ESD / i)',
+        versoes: ['Fan KS', 'Fan ES', 'Fan ESD', 'Cargo KS', 'Cargo ES', 'Fan 125i (2016–2018)'],
         destaques: [
-          'Novo motor 124,7cc OHC com corrente de comando',
-          'Carburador (2009–2015) e Injeção PGM-FI na Fan 125i (2016–2018)',
-          'Folga de válvulas Adm 0,08 mm / Esc 0,12 mm',
+          'Motor 124,7 cm³ OHC com corrente de comando (11,6 cv @ 8.250 rpm)',
+          'Folga de válvulas OHC: Adm 0,08 mm / Esc 0,12 mm (motor frio)',
+          'Óleo SAE 10W-30 API SJ (ou superior) JASO MA (1,0 L drenagem / 1,2 L desmontagem)',
         ],
         alertasBancada: [
-          'Mudança radical em 2009: saiu o motor vareta (OHV) e entrou o OHC com corrente de comando; a válvula de escape passou para 0,12 ± 0,02 mm.',
-          'Vela passou para rosca fina M10 (NGK CPR8EA-9) — nunca forçar vela DP8EA-9 antiga.',
-          'De 2009 a 2015 usa carburador Keihin com TPS integrado ao CDI; de 2016 a 2018 (CG 125i) passou a ser injetada PGM-FI (somente gasolina).',
-          'Capacidade de óleo é 1,0 L na troca periódica (1,2 L na desmontagem) com SAE 10W-30 JASO MA e bujão de dreno com 30 N·m (3,1 kgf·m).',
+          'Mudança estrutural em 2009: saiu o motor vareta (OHV 124,1 cm³) e entrou o OHC 124,7 cm³ (52,40 x 57,84 mm) com corrente de comando; a folga de válvula de escape passou para 0,12 mm e a vela passou para rosca M10 (NGK CPR8EA-9 ou opcional CPR9EA-9).',
+          'Diferença crítica no volume de fluido da suspensão dianteira entre os manuais 2011 e 2014: o Manual 2011 (pág. 10-1) especifica 72 cm³ por canela, enquanto o Manual 2014 (pág. 38 e 73 / PDF pág. 50 e 85) especifica 139,0 ± 2,5 cm³ com substituição a cada 16.000 km!',
+          'Corrente de transmissão mudou de 116 elos (DID 428MX – 116RB no Manual 2011 pág. 6-16) para 118 elos (DID 428MX – 118LE no Manual 2014 págs. 67 e 115), mantendo pinhão 14 dentes e coroa 43 dentes (redução final 3,071) e folga de 10 – 20 mm.',
+          'Diferenças de freio, roda e elétrica entre os manuais 2011 e 2014: torque do eixo dianteiro mudou de 62 N·m (2011 pág. 6-24) para 59 N·m (2014 págs. 80/81/118); folga do pedal do freio traseiro mudou de 15 – 25 mm (2011 pág. 6-19) para 20 – 30 mm (2014 pág. 61); bateria na ES era 12 V – 5 Ah em 2011 (4 Ah na KS) e foi unificada em 12 V – 4 Ah / DTZ5 para KS/ES/ESD em 2014 (pág. 117).',
+          'Filtro de ar é do tipo viscoso (úmido com óleo) — NUNCA limpar com ar comprimido: substituir a cada 12.000 km (Manual 2011 pág. 6-2) ou a cada 16.000 km (Manual 2014 pág. 36).',
         ],
         auditoria: {
           status: 'verificado_manual',
           ultimaRevisao: '2026-11-19',
           fonte:
-            'Manuais Oficiais Honda: CG 125 Fan e Cargo 2011.pdf (D2203-MAN-0734, págs. 6-6 a 6-25 e 10-1 a 10-4) e CG 125 Fan e Cargo 2014.pdf',
+            'CG 125 Fan e Cargo 2011.pdf (D2203-MAN-0734 — págs. 4-3, 5-8, 6-1 a 6-29 e 10-1 a 10-5 [PDF págs. 17, 28, 41–69, 85–89 e 164]) e CG 125 Fan e Cargo 2014.pdf (D2203-MAN-0944 — págs. 34–89 e 112–118 [PDF págs. 46–101, 124–130 e 211])',
           notas:
-            'Conferido com 2 PDFs locais: óleo SAE 10W-30 JASO MA (1,0 L drenagem / 1,2 L desmontagem); bujão 30 N·m (3,1 kgf·m); válvulas OHC Adm 0,08 mm / Esc 0,12 mm; relação 14x43 (DID 428MX-116RB); bengala 72 cm³.',
+            'Auditado 100% nos 2 PDFs locais (2011 e 2014 carburadas): cilindrada 124,7 cm³; óleo Genuíno Honda SAE 10W-30 API SJ JASO MA (1,0 L drenagem / 1,2 L desmontagem); parafuso de drenagem 30 N·m (3,1 kgf·m); válvulas OHC Adm 0,08 mm / Esc 0,12 mm; vela NGK CPR8EA-9 (opcional CPR9EA-9), folga 0,80–0,90 mm; relação 14x43 (3,071) com corrente DID 428MX-116RB (2011) / DID 428MX-118LE (2014) e folga 10–20 mm; bengala 72 cm³ (2011) / 139,0 ± 2,5 cm³ (2014); eixo diant. 62 N·m (2011) / 59 N·m (2014), eixo tras. 88 N·m e porca do braço limitador do freio tras. 22 N·m. Pendências que aguardam Manual de Serviço (e manual específico da CG 125i 2016–2018 não presente em public/manuals/): dados do sistema PGM-FI da versão 125i (2016–2018), modelo/giclagem do carburador 2009–2015, nível de óleo da bengala em mm e torques internos (vela em N·m, tampa do cabeçote, contraporca de válvula, filtro centrífugo, coroa, pinça de freio ESD e coluna de direção).',
         },
         fichaTecnica: {
-          versaoReferencia: 'Fan ES / 125i',
+          versaoReferencia: 'Fan KS / ES / ESD • Cargo KS / ES (Manuais 2011 e 2014)',
           cilindradaCc: 124.7,
           motor: MOTOR_OHC_2V,
           alimentacao: 'carburador',
@@ -913,65 +1155,90 @@ export const HONDA: Modelo[] = [
           partida: 'pedal-eletrica',
           cambio: { tipo: 'manual', marchas: 5 },
           freios: { dianteiro: 'tambor', traseiro: 'tambor', sistema: 'convencional' },
-          pesoSecoKg: 110,
+          pesoSecoKg: 108.9,
           motorDetalhes: {
             diametroCursoMm: { diametro: 52.4, curso: 57.84 },
             taxaCompressao: '9,2:1',
-            potencia: '11,6 cv @ 8.250 rpm (11,8 cv na 125i)',
-            torque: '1,06 kgf·m @ 6.000 rpm',
+            potencia: '11,6 cv @ 8.250 rpm (Manuais 2011 pág. 10-2 e 2014 pág. 113)',
+            torque: '1,06 kgf·m @ 6.000 rpm (Manuais 2011 pág. 10-2 e 2014 pág. 113)',
             marchaLentaRpm: faixaRpm(1300, 1500, '1.400 ± 100 rpm'),
-            comando: 'OHC (corrente de comando)',
-            filtroOleo: 'Filtro centrífugo + tela metálica (limpeza a cada 12.000 km)',
+            comando: 'OHC (4 tempos, arrefecido a ar, monocilíndrico, acionado por corrente, 2 válvulas)',
+            filtroOleo: 'Filtro centrífugo de óleo + tela do filtro de óleo (limpar a cada 12.000 km)',
             alimentacaoDetalhe:
-              'Carburador Keihin (2009–2015: giclê alta #108 / baixa #38) | Injeção PGM-FI na 125i (2016–2018: bomba 2,9 bar)',
+              'Carburador (gasolina comum nos manuais 2011 e 2014) • Marcha lenta: 1.400 ± 100 rpm • Giclagem do carburador e dados de injeção da versão 125i (2016–2018): aguardam confirmação no Manual de Serviço',
           },
           fluidos: {
             oleoMotor: {
-              especificacao: 'SAE 10W-30 Semissintético (API SJ/SL / JASO MA)',
+              especificacao:
+                'ÓLEO GENUÍNO HONDA SAE 10W-30 API SJ (ou superior) JASO MA (proibido adicionar aditivos ao óleo)',
               capacidadeTrocaL: 1.0,
               capacidadeTotalL: 1.2,
-              observacao: '1,0 L após drenagem | 1,2 L após desmontagem (Manual CG 125 2011 pág. 10-1)',
+              observacao:
+                '1,0 L após drenagem | 1,2 L após desmontagem do motor (Manuais 2011 pág. 6-7/10-1 e 2014 pág. 58/112)',
             },
             tanqueL: 15.1,
             reservaL: 2.5,
-            fluidoFreio: 'Tambor mecânico (KS/ES/125i) / DOT 4 na versão ESD',
+            fluidoFreio:
+              'Tambor mecânico (Fan KS/ES e Cargo KS/ES) | Mobil Super Moto Brake Fluid DOT 4 na versão CG 125 Fan ESD (Manual 2014 pág. 46 e 114)',
             fluidoBengala: {
-              especificacao: 'Fluido ATF / Fork Oil 10W',
+              especificacao: 'Fluido para suspensão Honda (Manual 2014 pág. 38 e 73: substituir a cada 16.000 km)',
               volumePorCanelaMl: 72,
-              observacao: '72 cm³ (ml) por canela (Manual CG 125 Fan/Cargo 2011 pág. 10-1)',
+              observacao:
+                '72 cm³ por canela no Manual 2011 (pág. 10-1 / PDF pág. 85) | 139,0 ± 2,5 cm³ no Manual 2014 (pág. 73 / PDF pág. 85)',
             },
           },
           folgas: {
-            valvulaAdmissaoMm: faixaMm(0.06, 0.1, '0,08 ± 0,02 mm'),
-            valvulaEscapeMm: faixaMm(0.1, 0.14, '0,12 ± 0,02 mm'),
-            folgaCorrenteMm: faixaMm(10, 20, '10 – 20 mm'),
-            folgaManeteEmbreagemMm: faixaMm(10, 20, '10 – 20 mm'),
-            folgaPedalFreioMm: faixaMm(20, 30, '20 – 30 mm'),
-            folgaAceleradorMm: faixaMm(2, 6, '2 – 6 mm'),
+            valvulaAdmissaoMm: faixaMm(0.08, 0.08, '0,08 mm (motor frio)'),
+            valvulaEscapeMm: faixaMm(0.12, 0.12, '0,12 mm (motor frio)'),
+            folgaCorrenteMm: faixaMm(10, 20, '10 – 20 mm (não pilotar se exceder 50 mm)'),
+            folgaManeteEmbreagemMm: faixaMm(
+              10,
+              20,
+              '10 – 20 mm (alavanca do freio dianteiro a tambor KS/ES também 10 – 20 mm)',
+            ),
+            folgaPedalFreioMm: faixaMm(
+              15,
+              30,
+              '15 – 25 mm (Manual 2011 pág. 6-19 / PDF pág. 59) | 20 – 30 mm (Manual 2014 pág. 61 / PDF pág. 73)',
+            ),
+            folgaAceleradorMm: faixaMm(2, 6, '2 – 6 mm (medida no flange da manopla)'),
           },
           eletrica: {
             vela: {
-              modelo: 'NGK CPR8EA-9 (Rosca M10)',
-              iridiumAlternativa: 'NGK CPR8EAIX-9',
-              folgaEletrodoMm: faixaMm(0.8, 0.9, '0,8 – 0,9 mm'),
+              modelo: 'NGK CPR8EA-9',
+              alternativas: ['NGK CPR9EA-9 (Opcional)'],
+              folgaEletrodoMm: faixaMm(0.8, 0.9, '0,8 – 0,9 mm (0,80 – 0,90 mm)'),
             },
             bateria: {
-              modelo: 'Yuasa YTX5L-BS / Heliar HTZ6L',
+              modelo:
+                'Manual 2011 (pág. 10-4): 12 V – 5 Ah (10h) (Fan ES / Cargo ES) e 12 V – 4 Ah (10h) (Fan KS / Cargo KS) | Manual 2014 (pág. 117): 12 V – 4 Ah / DTZ5 (KS, ES e ESD)',
               tensaoV: 12,
-              capacidadeAh: 5,
-              tensaoCargaV: '13,5V – 14,8V @ 5.000 rpm',
+              capacidadeAh: 4,
+              tensaoCargaV: 'Alternador: 0,12 kW / 5.000 rpm • Ignição CDI',
             },
             fusivelPrincipalA: 15,
-            fusiveisSecundarios: '10A',
-            lampadaFarol: 'HS1 / H4 12V 35/35W',
+            fusiveisSecundarios: '5 A e 10 A (Manual 2011 pág. 6-28/10-4) | 10 A (Manual 2014 pág. 117)',
+            lampadaFarol:
+              '12 V – 35/35 W (Lanterna/freio: 12 V – 5/21 W • Sinaleiras: 12 V – 16 W x 4 [2011] / 12 V – 10 W x 4 + luz de placa 12 V – 5 W [2014])',
           },
           pneus: {
-            dianteiro: { medida: '80/100-18 M/C 47P', pressaoPsi: 25, pressaoComGarupaPsi: 25 },
-            traseiro: { medida: '90/90-18 M/C 57P', pressaoPsi: 29, pressaoComGarupaPsi: 33 },
+            dianteiro: {
+              medida: '80/100 – 18M/C 47P',
+              pressaoPsi: 25,
+              pressaoComGarupaPsi: 25,
+              tipo: 'Com câmara • 25 psi (175 kPa / 1,75 kgf/cm²) só piloto e piloto + passageiro (Cargo: somente piloto) • Sulco mín. 1,5 mm',
+            },
+            traseiro: {
+              medida: '90/90 – 18M/C 57P (REINF 57P em 2014)',
+              pressaoPsi: 29,
+              pressaoComGarupaPsi: 33,
+              tipo: 'Com câmara • 29 psi (200 kPa / 2,00 kgf/cm²) só piloto (e Cargo) / 33 psi (225 kPa / 2,25 kgf/cm²) piloto + passageiro (Fan) • Sulco mín. 2,0 mm',
+            },
           },
           transmissaoFinal: {
             tipo: 'corrente',
-            corrente: 'DID 428MX – 116RB (116 elos)',
+            corrente:
+              'DID 428MX – 116RB (116 elos no Manual 2011 pág. 6-16) | DID 428MX – 118LE (118 elos no Manual 2014 págs. 67 e 115) • Lubrificante: óleo SAE 80 ou 90',
             pinhaoDentes: 14,
             coroaDentes: 43,
           },
