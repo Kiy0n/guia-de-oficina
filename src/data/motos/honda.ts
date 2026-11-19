@@ -343,7 +343,7 @@ const TORQUES_POP_100_110: TorqueAperto[] = [
 // ---------------------------------------------------------------------------
 
 const cg160Base: FichaTecnica = {
-  versaoReferencia: 'Fan / Titan / Start / Cargo',
+  versaoReferencia: 'Fan / Titan / Cargo',
   cilindradaCc: 162.7,
   motor: MOTOR_OHC_2V,
   alimentacao: 'injecao',
@@ -373,7 +373,7 @@ const cg160Base: FichaTecnica = {
     },
     tanqueL: 16.1,
     reservaL: 3.1,
-    fluidoFreio: 'DOT 4 (disco dianteiro Titan/Fan; tambor mecânico na Start)',
+    fluidoFreio: 'DOT 4 (disco dianteiro Titan/Fan/Cargo)',
     fluidoBengala: {
       especificacao: 'Fluido para suspensão Honda (Manual CG 160 2016 PDF pág. 93)',
       volumePorCanelaMl: 139,
@@ -425,6 +425,119 @@ const cg160Base: FichaTecnica = {
     coroaDentes: 44,
   },
   torques: TORQUES_CG160,
+};
+
+const TORQUES_CG160_START: TorqueAperto[] = [
+  torque(
+    'Parafuso de drenagem do óleo do motor',
+    30,
+    'motor',
+    '30 N·m (3,1 kgf·m) • Manuais CG 160 Start 2016 pág. 104 (PDF 122), 2018 pág. 104 (PDF 122) e 2024 págs. 53/106 (PDF 71/124)',
+  ),
+  torque(
+    'Porca do eixo dianteiro',
+    59,
+    'chassi',
+    '59 N·m (6,0 kgf·m) • Manuais CG 160 Start 2016 pág. 104, 2018 pág. 104 e 2024 págs. 74/106 (PDF 92/124)',
+  ),
+  torque(
+    'Porca do eixo traseiro',
+    88,
+    'chassi',
+    '88 N·m (9,0 kgf·m) • Manuais CG 160 Start 2016 pág. 104, 2018 pág. 104 e 2024 págs. 61/77/106 (PDF 79/95/124)',
+  ),
+  torque(
+    'Porcas superiores dos amortecedores traseiros (fixação bagageiro)',
+    34,
+    'suspensao',
+    '34 N·m (3,5 kgf·m) • Manuais CG 160 Start 2024 (PDF pág. 33) e 2025 (PDF pág. 34)',
+  ),
+  torque(
+    'Parafusos das alças traseiras (fixação bagageiro)',
+    42,
+    'chassi',
+    '42 N·m (4,3 kgf·m) • Manuais CG 160 Start 2024 (PDF pág. 33) e 2025 (PDF pág. 34)',
+  ),
+];
+
+const cg160StartBase: FichaTecnica = {
+  versaoReferencia: 'CG 160 Start (somente gasolina)',
+  cilindradaCc: 162.7,
+  motor: MOTOR_OHC_2V,
+  alimentacao: 'injecao',
+  combustivel: 'gasolina',
+  arrefecimento: 'ar',
+  partida: 'eletrica',
+  cambio: { tipo: 'manual', marchas: 5 },
+  freios: { dianteiro: 'tambor', traseiro: 'tambor', sistema: 'convencional' },
+  pesoSecoKg: 114,
+  motorDetalhes: {
+    diametroCursoMm: { diametro: 57.3, curso: 63.0 },
+    taxaCompressao: '9,5:1',
+    potencia: '14,9 cv @ 8.000 rpm (somente gasolina)',
+    torque: '1,40 kgf·m @ 6.000 rpm',
+    marchaLentaRpm: faixaRpm(1300, 1500, '1.400 ± 100 rpm'),
+    comando: 'OHC (acionado por corrente, 2 válvulas)',
+    filtroOleo: 'Filtro centrífugo de óleo + tela do filtro de óleo (limpar a cada 12.000 km)',
+    alimentacaoDetalhe:
+      'Injeção eletrônica PGM-FI exclusivamente a gasolina comum • Marcha lenta: 1.400 ± 100 rpm • Pressão da bomba de combustível: aguarda Manual de Serviço',
+  },
+  fluidos: {
+    oleoMotor: {
+      especificacao: 'ÓLEO GENUÍNO HONDA SAE 10W-30 API SJ JASO MA (sem aditivos)',
+      capacidadeTrocaL: 1.0,
+      capacidadeTotalL: 1.2,
+      observacao: '1,0 L após drenagem | 1,2 L após desmontagem do motor (Manuais CG 160 Start 2016–2025)',
+    },
+    tanqueL: 14.6,
+    reservaL: 3.2,
+    fluidoFreio: undefined,
+    fluidoBengala: undefined,
+  },
+  folgas: {
+    valvulaAdmissaoMm: faixaMm(0.08, 0.08, '0,08 mm (motor frio)'),
+    valvulaEscapeMm: faixaMm(0.24, 0.24, '0,24 mm (motor frio)'),
+    folgaCorrenteMm: faixaMm(15, 25, '15 – 25 mm (não pilotar se exceder 50 mm)'),
+    folgaManeteEmbreagemMm: faixaMm(10, 20, '10 – 20 mm (e alavanca do freio dianteiro a tambor: 10 – 20 mm)'),
+    folgaPedalFreioMm: faixaMm(20, 30, '20 – 30 mm'),
+    folgaAceleradorMm: faixaMm(2, 6, '2 – 6 mm (2016/2025) | 2 – 5 mm no Manual 2024 (PDF pág. 82)'),
+  },
+  eletrica: {
+    vela: {
+      modelo: 'NGK CPR8EA-9',
+      folgaEletrodoMm: faixaMm(0.8, 0.9, '0,80 – 0,90 mm'),
+    },
+    bateria: {
+      modelo: '12 V – 4 Ah / DTZ5 (selada)',
+      tensaoV: 12,
+      capacidadeAh: 4,
+      tensaoCargaV: 'Alternador 0,15 kW / 5.000 rpm (tensão de carga detalhada aguarda Manual de Serviço)',
+    },
+    fusivelPrincipalA: 15,
+    fusiveisSecundarios: '10 A',
+    lampadaFarol: '12 V – 35/35 W (Lanterna/freio: 12 V – 21/5 W • Sinaleiras: 12 V – 10 W x 4 • Placa: 12 V – 5 W)',
+  },
+  pneus: {
+    dianteiro: {
+      medida: '80/100 – 18M/C 47P',
+      pressaoPsi: 25,
+      pressaoComGarupaPsi: 25,
+      tipo: 'Com câmara (rodas raiadas — Pirelli City Dragon / Levorin Matrix) • 25 psi (175 kPa)',
+    },
+    traseiro: {
+      medida: '90/90 – 18M/C REINF 57P',
+      pressaoPsi: 29,
+      pressaoComGarupaPsi: 33,
+      tipo: 'Com câmara (rodas raiadas — Pirelli City Dragon / Levorin Matrix) • 29 psi só piloto / 33 psi com passageiro',
+    },
+  },
+  transmissaoFinal: {
+    tipo: 'corrente',
+    corrente: 'DID 428HX ou RK 428HSB — 118 elos',
+    pinhaoDentes: 15,
+    coroaDentes: 44,
+  },
+  torques: TORQUES_CG160_START,
 };
 
 const cg150Base: FichaTecnica = {
@@ -832,7 +945,7 @@ const pop110Base: FichaTecnica = {
 };
 
 // ---------------------------------------------------------------------------
-// Catálogo HONDA (12 modelos / 24 gerações)
+// Catálogo HONDA (13 modelos / 27 gerações)
 // ---------------------------------------------------------------------------
 
 export const HONDA: Modelo[] = [
@@ -841,13 +954,13 @@ export const HONDA: Modelo[] = [
     marca: 'Honda',
     nome: 'CG 160',
     categoria: 'street',
-    aliases: ['Titan', 'Fan', 'Start', 'Cargo', 'CG160'],
+    aliases: ['Titan', 'Fan', 'Cargo', 'CG160', 'CG 160 Fan', 'CG 160 Titan'],
     geracoes: [
       geracao('honda-cg-160', {
         anoInicio: 2016,
         anoFim: 2017,
         nomeGeracao: 'Lançamento 160cc',
-        versoes: ['Start', 'Fan', 'Titan'],
+        versoes: ['Fan', 'Titan', 'Cargo'],
         destaques: [
           'Motor 162,7 cm³ OHC Flex (14,9 cv G / 15,1 cv E @ 8.000 rpm)',
           'Folga de válvulas: Adm 0,08 mm / Esc 0,24 mm (motor frio)',
@@ -872,9 +985,9 @@ export const HONDA: Modelo[] = [
         anoInicio: 2018,
         anoFim: 2024,
         nomeGeracao: 'Freio Combinado CBS',
-        versoes: ['Start', 'Fan', 'Titan', 'Cargo'],
+        versoes: ['Fan', 'Titan', 'Cargo'],
         destaques: [
-          'Freio combinado CBS (disco dianteiro Titan/Fan; tambor mecânico Start)',
+          'Freio combinado CBS com disco dianteiro e pinça de 3 êmbolos',
           'Óleo SAE 10W-30 API SL JASO MA (1,0 L drenagem / 1,2 L desmontagem)',
           'Folga da corrente 15 – 25 mm • Bateria 12 V – 4 Ah (DTZ5) • Fusível principal 15 A',
         ],
@@ -910,9 +1023,9 @@ export const HONDA: Modelo[] = [
         anoInicio: 2025,
         anoFim: 2026,
         nomeGeracao: 'Nova Geração ABS / Farol LED',
-        versoes: ['Start', 'Fan', 'Titan'],
+        versoes: ['Fan', 'Titan', 'Cargo'],
         destaques: [
-          'Titan com ABS dianteiro e disco nas duas rodas (Fan e Start seguem com CBS)',
+          'Titan com ABS dianteiro e disco nas duas rodas (Fan e Cargo seguem com CBS)',
           'Tanque 14,0 L (reserva 2,5 L) • Potência 14,4 cv (G) / 14,7 cv (E) @ 8.000 rpm',
           'Farol e lanterna em LED • Pneu traseiro 100/80-18 na Titan e na Fan',
         ],
@@ -962,6 +1075,169 @@ export const HONDA: Modelo[] = [
               pressaoComGarupaPsi: 33,
               tipo: 'Sem câmara • 29 psi (200 kPa) só piloto / 33 psi (225 kPa) piloto + passageiro',
             },
+          },
+        },
+      }),
+    ],
+  },
+  {
+    id: 'honda-cg-160-start',
+    marca: 'Honda',
+    nome: 'CG 160 Start',
+    categoria: 'street',
+    aliases: ['Start', 'Start 160', 'CG 160 Start', 'CG160 Start', 'CG160Start'],
+    geracoes: [
+      geracao('honda-cg-160-start', {
+        anoInicio: 2016,
+        anoFim: 2017,
+        nomeGeracao: 'Tambor Convencional (Gasolina)',
+        versoes: ['Start'],
+        destaques: [
+          'Motor 162,7 cm³ OHC PGM-FI exclusivamente a GASOLINA (14,9 cv @ 8.000 rpm)',
+          'Freios a tambor mecânico nas duas rodas (sem disco e sem fluido DOT 4)',
+          'Rodas raiadas com câmara • Tanque 14,6 L (reserva 3,2 L) • Peso seco 114 kg',
+        ],
+        alertasBancada: [
+          'Atenção: a CG 160 Start é EXCLUSIVAMENTE a gasolina (NÃO é Flex) — abastecer com etanol causa falha de partida e funcionamento irregular (Manual CG 160 Start 2016 PDF pág. 119).',
+          'Freios a tambor mecânico na dianteira e traseira (sem sistema hidráulico e sem fluido DOT 4); folga da alavanca dianteira 10 – 20 mm e pedal traseiro 20 – 30 mm.',
+          'Rodas raiadas com pneus COM câmara (dianteiro 80/100-18 47P a 25 psi; traseiro 90/90-18 REINF 57P a 29/33 psi) — conferir tensão dos raios e nipples nas revisões (PDF pág. 89).',
+          'Óleo SAE 10W-30 API SJ JASO MA (1,0 L drenagem / 1,2 L desmontagem); válvulas Adm 0,08 mm / Esc 0,24 mm (motor frio); corrente DID 428HX ou RK 428HSB (118 elos, 15x44, folga 15–25 mm).',
+        ],
+        auditoria: {
+          status: 'verificado_manual',
+          ultimaRevisao: '2026-11-19',
+          fonte: 'CG 160 Start 2016.pdf (págs. 30, 52, 60, 100–104 [PDF págs. 7, 48, 60, 70, 78, 89, 118–122])',
+          notas:
+            'Auditado 100% no Manual CG 160 Start 2016: gasolina comum; 14,9 cv @ 8.000 rpm; 1,40 kgf·m @ 6.000 rpm; tanque 14,6 L (reserva 3,2 L); peso seco 114 kg; óleo SAE 10W-30 API SJ JASO MA (1,0 / 1,2 L); válvulas 0,08 / 0,24 mm; vela NGK CPR8EA-9 (0,80–0,90 mm); tambor dianteiro e traseiro sem DOT 4; rodas raiadas com câmara (80/100-18 e 90/90-18); bateria 12V 4Ah DTZ5; fusíveis 15A / 10A; torques 30 / 59 / 88 N·m. Pendências que aguardam Manual de Serviço: volume/nível de óleo da bengala, pressão da bomba PGM-FI e torques internos.',
+        },
+        fichaTecnica: cg160StartBase,
+      }),
+      geracao('honda-cg-160-start', {
+        anoInicio: 2018,
+        anoFim: 2024,
+        nomeGeracao: 'CBS a Tambor (Gasolina)',
+        versoes: ['Start CBS'],
+        destaques: [
+          'Freio combinado CBS mecânico a cabo nos dois tambores (sem disco e sem DOT 4)',
+          'Motor 162,7 cm³ OHC PGM-FI somente gasolina • Óleo SAE 10W-30 API SL JASO MA',
+          'Rodas raiadas com câmara • Tanque 14,6 L (reserva 3,2 L) • Peso seco 115 kg',
+        ],
+        alertasBancada: [
+          'Freio CBS da Start 2018–2024 é 100% MECÂNICO a tambor (sem pinça hidráulica e sem fluido DOT 4): ajustar sempre a folga da alavanca dianteira (10–20 mm) ANTES do pedal traseiro e conferir a folga da articulação nº 2 do CBS (~1 mm — Manual 2024 PDF págs. 71–73).',
+          'Exclusivamente a GASOLINA (NÃO é Flex): 14,9 cv @ 8.000 rpm; torque 1,40 kgf·m @ 6.500 rpm (2018) / 1,4 kgf·m @ 7.000 rpm (2024).',
+          'Fusíveis secundários mudaram entre 2018 e 2024: 10 A x 2 no Manual 2018 (PDF pág. 122) e 7,5 A no Manual 2024 (PDF pág. 124); principal permanece 15 A.',
+          'Folga da manopla do acelerador no Manual 2024 (PDF pág. 82): 2 – 5 mm. Torques oficiais: drenagem 30 N·m, eixo dianteiro 59 N·m, eixo traseiro 88 N·m, amortecedor/bagageiro 34 N·m e alças 42 N·m (PDF pág. 33).',
+        ],
+        auditoria: {
+          status: 'verificado_manual',
+          ultimaRevisao: '2026-11-19',
+          fonte:
+            'CG 160 Start 2018.pdf (págs. 30, 51–53, 60, 100–104 [PDF págs. 7, 36, 48, 69–71, 78, 118–122]) e CG 160 Start 2024.pdf (págs. 32, 53–55, 62, 64, 102–106 [PDF págs. 7, 33, 38, 50, 61, 71–73, 80, 82, 120–124])',
+          notas:
+            'Auditado 100% nos Manuais CG 160 Start 2018 e 2024: gasolina comum; 14,9 cv @ 8.000 rpm; 1,40 kgf·m @ 6.500 rpm (2018) / 1,4 kgf·m @ 7.000 rpm (2024); tanque 14,6 L (reserva 3,2 L); peso seco 115 kg; óleo SAE 10W-30 API SL JASO MA (1,0 / 1,2 L); válvulas 0,08 / 0,24 mm; vela NGK CPR8EA-9 (0,80–0,90 mm); CBS mecânico a tambor dianteiro e traseiro (sem DOT 4); rodas raiadas com câmara (80/100-18 e 90/90-18); corrente 118 elos 15x44 (DID 428HX 2018 / DID 428DH 2024 ou RK 428HSB); bateria 12V 4Ah DTZ5; fusíveis 15A principal / 10A x 2 (2018) e 7,5A (2024); torques 30 / 59 / 88 / 34 / 42 N·m.',
+        },
+        fichaTecnica: {
+          ...cg160StartBase,
+          versaoReferencia: 'CG 160 Start CBS (tambor • gasolina)',
+          pesoSecoKg: 115,
+          freios: { dianteiro: 'tambor', traseiro: 'tambor', sistema: 'CBS' },
+          motorDetalhes: {
+            ...cg160StartBase.motorDetalhes,
+            diametroCursoMm: { diametro: 57.3, curso: 63.095 },
+            torque: '1,40 kgf·m @ 6.500 rpm (2018) | 1,4 kgf·m @ 7.000 rpm (2024)',
+          },
+          fluidos: {
+            ...cg160StartBase.fluidos!,
+            oleoMotor: {
+              ...cg160StartBase.fluidos!.oleoMotor!,
+              especificacao: 'ÓLEO PRO HONDA / GENUÍNO HONDA SAE 10W-30 API SL JASO MA (sem aditivos)',
+            },
+          },
+          folgas: {
+            ...cg160StartBase.folgas,
+            folgaAceleradorMm: faixaMm(2, 5, '2 – 5 mm (Manual 2024 PDF pág. 82)'),
+          },
+          eletrica: {
+            ...cg160StartBase.eletrica,
+            fusiveisSecundarios: '10 A x 2 (2018) | 7,5 A (2024)',
+          },
+          transmissaoFinal: {
+            ...cg160StartBase.transmissaoFinal!,
+            corrente: 'DID 428HX (2018) | DID 428DH (2024) ou RK 428HSB — 118 elos',
+          },
+        },
+      }),
+      geracao('honda-cg-160-start', {
+        anoInicio: 2025,
+        anoFim: 2026,
+        nomeGeracao: 'Nova Geração Disco Dianteiro CBS (Gasolina)',
+        versoes: ['Start CBS Disco'],
+        destaques: [
+          'Estreia freio dianteiro a DISCO hidráulico CBS (DOT 4) + rodas de liga sem câmara',
+          'Continua exclusivamente a GASOLINA (PROMOT 5: 14,4 cv @ 8.000 rpm / 1,41 kgf·m @ 6.750 rpm)',
+          'Tanque 14,0 L (reserva 2,5 L) • Pneu traseiro 100/80-18 • Lanterna traseira LED (farol halógeno 35/35 W)',
+        ],
+        alertasBancada: [
+          'A partir de 2025 a CG 160 Start passa a usar freio dianteiro a DISCO com acionamento hidráulico CBS (Fluido para Freios DOT 4 — Manual 2025 PDF págs. 65 e 115) e traseiro a tambor.',
+          'Passa a utilizar pneus SEM câmara (NÃO instalar câmara de ar — PDF pág. 68): dianteiro 80/100-18 (25 psi) e traseiro mais largo 100/80-18 REINF (29/33 psi).',
+          'Permanece exclusivamente a GASOLINA comum (NÃO é Flex) com calibração PROMOT 5: 14,4 cv @ 8.000 rpm, 1,41 kgf·m @ 6.750 rpm, tanque 14,0 L (reserva 2,5 L) e peso seco 117 kg.',
+          'Diferença de iluminação vs Fan/Titan 2025: a Start 2025 mantém farol halógeno 12 V – 35/35 W com lanterna traseira/freio em LED (PDF pág. 117). Fusíveis secundários: 7,5 A e 10 A (principal 15 A).',
+        ],
+        auditoria: {
+          status: 'verificado_manual',
+          ultimaRevisao: '2026-11-19',
+          fonte: 'CG 160 Start 2025.pdf (págs. 39–40, 45, 59, 63, 65, 95–99 [PDF págs. 21, 34, 39, 57–58, 63, 65, 68, 77, 81, 83, 113–117])',
+          notas:
+            'Auditado 100% no Manual CG 160 Start 2025: gasolina comum; 14,4 cv @ 8.000 rpm; 1,41 kgf·m @ 6.750 rpm; tanque 14,0 L (reserva 2,5 L); peso seco 117 kg; óleo Pro Honda SAE 10W-30 API SL JASO MA (1,0 / 1,2 L); válvulas 0,08 / 0,24 mm; vela NGK CPR8EA-9 (0,80–0,90 mm); freio dianteiro a disco hidráulico CBS (DOT 4) e traseiro a tambor (pedal 20–30 mm); acelerador 2–6 mm; embreagem 10–20 mm; pneus sem câmara 80/100-18 e 100/80-18; corrente DID 428DH ou RK 428HSB (118 elos, 15x44, folga 15–25 mm); bateria 12V 4Ah DTZ5; fusíveis 15A principal / 7,5A e 10A; farol 12V 35/35W e lanterna LED; torques bagageiro 34 / 42 N·m.',
+        },
+        fichaTecnica: {
+          ...cg160StartBase,
+          versaoReferencia: 'CG 160 Start CBS Disco (2025 • gasolina)',
+          pesoSecoKg: 117,
+          freios: { dianteiro: 'disco', traseiro: 'tambor', sistema: 'CBS' },
+          motorDetalhes: {
+            ...cg160StartBase.motorDetalhes,
+            diametroCursoMm: { diametro: 57.3, curso: 63.096 },
+            potencia: '14,4 cv @ 8.000 rpm (somente gasolina • PROMOT 5)',
+            torque: '1,41 kgf·m @ 6.750 rpm',
+          },
+          fluidos: {
+            ...cg160StartBase.fluidos!,
+            oleoMotor: {
+              ...cg160StartBase.fluidos!.oleoMotor!,
+              especificacao: 'Óleo Pro Honda SAE 10W-30 API SL JASO MA (sem aditivos)',
+            },
+            tanqueL: 14.0,
+            reservaL: 2.5,
+            fluidoFreio: 'DOT 4 (freio dianteiro a disco hidráulico CBS; traseiro a tambor — Manual 2025 PDF pág. 65)',
+          },
+          folgas: {
+            ...cg160StartBase.folgas,
+            folgaManeteEmbreagemMm: faixaMm(10, 20, '10 – 20 mm'),
+            folgaAceleradorMm: faixaMm(2, 6, '2 – 6 mm (Manual 2025 PDF pág. 83)'),
+          },
+          eletrica: {
+            ...cg160StartBase.eletrica,
+            fusiveisSecundarios: '7,5 A, 10 A',
+            lampadaFarol: '12 V – 35/35 W (Lanterna/freio: LED • Sinaleiras: 12 V – 10 W x 4 • Placa: 12 V – 5 W)',
+          },
+          pneus: {
+            dianteiro: {
+              medida: '80/100 – 18M/C 47P (Pirelli) / 47S (Michelin)',
+              pressaoPsi: 25,
+              pressaoComGarupaPsi: 25,
+              tipo: 'Sem câmara (Pirelli City Dragon / Michelin Pilot Street 2) • 25 psi (175 kPa)',
+            },
+            traseiro: {
+              medida: '100/80 – 18M/C REINF 59P (Pirelli) / 59S (Michelin)',
+              pressaoPsi: 29,
+              pressaoComGarupaPsi: 33,
+              tipo: 'Sem câmara (NÃO usar câmara de ar) • 29 psi só piloto / 33 psi com passageiro',
+            },
+          },
+          transmissaoFinal: {
+            ...cg160StartBase.transmissaoFinal!,
+            corrente: 'DID 428DH ou RK 428HSB — 118 elos',
           },
         },
       }),

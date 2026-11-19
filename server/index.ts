@@ -158,6 +158,7 @@ const ALIASES_SLUG_MODELO: Record<string, string> = {
   ybr125fazer: 'fazer125',
   en125: 'yes125',
   gn125: 'intruder125',
+  start160: 'cg160start',
 };
 
 function canonizarSlugModelo(valor: string): string {
@@ -170,6 +171,10 @@ function modelosCasam(modeloPdfSlug: string, filtroModelo: string): boolean {
   const b = canonizarSlugModelo(filtroModelo);
   if (!a || !b) return true;
   if (a === b) return true;
+  // Evita cruzar CG 160 Start (tambor/gasolina) com CG 160 Fan/Titan/Cargo (disco/flex)
+  if ((a === 'cg160start' && b === 'cg160') || (a === 'cg160' && b === 'cg160start')) {
+    return false;
+  }
   if (a.length >= 4 && b.includes(a)) return true;
   if (b.length >= 4 && a.includes(b)) return true;
   return false;
