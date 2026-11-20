@@ -1001,6 +1001,16 @@ fn handle_serve_pdf(request: Request, ctx: &ServerContext, rel_raw: &str) {
         return;
     }
 
+    let is_pdf = file_canon
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(|e| e.eq_ignore_ascii_case("pdf"))
+        .unwrap_or(false);
+    if !is_pdf {
+        respond_error(request, 404, "Arquivo PDF não encontrado.");
+        return;
+    }
+
     let Ok(meta) = fs::metadata(&file_canon) else {
         respond_error(request, 404, "Arquivo PDF não encontrado.");
         return;

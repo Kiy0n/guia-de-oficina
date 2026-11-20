@@ -230,6 +230,21 @@
  * Regras de impressão (@media print) para o Relatório Final de Revisão
  * ------------------------------------------------------------------------- */
 @media print {
+  :root,
+  .dark {
+    color-scheme: light !important;
+    --background: #ffffff !important;
+    --foreground: #111827 !important;
+    --card: #ffffff !important;
+    --card-foreground: #111827 !important;
+    --secondary: #f3f4f6 !important;
+    --secondary-foreground: #111827 !important;
+    --muted: #f3f4f6 !important;
+    --muted-foreground: #4b5563 !important;
+    --border: #d1d5db !important;
+    --input: #d1d5db !important;
+  }
+
   html {
     color-scheme: light !important;
   }

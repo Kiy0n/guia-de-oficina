@@ -33,7 +33,15 @@ app.use(express.json({ limit: '1mb' }));
 
 // ---------------------------------------------------------------------------
 // Servir public/manuals estaticamente em /manuals com visualização inline
+// Restrito estritamente a arquivos .pdf (bloqueia README.md e outros arquivos)
 // ---------------------------------------------------------------------------
+app.use('/manuals', (req, res, next) => {
+  if (!req.path.toLowerCase().endsWith('.pdf')) {
+    res.status(404).json({ error: 'Arquivo de manual não encontrado.' });
+    return;
+  }
+  next();
+});
 app.use(
   '/manuals',
   express.static(MANUALS_DIR, {
@@ -46,6 +54,9 @@ app.use(
     },
   }),
 );
+app.use('/manuals', (_req, res) => {
+  res.status(404).json({ error: 'Arquivo de manual não encontrado.' });
+});
 
 // ---------------------------------------------------------------------------
 // Helpers de descoberta e normalização de Manuais PDF
@@ -255,11 +266,15 @@ api.get('/manuais', async (req, res) => {
 
   const marcaFiltro = typeof req.query.marca === 'string' ? req.query.marca.trim().toLowerCase() : undefined;
   const modeloFiltro = typeof req.query.modelo === 'string' ? req.query.modelo.trim() : undefined;
-  const anoInicioRaw = typeof req.query.anoInicio === 'string' ? Number(req.query.anoInicio) : undefined;
-  const anoFimRaw = typeof req.query.anoFim === 'string' ? Number(req.query.anoFim) : undefined;
-
-  const anoInicio = anoInicioRaw !== undefined && !Number.isNaN(anoInicioRaw) ? anoInicioRaw : undefined;
-  const anoFim = anoFimRaw !== undefined && !Number.isNaN(anoFimRaw) ? anoFimRaw : undefined;
+  const parseAnoQuery = (raw: unknown): number | undefined => {
+    if (typeof raw !== 'string') return undefined;
+    const trimmed = raw.trim();
+    if (!trimmed) return undefined;
+    const parsed = Number(trimmed);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  };
+  const anoInicio = parseAnoQuery(req.query.anoInicio);
+  const anoFim = parseAnoQuery(req.query.anoFim);
 
   const filtrados = todos.filter((item) => {
     if (marcaFiltro && item.marca.toLowerCase() !== marcaFiltro) {
@@ -416,6 +431,14 @@ if (IS_PROD && existsSync(CLIENT_DIST)) {
 // Tratamento de erros (Express 5 propaga rejeições de handlers async)
 // ---------------------------------------------------------------------------
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  const status =
+    typeof err === 'object' && err !== null && 'status' in err && typeof err.status === 'number'
+      ? err.status
+      : 500;
+  if (status >= 400 && status < 500) {
+    res.status(status).json({ error: 'Requisição inválida.' });
+    return;
+  }
   console.error('[server] erro não tratado:', err);
   res.status(500).json({ error: 'Erro interno do servidor.' });
 });

@@ -33,3 +33,9 @@ data/manuals-index/
 public/manuals/**/*.pdf
 public/manuals/**/*.PDF
 !public/manuals/README.md
+
+# Testes E2E / Playwright (relatórios e screenshots de evidência)
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

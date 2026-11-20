@@ -324,7 +324,7 @@ export function MultimetroInterativoSvg() {
         <text x="192" y="86" fill="#a1a1aa" fontSize="9" fontFamily="sans-serif">
           Referência na moto:
         </text>
-        <text x="192" y="102" fill="#f4f4f5" fontSize="10" fontWeight="bold" fontFamily="monospace">
+        <text x="192" y="102" fill="#f4f4f5" fontSize="8" fontWeight="bold" fontFamily="sans-serif">
           {atual.leituraSecundaria}
         </text>
 
@@ -332,7 +332,7 @@ export function MultimetroInterativoSvg() {
         <text x="198" y="131" fill="#fbbf24" fontSize="8.5" fontWeight="bold" fontFamily="sans-serif">
           Pontas de prova:
         </text>
-        <text x="198" y="144" fill="#d4d4d8" fontSize="8.5" fontFamily="sans-serif">
+        <text x="198" y="144" fill="#d4d4d8" fontSize="7.8" fontFamily="sans-serif">
           Preta em COM · Vermelha em VΩmA
         </text>
         <text x="198" y="155" fill="#a1a1aa" fontSize="8" fontFamily="sans-serif">
@@ -430,13 +430,13 @@ export function TorquimetroEstaloSvg({ pausado }: { pausado: boolean }) {
 
         {/* Mini tabela de conversão rápida */}
         <rect x="14" y="146" width="332" height="32" rx="6" fill="#18181b" stroke="#27272a" />
-        <text x="24" y="160" fill="#fbbf24" fontSize="9.5" fontWeight="bold" fontFamily="monospace">
+        <text x="22" y="160" fill="#fbbf24" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
           1 kgf·m ≈ 9,8 N·m
         </text>
-        <text x="142" y="160" fill="#e4e4e7" fontSize="9" fontFamily="monospace">
+        <text x="132" y="160" fill="#e4e4e7" fontSize="8" fontFamily="monospace">
           10 N·m ≈ 1,0 kgf·m · 30 N·m ≈ 3,0 kgf·m
         </text>
-        <text x="24" y="172" fill="#a1a1aa" fontSize="8.5" fontFamily="sans-serif">
+        <text x="22" y="172" fill="#a1a1aa" fontSize="7.8" fontFamily="sans-serif">
           Regra de ouro: sempre volte a escala para o mínimo (zero) ao guardar o torquímetro.
         </text>
       </svg>
@@ -529,7 +529,7 @@ export function FolgaCorrenteSvg({ pausado }: { pausado: boolean }) {
 
         {/* Lembrete inferior */}
         <rect x="14" y="156" width="332" height="24" rx="6" fill="#18181b" stroke="#27272a" />
-        <text x="180" y="171.5" textAnchor="middle" fill="#e4e4e7" fontSize="9" fontFamily="sans-serif">
+        <text x="180" y="171.5" textAnchor="middle" fill="#e4e4e7" fontSize="7.5" fontFamily="sans-serif">
           Gire a roda antes e ajuste sempre no ponto mais tenso da corrente (meio do vão inferior).
         </text>
       </svg>

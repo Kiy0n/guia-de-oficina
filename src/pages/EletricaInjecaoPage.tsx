@@ -75,16 +75,28 @@ export function EletricaInjecaoPage() {
   const moto = useMotoSelecionada();
   const { setSection } = useMoto();
 
-  const [abaAtiva, setAbaAtiva] = useState<string>('codigos-fi');
+  const arq = useMemo(
+    () => getArquiteturaMoto(moto.modelo, moto.geracao),
+    [moto.modelo, moto.geracao],
+  );
+  const isCarburada100 = arq.tipoAlimentacao === 'carburada';
+  const isMista = arq.tipoAlimentacao === 'mista';
+
+  const [abaAtiva, setAbaAtiva] = useState<string>(() =>
+    isCarburada100 ? 'multimetro' : 'codigos-fi',
+  );
   const [marcaFi, setMarcaFi] = useState<Marca>(moto.marca);
   const [buscaCodigo, setBuscaCodigo] = useState<string>('');
   const [buscaFio, setBuscaFio] = useState<string>('');
   const [apenasTestesMotoAtual, setApenasTestesMotoAtual] = useState<boolean>(true);
+  const [verTabelaFiEmCarburada, setVerTabelaFiEmCarburada] = useState<boolean>(false);
 
-  // Sincroniza a marca do decodificador sempre que o usuário trocar de moto
+  // Sincroniza a marca e a aba padrão sempre que o usuário trocar de moto/geração
   useEffect(() => {
     setMarcaFi(moto.marca);
-  }, [moto.marca]);
+    setVerTabelaFiEmCarburada(false);
+    setAbaAtiva(isCarburada100 ? 'multimetro' : 'codigos-fi');
+  }, [moto.marca, moto.geracao.id, isCarburada100]);
 
   const filtroManuais = useMemo(
     () => ({
@@ -100,12 +112,6 @@ export function EletricaInjecaoPage() {
 
   const def = SECTIONS.find((s) => s.id === 'eletrica') ?? SECTIONS[0];
   const ficha = moto.geracao.fichaTecnica;
-  const arq = useMemo(
-    () => getArquiteturaMoto(moto.modelo, moto.geracao),
-    [moto.modelo, moto.geracao],
-  );
-  const isCarburada100 = arq.tipoAlimentacao === 'carburada';
-  const isMista = arq.tipoAlimentacao === 'mista';
   const guiaMarca = GUIAS_LEITURA_FI[marcaFi];
 
   const testesMultimetroVisiveis = useMemo(() => {
@@ -275,27 +281,71 @@ export function EletricaInjecaoPage() {
         {/* ABA 1: DECODIFICADOR DE CÓDIGOS DE FALHA (FI / MIL)              */}
         {/* ================================================================ */}
         <TabsContent value="codigos-fi" className="space-y-5">
-          {/* Banner informativo caso a geração selecionada seja carburada ou mista */}
-          {(isCarburada100 || isMista) && (
-            <div className="flex items-start gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
-              <Info className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400" />
-              <div className="space-y-1 text-xs leading-relaxed">
-                <p className="font-bold text-amber-800 dark:text-amber-300">
-                  {isMista
-                    ? `Atenção: A ${moto.marca} ${moto.modelo.nome} (${moto.geracao.anosLabel}) abrange anos carburados e injetados (${arq.descricaoAlimentacao}).`
-                    : `Atenção: A ${moto.marca} ${moto.modelo.nome} (${moto.geracao.anosLabel} · ${moto.geracao.nomeGeracao}) é 100% CARBURADA.`}
-                </p>
-                <p className="text-foreground/85">
-                  {isMista
-                    ? 'Os códigos de falha FI/MIL abaixo aplicam-se apenas às versões injetadas desta geração. Para as versões carburadas (CDI), utilize a aba de Testes no Multímetro.'
-                    : 'Esta geração utiliza sistema de ignição por CDI/TCI e não possui central de injeção eletrônica nem luz de falha FI/MIL. Utilize a aba de Testes no Multímetro para diagnosticar bateria, estator, retificador e bobinas.'}
-                </p>
-              </div>
-            </div>
-          )}
+          {/* Moto 100% carburada: oculta tabela FI/ECU por padrão e direciona para Multímetro */}
+          {isCarburada100 && !verTabelaFiEmCarburada ? (
+            <Card className="border-amber-500/40 bg-amber-500/10">
+              <CardContent className="flex flex-col items-start justify-between gap-4 py-6 sm:flex-row sm:items-center">
+                <div className="flex items-start gap-3">
+                  <Info className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400" />
+                  <div className="space-y-1 text-xs leading-relaxed">
+                    <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+                      {moto.marca} {moto.modelo.nome} ({moto.geracao.anosLabel} ·{' '}
+                      {moto.geracao.nomeGeracao}) é 100% Carburada
+                    </p>
+                    <p className="text-foreground/85">
+                      Esta geração utiliza sistema de ignição por CDI/TCI e não possui central de
+                      injeção eletrônica nem luz de falha FI/MIL. Utilize a aba de{' '}
+                      <strong>Testes no Multímetro</strong> para diagnosticar bateria, estator,
+                      retificador e bobinas.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="default"
+                    size="sm"
+                    onClick={() => setAbaAtiva('multimetro')}
+                    className="gap-1.5 text-xs"
+                  >
+                    <Wrench className="size-3.5" />
+                    Ir para Testes no Multímetro
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setVerTabelaFiEmCarburada(true)}
+                    className="text-xs"
+                  >
+                    Consultar tabela FI de outras motos
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {/* Banner informativo caso a geração selecionada seja mista ou usuário tenha expandido */}
+              {(isCarburada100 || isMista) && (
+                <div className="flex items-start gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
+                  <Info className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400" />
+                  <div className="space-y-1 text-xs leading-relaxed">
+                    <p className="font-bold text-amber-800 dark:text-amber-300">
+                      {isMista
+                        ? `Atenção: A ${moto.marca} ${moto.modelo.nome} (${moto.geracao.anosLabel}) abrange anos carburados e injetados (${arq.descricaoAlimentacao}).`
+                        : `Modo consulta: a ${moto.marca} ${moto.modelo.nome} (${moto.geracao.anosLabel}) é 100% CARBURADA (sem FI/MIL).`}
+                    </p>
+                    <p className="text-foreground/85">
+                      {isMista
+                        ? 'Os códigos de falha FI/MIL abaixo aplicam-se apenas às versões injetadas desta geração. Para as versões carburadas (CDI), utilize a aba de Testes no Multímetro.'
+                        : 'Os códigos abaixo servem apenas como referência para modelos injetados de outras gerações.'}
+                    </p>
+                  </div>
+                </div>
+              )}
 
-          {/* Seletor de Marca + Busca de código/sintoma */}
-          <div className="flex flex-col gap-3 rounded-2xl border bg-card/80 p-4 sm:flex-row sm:items-center sm:justify-between">
+              {/* Seletor de Marca + Busca de código/sintoma */}
+              <div className="flex flex-col gap-3 rounded-2xl border bg-card/80 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="mr-1 text-xs font-semibold text-muted-foreground">
                 Sistema de Injeção:
@@ -462,6 +512,8 @@ export function EletricaInjecaoPage() {
               ))}
             </div>
           )}
+            </>
+          )}
         </TabsContent>
 
         {/* ================================================================ */}
@@ -531,7 +583,10 @@ export function EletricaInjecaoPage() {
               >
                 <CardHeader className="pb-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <Badge variant="default" className="font-mono text-xs">
+                    <Badge
+                      variant="default"
+                      className="max-w-full whitespace-normal break-words font-mono text-xs leading-snug"
+                    >
                       Escala: {teste.escalaMultimetro}
                     </Badge>
                     {teste.apenasInjecao && (

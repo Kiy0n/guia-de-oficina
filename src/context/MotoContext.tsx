@@ -86,6 +86,7 @@ export function MotoProvider({ children }: { children: ReactNode }) {
     setMoto(selecao);
     setSection(DEFAULT_SECTION);
     setView({ tipo: 'workspace' });
+    window.scrollTo({ top: 0 });
   }, []);
 
   const selecionarGeracao = useCallback(
@@ -119,6 +120,7 @@ export function MotoProvider({ children }: { children: ReactNode }) {
   const abrirFundamentos = useCallback(() => {
     setSection('fundamentos');
     setView({ tipo: 'workspace' });
+    window.scrollTo({ top: 0 });
   }, []);
 
   const value = useMemo<MotoContextValue>(

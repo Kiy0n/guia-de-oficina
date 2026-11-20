@@ -28,6 +28,8 @@ Aplicativo desktop **gratuito e 100% offline** para consulta técnica rápida de
   - Consulta rápida de testes elétricos, sensores e códigos de falha compatíveis com cada geração.
 - **Biblioteca Offline de Manuais PDF (78 Manuais Oficiais):**
   - 78 manuais oficiais otimizados e **100% pesquisáveis** com busca instantânea por palavra-chave, salto direto para a página, **Modo Leitura em texto** e botão para abrir no navegador/leitor externo do sistema.
+- **Fundamentos (FVM) & Utilitários de Bancada:**
+  - Acesso direto no **Modo Universal** (sem precisar selecionar moto) com guias visuais interativos de instrumentos (calibre, multímetro, torquímetro, corrente), glossário técnico (26 termos), olho clínico de desgaste, **Conversor Rápido de Oficina** (`N·m ↔ kgf·m ↔ lbf·ft`, `PSI ↔ bar ↔ kPa`, `mm ↔ pol`) e **Caderneta de Manutenção Local** com backup JSON e impressão.
 - **Experiência Leve de Bancada:**
   - Alternância entre **Tema Claro** e **Tema Escuro**, inicialização rápida em janela nativa Windows (Tauri v2 + WebView2) e funcionamento **100% offline** — sem Docker, sem servidor externo e sem internet para o usuário final.
 
@@ -35,7 +37,7 @@ Aplicativo desktop **gratuito e 100% offline** para consulta técnica rápida de
 
 ## Download Pronto para Uso (Windows `.exe`)
 
-Para apenas instalar e usar (sem precisar compilar nada), baixe o instalador pronto **`Guia de Oficina_2.1.0_x64-setup.exe`** na aba **Releases** deste repositório:
+Para apenas instalar e usar (sem precisar compilar nada), baixe o instalador pronto **`Guia de Oficina_2.2.0_x64-setup.exe`** na aba **Releases** deste repositório:
 
 - **[Baixar última versão (Releases)](https://github.com/Kiy0n/guia-de-oficina/releases/latest)**
 
@@ -78,5 +80,5 @@ Para apenas instalar e usar (sem precisar compilar nada), baixe o instalador pro
 5. **Localizar o instalador gerado:**
    - O instalador NSIS final é gerado em:
      ```text
-     src-tauri/target/release/bundle/nsis/Guia de Oficina_2.1.0_x64-setup.exe
+     src-tauri/target/release/bundle/nsis/Guia de Oficina_2.2.0_x64-setup.exe
      ```

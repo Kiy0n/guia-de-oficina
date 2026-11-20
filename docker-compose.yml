@@ -50,5 +50,26 @@ services:
       - ./public/manuals:/app/public/manuals:ro
     restart: unless-stopped
 
+  # -------------------------------------------------------------------------
+  # Testes E2E & API (Playwright em container isolado na mesma rede do dev)
+  #   docker compose --profile test run --rm playwright
+  # -------------------------------------------------------------------------
+  playwright:
+    profiles: ["test"]
+    build:
+      context: .
+      dockerfile: Dockerfile.playwright
+    image: guia-de-oficina:playwright
+    container_name: guia-de-oficina-playwright
+    depends_on:
+      - dev
+    environment:
+      BASE_URL: http://dev:5173
+      API_URL: http://dev:3001
+      CI: "true"
+    volumes:
+      - .:/workspace/app
+    ipc: host
+
 volumes:
   node_modules:

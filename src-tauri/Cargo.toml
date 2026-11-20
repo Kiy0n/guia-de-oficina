@@ -1,6 +1,6 @@
 [package]
 name = "guia-de-oficina"
-version = "2.1.0"
+version = "2.2.0"
 description = "Guia de Oficina — Manual Técnico de Motocicletas"
 authors = ["Guia de Oficina"]
 edition = "2021"

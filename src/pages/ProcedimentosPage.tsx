@@ -204,7 +204,10 @@ function extrairDadosContextuaisMoto(
       {
         rotulo: 'Arquitetura de Freios desta Geração',
         valor: `Diant: ${f.freios.dianteiro.toUpperCase()} · Tras: ${f.freios.traseiro.toUpperCase()} (${f.freios.sistema})`,
-        detalhe: `Fluido: ${f.fluidos?.fluidoFreio ?? 'DOT 4'}`,
+        detalhe:
+          f.freios.dianteiro === 'disco' || f.freios.traseiro === 'disco'
+            ? `Fluido: ${f.fluidos?.fluidoFreio ?? 'DOT 4'}`
+            : 'Acionamento 100% mecânico a tambor (sem fluido hidráulico)',
       },
       {
         rotulo: 'Folga Livre do Pedal / Manete',

@@ -148,7 +148,7 @@ export function CoroaDesgasteSvg() {
             strokeWidth="2.5"
           />
           <line x1="129" y1="22" x2="129" y2="92" stroke="#34d399" strokeDasharray="3 3" strokeWidth="1.2" />
-          <text x="160" y="24" fill="#6ee7b7" fontSize="10" fontWeight="bold" fontFamily="sans-serif">
+          <text x="160" y="24" textAnchor="middle" fill="#6ee7b7" fontSize="10" fontWeight="bold" fontFamily="sans-serif">
             Topo largo e cavidade em "U" simétrica
           </text>
           <text x="160" y="124" textAnchor="middle" fill="#a1a1aa" fontSize="9.5" fontFamily="sans-serif">
@@ -200,7 +200,7 @@ export function PneuTwiFreiosSvg() {
     <div className="grid gap-4 lg:grid-cols-3">
       {/* 3A. Pneu / TWI */}
       <div className="rounded-xl border border-border/70 bg-zinc-950 p-3.5 text-zinc-100">
-        <p className="mb-2 text-xs font-bold text-foreground dark:text-zinc-100">
+        <p className="mb-2 text-xs font-bold text-zinc-100">
           1. Pneu — Ressalto TWI (1,6 mm)
         </p>
         <svg

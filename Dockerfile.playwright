@@ -1,0 +1,13 @@
+# Imagem dedicada para testes E2E e API com Playwright (sem instalar browsers no host)
+# Instala @playwright/test em /workspace/node_modules (pai de /workspace/app) para resolução
+# ESM nativa sem conflitar com o volume Alpine node_modules do serviço dev.
+FROM mcr.microsoft.com/playwright:v1.52.0-noble
+
+WORKDIR /workspace
+RUN npm init -y > /dev/null 2>&1 \
+    && npm install --no-audit --no-fund @playwright/test@1.52.0
+
+ENV PATH="/workspace/node_modules/.bin:${PATH}"
+
+WORKDIR /workspace/app
+CMD ["playwright", "test"]

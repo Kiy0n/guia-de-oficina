@@ -51,7 +51,23 @@ export default defineConfig({
     host: true,
     port: 5173,
     strictPort: true,
-    watch: usePolling ? { usePolling: true, interval: 300 } : undefined,
+    allowedHosts: ['dev', 'localhost', '127.0.0.1'],
+    watch: usePolling
+      ? {
+          usePolling: true,
+          interval: 300,
+          ignored: [
+            '**/public/manuals/**',
+            '**/data/**',
+            '**/src-tauri/**',
+            '**/test-results/**',
+            '**/playwright-report/**',
+            '**/dist/**',
+            '**/dist-server/**',
+            '**/.git/**',
+          ],
+        }
+      : undefined,
     proxy: {
       '/api': {
         target: `http://localhost:${API_PORT}`,

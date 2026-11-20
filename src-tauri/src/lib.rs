@@ -18,8 +18,12 @@ fn abrir_url_externa(url: String) -> Result<(), String> {
     if !(trimmed.starts_with("http://127.0.0.1:") || trimmed.starts_with("https://")) {
         return Err("URL não permitida: apenas http://127.0.0.1: ou https:// são aceitas.".to_string());
     }
-    if trimmed.contains('"') || trimmed.contains('\r') || trimmed.contains('\n') {
-        return Err("URL contém caracteres inválidos.".to_string());
+    const FORBIDDEN_CHARS: [char; 8] = ['"', '|', '>', '<', '^', '%', ';', '`'];
+    if trimmed
+        .chars()
+        .any(|c| c.is_control() || FORBIDDEN_CHARS.contains(&c))
+    {
+        return Err("URL contém caracteres de controle ou metacaracteres não permitidos.".to_string());
     }
 
     #[cfg(target_os = "windows")]
