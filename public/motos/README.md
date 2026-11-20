@@ -1,18 +1,18 @@
 # Fotos de Referência das Motocicletas — Guia de Oficina
 
-Coloque aqui as fotos das motos em formato **`.webp`** (recomendado: largura ~640–800 px, proporção `16:10` ou fundo neutro/transparente, `< 80 KB` por arquivo) para exibição automática nos cards de seleção de **Ano / Geração** em `MotoSelectorWizard.tsx`.
+Coloque aqui as fotos das motos para exibição automática nos cards de seleção de **Ano / Geração** em `MotoSelectorWizard.tsx`.
 
-- Se a foto de uma geração ainda não existir nesta pasta, o card oculta o bloco de imagem automaticamente (sem ícone quebrado e sem afetar o layout).
-- Esta pasta é copiada automaticamente para `dist/motos/` no build do Vite, funcionando **100% offline** tanto no Docker quanto no aplicativo desktop **Tauri (`.exe`)**.
+- **Formato recomendado:** **`.webp`** (largura ~640–800 px, proporção `16:10`, `< 80 KB` por arquivo para manter o instalador Tauri leve).
+- **Fallback automático de extensão:** caso você salve temporariamente como **`.png`** ou **`.jpg`** com o mesmo nome-base, o aplicativo carrega automaticamente na ordem `.webp` → `.png` → `.jpg`.
+- **Fallback invisível:** se a foto ainda não existir nesta pasta, o card oculta o bloco de imagem sem ícone quebrado e sem alterar o layout.
+- **Offline (Docker + Tauri):** o `vite.config.ts` copia `public/motos/` para `dist/motos/` no build (enquanto mantém `public/manuals/` fora de `dist/`).
 
 ---
 
-## 1. Família Honda CG (com ramificação por versão)
+## Honda
 
-O sistema tenta primeiro a foto específica da **versão + geração** e, caso não exista, faz fallback opcional para a foto genérica da geração (ex.: `honda-cg-160-2016-2017.webp`).
-
-### CG 125
-| Versão | Geração | Arquivo Esperado (`public/motos/...`) |
+### Honda → CG 125 (com ramificação de versão)
+| Versão | Ano / Geração | Arquivo Esperado (`public/motos/...`) |
 | :--- | :--- | :--- |
 | **Titan** | 2000–2004 (OHV) | `honda-cg-125-titan-2000-2008.webp` |
 | **Fan** | 2005–2008 (OHV) | `honda-cg-125-fan-2000-2008.webp` |
@@ -22,8 +22,8 @@ O sistema tenta primeiro a foto específica da **versão + geração** e, caso n
 | **Cargo** | 2009–2015 (OHC Carburada) | `honda-cg-125-cargo-2009-2015.webp` |
 | **Cargo 125i** | 2016–2018 (PGM-FI) | `honda-cg-125-cargo-2016-2018.webp` |
 
-### CG 150
-| Versão | Geração | Arquivo Esperado (`public/motos/...`) |
+### Honda → CG 150 (com ramificação de versão)
+| Versão | Ano / Geração | Arquivo Esperado (`public/motos/...`) |
 | :--- | :--- | :--- |
 | **Titan** | 2004–2008 (Carburada) | `honda-cg-150-titan-2004-2008.webp` |
 | **Titan** | 2009–2015 (PGM-FI / Mix / Flex) | `honda-cg-150-titan-2009-2015.webp` |
@@ -31,8 +31,8 @@ O sistema tenta primeiro a foto específica da **versão + geração** e, caso n
 | **Cargo** | 2014–2015 (PGM-FI) | `honda-cg-150-cargo-2009-2015.webp` |
 | **Sport** | 2005–2008 (Carburada) | `honda-cg-150-sport-2004-2008.webp` |
 
-### CG 160
-| Versão | Geração | Arquivo Esperado (`public/motos/...`) |
+### Honda → CG 160 (com ramificação de versão)
+| Versão | Ano / Geração | Arquivo Esperado (`public/motos/...`) |
 | :--- | :--- | :--- |
 | **Start** | 2016–2017 (Tambor) | `honda-cg-160-start-2016-2017.webp` |
 | **Start** | 2018–2024 (CBS Tambor) | `honda-cg-160-start-2018-2024.webp` |
@@ -47,10 +47,8 @@ O sistema tenta primeiro a foto específica da **versão + geração** e, caso n
 | **Cargo** | 2018–2024 (CBS) | `honda-cg-160-cargo-2018-2024.webp` |
 | **Cargo** | 2025–2026 (CBS) | `honda-cg-160-cargo-2025-2026.webp` |
 
----
-
-## 2. Demais Modelos Honda
-| Modelo | Geração | Arquivo Esperado (`public/motos/...`) |
+### Honda → Demais Modelos (fluxo direto Modelo → Ano)
+| Modelo | Ano / Geração | Arquivo Esperado (`public/motos/...`) |
 | :--- | :--- | :--- |
 | **Biz 100** | 1998–2005 (C100) | `honda-biz-100-1998-2005.webp` |
 | **Biz 100** | 2013–2015 | `honda-biz-100-2013-2015.webp` |
@@ -73,24 +71,42 @@ O sistema tenta primeiro a foto específica da **versão + geração** e, caso n
 
 ---
 
-## 3. Modelos Yamaha
-| Modelo | Geração | Arquivo Esperado (`public/motos/...`) |
+## Yamaha
+
+### Yamaha → Fazer 150 (com ramificação de versão)
+| Versão | Ano / Geração | Arquivo Esperado (`public/motos/...`) |
 | :--- | :--- | :--- |
-| **Crosser 150** | 2015–2018 | `yamaha-crosser-150-2015-2018.webp` |
-| **Crosser 150** | 2019–2026 (ABS / LED) | `yamaha-crosser-150-2019-2026.webp` |
+| **YS150 Fazer** | 2014–2024 (ED / SED / UBS) | `yamaha-fazer-150-ys150-2014-2024.webp` |
+| **FZ15 ABS** | 2023–2026 (ABS / LED) | `yamaha-fazer-150-fz15-2023-2026.webp` |
+
+### Yamaha → YBR 125 / Factor 125 (com ramificação de versão)
+| Versão | Ano / Geração | Arquivo Esperado (`public/motos/...`) |
+| :--- | :--- | :--- |
+| **YBR 125** | 2000–2008 (Carburada) | `yamaha-ybr-factor-125-ybr125-2000-2008.webp` |
+| **Factor 125** | 2009–2016 (Carburada) | `yamaha-ybr-factor-125-factor125-2009-2016.webp` |
+| **Factor 125i** | 2017–2024 (Injetada Blueflex) | `yamaha-ybr-factor-125-factor125i-2017-2024.webp` |
+
+### Yamaha → Crosser 150 (com ramificação de versão)
+| Versão | Ano / Geração | Arquivo Esperado (`public/motos/...`) |
+| :--- | :--- | :--- |
+| **Crosser S** *(para-lama baixo)* | 2015–2018 (E / ED / S) | `yamaha-crosser-150-s-2015-2018.webp` |
+| **Crosser S** *(para-lama baixo)* | 2019–2026 (ABS / LED) | `yamaha-crosser-150-s-2019-2026.webp` |
+| **Crosser Z** *(para-lama alto)* | 2015–2018 (Z) | `yamaha-crosser-150-z-2015-2018.webp` |
+| **Crosser Z** *(para-lama alto)* | 2019–2026 (ABS / LED) | `yamaha-crosser-150-z-2019-2026.webp` |
+
+### Yamaha → Demais Modelos (fluxo direto Modelo → Ano)
+| Modelo | Ano / Geração | Arquivo Esperado (`public/motos/...`) |
+| :--- | :--- | :--- |
 | **Factor 150** | 2016–2024 (Blueflex) | `yamaha-factor-150-2016-2024.webp` |
 | **Factor 150** | 2025–2026 (LED / DX) | `yamaha-factor-150-2025-2026.webp` |
 | **Fazer 125** | 2016–2024 | `yamaha-fazer-125-2016-2024.webp` |
-| **Fazer 150** | 2014–2024 (YS150) | `yamaha-fazer-150-2014-2024.webp` |
-| **Fazer 150** | 2023–2026 (FZ15 ABS) | `yamaha-fazer-150-2023-2026.webp` |
-| **YBR 125 / Factor 125** | 2000–2008 (YBR 125) | `yamaha-ybr-factor-125-2000-2008.webp` |
-| **YBR 125 / Factor 125** | 2009–2016 (Factor Carburada) | `yamaha-ybr-factor-125-2009-2016.webp` |
-| **YBR 125 / Factor 125** | 2017–2024 (Factor 125i) | `yamaha-ybr-factor-125-2017-2024.webp` |
 
 ---
 
-## 4. Modelos Suzuki
-| Modelo | Geração | Arquivo Esperado (`public/motos/...`) |
+## Suzuki
+
+### Suzuki → Modelos (fluxo direto Modelo → Ano)
+| Modelo | Ano / Geração | Arquivo Esperado (`public/motos/...`) |
 | :--- | :--- | :--- |
 | **Intruder 125** | 2002–2007 (VM22) | `suzuki-intruder-125-2002-2007.webp` |
 | **Intruder 125** | 2008–2016 (BS26) | `suzuki-intruder-125-2008-2016.webp` |

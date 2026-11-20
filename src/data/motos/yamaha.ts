@@ -540,7 +540,7 @@ export const YAMAHA: Modelo[] = [
     marca: 'Yamaha',
     nome: 'Crosser 150',
     categoria: 'trail',
-    aliases: ['Crosser', 'XTZ 150', 'XTZ150'],
+    aliases: ['Crosser', 'XTZ 150', 'XTZ150', 'Crosser S', 'Crosser Z', 'Crosser 150 S', 'Crosser 150 Z'],
     geracoes: [
       geracao('yamaha-crosser-150', {
         anoInicio: 2015,
@@ -654,7 +654,7 @@ export const YAMAHA: Modelo[] = [
     marca: 'Yamaha',
     nome: 'YBR 125 / Factor 125',
     categoria: 'street',
-    aliases: ['YBR', 'Factor 125', 'Factor', 'YBR125', 'Factor 125i'],
+    aliases: ['YBR', 'YBR 125', 'Factor 125', 'Factor', 'YBR125', 'Factor 125i'],
     geracoes: [
       geracao('yamaha-ybr-factor-125', {
         anoInicio: 2000,
