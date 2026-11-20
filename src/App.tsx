@@ -13,9 +13,9 @@ const VIEW_TRANSITION = {
 };
 
 function Router() {
-  const { view, moto } = useMoto();
+  const { view, moto, section } = useMoto();
   const { registrarAcessoMoto } = usePreferencias();
-  const isWizard = view.tipo === 'wizard' || !moto;
+  const isWizard = view.tipo === 'wizard' || (!moto && section !== 'fundamentos');
   const start = view.tipo === 'wizard' ? view.start : { step: 1 as const };
 
   useEffect(() => {

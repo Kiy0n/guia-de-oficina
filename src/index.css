@@ -270,3 +270,92 @@
     print-color-adjust: exact;
   }
 }
+
+/* -------------------------------------------------------------------------
+ * Animações didáticas dos diagramas SVG da seção Fundamentos
+ * Respeitam prefers-reduced-motion e controle manual (.anim-pausada)
+ * ------------------------------------------------------------------------- */
+@keyframes lamina-desliza {
+  0%,
+  100% {
+    transform: translateX(0px);
+  }
+  50% {
+    transform: translateX(-28px);
+  }
+}
+
+@keyframes torquimetro-puxa {
+  0%,
+  15% {
+    transform: rotate(-14deg);
+  }
+  58%,
+  72% {
+    transform: rotate(16deg);
+  }
+  100% {
+    transform: rotate(-14deg);
+  }
+}
+
+@keyframes torquimetro-estalo {
+  0%,
+  52% {
+    opacity: 0;
+  }
+  58%,
+  76% {
+    opacity: 1;
+  }
+  86%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes corrente-folga {
+  0%,
+  100% {
+    transform: translateY(-9px);
+  }
+  50% {
+    transform: translateY(9px);
+  }
+}
+
+.anim-lamina-desliza {
+  animation: lamina-desliza 3.2s ease-in-out infinite;
+}
+
+.anim-torquimetro-puxa {
+  animation: torquimetro-puxa 3.8s ease-in-out infinite;
+}
+
+.anim-torquimetro-estalo {
+  animation: torquimetro-estalo 3.8s ease-in-out infinite;
+}
+
+.anim-corrente-folga {
+  animation: corrente-folga 2.8s ease-in-out infinite;
+}
+
+.anim-pausada .anim-lamina-desliza,
+.anim-pausada .anim-torquimetro-puxa,
+.anim-pausada .anim-torquimetro-estalo,
+.anim-pausada .anim-corrente-folga {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-lamina-desliza,
+  .anim-torquimetro-puxa,
+  .anim-torquimetro-estalo,
+  .anim-corrente-folga {
+    animation: none !important;
+  }
+
+  .anim-torquimetro-estalo {
+    opacity: 1;
+  }
+}

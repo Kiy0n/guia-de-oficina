@@ -7,6 +7,7 @@ import {
   CircleGauge,
   Clock,
   Eye,
+  GraduationCap,
   Search,
   Star,
   Undo2,
@@ -909,7 +910,7 @@ function StepGeracao({
 // ---------------------------------------------------------------------------
 
 export function MotoSelectorWizard({ start }: { start: WizardStart }) {
-  const { moto, selecionarMoto, cancelarTroca } = useMoto();
+  const { moto, selecionarMoto, cancelarTroca, abrirFundamentos } = useMoto();
 
   const startModelo = start.modeloId ? findModelo(start.modeloId) : undefined;
   const startFamilia = startModelo ? resolverContextoFamiliaInicial(startModelo.id) : null;
@@ -1016,15 +1017,34 @@ export function MotoSelectorWizard({ start }: { start: WizardStart }) {
             </span>
             <span className="font-bold tracking-tight">Guia de Oficina</span>
           </div>
-          {moto && (
-            <Button variant="ghost" size="sm" className="ml-auto" onClick={cancelarTroca}>
-              <Undo2 />
-              <span className="hidden sm:inline">
-                Voltar para {moto.modelo.nome} {moto.geracao.anosLabel}
-              </span>
-              <span className="sm:hidden">Voltar</span>
+          <div className="ml-auto flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={abrirFundamentos}
+              className="gap-1.5 border-emerald-500/40 bg-emerald-500/10 text-xs font-semibold text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300"
+            >
+              <GraduationCap className="size-4" />
+              <span>Fundamentos</span>
+              <Badge
+                variant="outline"
+                className="hidden border-emerald-500/40 bg-emerald-500/15 px-1.5 py-0 text-[10px] text-emerald-700 sm:inline-flex dark:text-emerald-300"
+              >
+                FVM
+              </Badge>
             </Button>
-          )}
+
+            {moto && (
+              <Button variant="ghost" size="sm" onClick={cancelarTroca}>
+                <Undo2 />
+                <span className="hidden sm:inline">
+                  Voltar para {moto.modelo.nome} {moto.geracao.anosLabel}
+                </span>
+                <span className="sm:hidden">Voltar</span>
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 

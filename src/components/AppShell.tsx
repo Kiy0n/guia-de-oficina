@@ -7,6 +7,7 @@ import {
   Clapperboard,
   ClipboardList,
   Gauge,
+  GraduationCap,
   Lightbulb,
   Menu,
   Moon,
@@ -26,7 +27,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { useMoto, useMotoSelecionada } from '@/context/MotoContext';
+import { useMoto } from '@/context/MotoContext';
 import { usePreferencias } from '@/context/PreferenciasContext';
 import { BRAND_THEME } from '@/lib/brands';
 import { SECTIONS, type SectionId } from '@/lib/sections';
@@ -35,6 +36,7 @@ import { DiagnosticoCorretivoPage } from '@/pages/DiagnosticoCorretivoPage';
 import { EletricaInjecaoPage } from '@/pages/EletricaInjecaoPage';
 import { FerramentasPage } from '@/pages/FerramentasPage';
 import { FichaTecnicaPage } from '@/pages/FichaTecnicaPage';
+import { FundamentosPage } from '@/pages/FundamentosPage';
 import { IniciarRevisaoPage } from '@/pages/IniciarRevisaoPage';
 import { ManuaisPage } from '@/pages/ManuaisPage';
 import { ManualRevisoesPage } from '@/pages/ManualRevisoesPage';
@@ -46,7 +48,9 @@ const SECTION_TRANSITION = {
   ease: [0.22, 1, 0.36, 1] as const,
 };
 
-function SectionContent({ id }: { id: SectionId }) {
+function SectionContent({ id, temMoto }: { id: SectionId; temMoto: boolean }) {
+  if (id === 'fundamentos') return <FundamentosPage />;
+  if (!temMoto) return <FundamentosPage />;
   if (id === 'ficha-tecnica') return <FichaTecnicaPage />;
   if (id === 'iniciar-revisao') return <IniciarRevisaoPage />;
   if (id === 'manual-revisoes') return <ManualRevisoesPage />;
@@ -60,8 +64,7 @@ function SectionContent({ id }: { id: SectionId }) {
 }
 
 export function AppShell() {
-  const { section, setSection, trocarMoto } = useMoto();
-  const moto = useMotoSelecionada();
+  const { moto, section, setSection, trocarMoto } = useMoto();
   const {
     tema,
     modoBancada,
@@ -81,10 +84,16 @@ export function AppShell() {
   const [colaAberta, setColaAberta] = useState(false);
   const [glossarioAberto, setGlossarioAberto] = useState(false);
 
-  const theme = BRAND_THEME[moto.marca];
-  const motoFavorita = isFavorita(moto.modelo.id, moto.geracao.id);
+  const theme = moto ? BRAND_THEME[moto.marca] : null;
+  const motoFavorita = moto ? isFavorita(moto.modelo.id, moto.geracao.id) : false;
 
   const navegar = (id: SectionId) => {
+    const defSecao = SECTIONS.find((s) => s.id === id);
+    if (!moto && defSecao?.requerMoto !== false) {
+      setMenuMobileAberto(false);
+      trocarMoto('fabricante');
+      return;
+    }
     setSection(id);
     setMenuMobileAberto(false);
     window.scrollTo({ top: 0 });
@@ -138,37 +147,60 @@ export function AppShell() {
       </div>
 
       <div className="px-4 pb-3">
-        <div className={cn('group relative overflow-hidden rounded-xl border-2 bg-card p-3.5', theme.border)}>
-          <div className="flex items-center gap-3">
-            <theme.Logo emblemOnly className="size-11 shrink-0" />
-            <div className="min-w-0">
-              <p className="truncate font-semibold">{moto.modelo.nome}</p>
-              <p className="font-mono text-xs text-muted-foreground">{moto.geracao.anosLabel}</p>
-              <p className="truncate text-xs text-muted-foreground">{moto.geracao.nomeGeracao}</p>
+        {moto && theme ? (
+          <div className={cn('group relative overflow-hidden rounded-xl border-2 bg-card p-3.5', theme.border)}>
+            <div className="flex items-center gap-3">
+              <theme.Logo emblemOnly className="size-11 shrink-0" />
+              <div className="min-w-0">
+                <p className="truncate font-semibold">{moto.modelo.nome}</p>
+                <p className="font-mono text-xs text-muted-foreground">{moto.geracao.anosLabel}</p>
+                <p className="truncate text-xs text-muted-foreground">{moto.geracao.nomeGeracao}</p>
+              </div>
             </div>
+            <Button variant="secondary" size="sm" className="mt-2.5 w-full" onClick={() => trocar('ano')}>
+              <ArrowLeftRight /> Trocar Moto / Ano
+            </Button>
           </div>
-          <Button variant="secondary" size="sm" className="mt-2.5 w-full" onClick={() => trocar('ano')}>
-            <ArrowLeftRight /> Trocar Moto / Ano
-          </Button>
-        </div>
+        ) : (
+          <div className="rounded-xl border border-primary/35 bg-primary/8 p-3.5">
+            <div className="flex items-center gap-2.5">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                <GraduationCap className="size-5" />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">Modo Universal</p>
+                <p className="text-xs text-muted-foreground">Nenhuma moto selecionada</p>
+              </div>
+            </div>
+            <Button variant="default" size="sm" className="mt-2.5 w-full" onClick={() => trocar('fabricante')}>
+              <Wrench className="size-3.5" /> Selecionar Moto
+            </Button>
+          </div>
+        )}
       </div>
 
       <Separator />
 
       <ScrollArea className="min-h-0 flex-1">
         <nav aria-label="Seções" className="flex flex-col gap-1 p-3">
-          {SECTIONS.map(({ id, titulo, icon: Icon }, i) => {
+          {SECTIONS.map(({ id, titulo, icon: Icon, badge, requerMoto }, i) => {
             const ativo = id === section;
+            const bloqueadoSemMoto = !moto && requerMoto !== false;
             return (
               <button
                 key={id}
                 type="button"
                 data-compact="true"
                 onClick={() => navegar(id)}
+                title={bloqueadoSemMoto ? 'Selecione uma moto para acessar esta seção' : undefined}
                 aria-current={ativo ? 'page' : undefined}
                 className={cn(
                   'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
-                  ativo ? 'font-semibold text-primary' : 'text-foreground/85 hover:bg-accent',
+                  ativo
+                    ? 'font-semibold text-primary'
+                    : bloqueadoSemMoto
+                      ? 'text-muted-foreground/75 hover:bg-accent/60'
+                      : 'text-foreground/85 hover:bg-accent',
                 )}
               >
                 {ativo && (
@@ -180,7 +212,15 @@ export function AppShell() {
                 )}
                 <span className="relative z-10 w-4 font-mono text-xs text-muted-foreground">{i + 1}</span>
                 <Icon className="relative z-10 size-4 shrink-0" />
-                <span className="relative z-10 flex-1">{titulo}</span>
+                <span className="relative z-10 flex-1 truncate">{titulo}</span>
+                {badge && (
+                  <Badge
+                    variant="outline"
+                    className="relative z-10 border-emerald-500/40 bg-emerald-500/15 px-1.5 py-0 text-[10px] font-bold text-emerald-700 dark:text-emerald-300"
+                  >
+                    {badge}
+                  </Badge>
+                )}
                 <ChevronRight
                   className={cn(
                     'relative z-10 size-4 opacity-0 transition-opacity group-hover:opacity-60',
@@ -265,54 +305,67 @@ export function AppShell() {
 
           <Separator orientation="vertical" className="mx-0.5 hidden !h-6 lg:block" />
 
-          {/* Pill da Moto Ativa + Estrela Favoritar */}
-          <div className="flex min-w-0 items-center gap-1">
-            <button
-              type="button"
-              data-compact="true"
-              onClick={() => trocar('ano')}
-              title="Trocar ano / geração"
-              className="flex min-w-0 items-center gap-1.5 rounded-lg px-2 py-1 text-sm transition-colors hover:bg-accent"
-            >
-              <Badge variant={theme.badge} className="shrink-0">
-                {moto.marca}
-              </Badge>
-              <span className="truncate font-semibold">{moto.modelo.nome}</span>
-              <span className="hidden font-mono text-xs text-muted-foreground sm:inline">
-                • {moto.geracao.anosLabel}
-              </span>
-            </button>
+          {/* Pill da Moto Ativa + Estrela Favoritar (ou badge Universal quando sem moto) */}
+          {moto && theme ? (
+            <div className="flex min-w-0 items-center gap-1">
+              <button
+                type="button"
+                data-compact="true"
+                onClick={() => trocar('ano')}
+                title="Trocar ano / geração"
+                className="flex min-w-0 items-center gap-1.5 rounded-lg px-2 py-1 text-sm transition-colors hover:bg-accent"
+              >
+                <Badge variant={theme.badge} className="shrink-0">
+                  {moto.marca}
+                </Badge>
+                <span className="truncate font-semibold">{moto.modelo.nome}</span>
+                <span className="hidden font-mono text-xs text-muted-foreground sm:inline">
+                  • {moto.geracao.anosLabel}
+                </span>
+              </button>
 
-            <button
-              type="button"
-              data-compact="true"
-              onClick={() => toggleFavorita(moto.modelo.id, moto.geracao.id)}
-              title={motoFavorita ? 'Remover de Minhas Motos' : 'Fixar moto como favorita ⭐'}
-              aria-label={motoFavorita ? 'Remover de Minhas Motos' : 'Fixar moto como favorita'}
-              className={cn(
-                'rounded-lg p-1.5 transition-colors hover:bg-accent',
-                motoFavorita ? 'text-amber-400' : 'text-muted-foreground hover:text-amber-400',
-              )}
-            >
-              <Star className={cn('size-4', motoFavorita && 'fill-current')} />
-            </button>
-          </div>
+              <button
+                type="button"
+                data-compact="true"
+                onClick={() => toggleFavorita(moto.modelo.id, moto.geracao.id)}
+                title={motoFavorita ? 'Remover de Minhas Motos' : 'Fixar moto como favorita ⭐'}
+                aria-label={motoFavorita ? 'Remover de Minhas Motos' : 'Fixar moto como favorita'}
+                className={cn(
+                  'rounded-lg p-1.5 transition-colors hover:bg-accent',
+                  motoFavorita ? 'text-amber-400' : 'text-muted-foreground hover:text-amber-400',
+                )}
+              >
+                <Star className={cn('size-4', motoFavorita && 'fill-current')} />
+              </button>
+            </div>
+          ) : (
+            <div className="flex min-w-0 items-center gap-2">
+              <Badge
+                variant="outline"
+                className="border-emerald-500/40 bg-emerald-500/15 text-xs text-emerald-700 dark:text-emerald-300"
+              >
+                Fundamentos · Universal
+              </Badge>
+            </div>
+          )}
 
           {/* Controles rápidos de Bancada à direita */}
           <div className="ml-auto flex items-center gap-1 sm:gap-1.5">
-            {/* Botão Cola Rápida */}
-            <Button
-              type="button"
-              data-compact="true"
-              variant="secondary"
-              size="sm"
-              onClick={() => setColaAberta(true)}
-              title="Abrir Cola Rápida da moto atual (óleo, válvulas, vela, PSI e torques)"
-              className="h-8 gap-1.5 px-2.5 text-xs font-semibold"
-            >
-              <Gauge className="size-3.5 text-primary" />
-              <span>Cola</span>
-            </Button>
+            {/* Botão Cola Rápida (apenas quando há moto selecionada) */}
+            {moto && (
+              <Button
+                type="button"
+                data-compact="true"
+                variant="secondary"
+                size="sm"
+                onClick={() => setColaAberta(true)}
+                title="Abrir Cola Rápida da moto atual (óleo, válvulas, vela, PSI e torques)"
+                className="h-8 gap-1.5 px-2.5 text-xs font-semibold"
+              >
+                <Gauge className="size-3.5 text-primary" />
+                <span>Cola</span>
+              </Button>
+            )}
 
             {/* Tela Acesa (Desktop/Tablet) */}
             <Button
@@ -372,7 +425,7 @@ export function AppShell() {
               className="hidden h-8 shrink-0 gap-1.5 text-xs sm:inline-flex"
             >
               <ArrowLeftRight className="size-3.5" />
-              <span className="hidden md:inline">Trocar Moto</span>
+              <span className="hidden md:inline">{moto ? 'Trocar Moto' : 'Selecionar Moto'}</span>
             </Button>
 
             <ApiStatusIndicator className="hidden xl:inline-flex" />
@@ -420,13 +473,13 @@ export function AppShell() {
           <div className="mx-auto max-w-6xl px-4 py-6 pb-24 sm:px-6 md:py-8 md:pb-8">
             <AnimatePresence mode="wait">
               <motion.div
-                key={`${moto.geracao.id}-${section}`}
+                key={`${moto?.geracao.id ?? 'universal'}-${section}`}
                 initial={{ opacity: 0, y: 12, scale: 0.99 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8, scale: 0.99 }}
                 transition={SECTION_TRANSITION}
               >
-                <SectionContent id={section} />
+                <SectionContent id={section} temMoto={Boolean(moto)} />
               </motion.div>
             </AnimatePresence>
           </div>
@@ -479,7 +532,7 @@ export function AppShell() {
       </nav>
 
       {/* Sheets auxiliares globais */}
-      <ColaRapidaSheet open={colaAberta} onOpenChange={setColaAberta} />
+      {moto && <ColaRapidaSheet open={colaAberta} onOpenChange={setColaAberta} />}
       <GlossarioSheet open={glossarioAberto} onOpenChange={setGlossarioAberto} />
     </div>
   );

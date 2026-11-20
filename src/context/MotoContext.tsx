@@ -29,6 +29,8 @@ interface MotoContextValue {
   /** Troca apenas o ano/geração do modelo atual com 1 clique, mantendo a aba ativa. */
   selecionarGeracao: (geracaoId: string) => void;
   setSection: (section: SectionId) => void;
+  /** Abre a seção Fundamentos diretamente, com ou sem moto selecionada. */
+  abrirFundamentos: () => void;
   /** Abre o wizard; `'ano'` começa no passo 3 com o modelo atual. */
   trocarMoto: (inicio?: 'fabricante' | 'ano') => void;
   /** Volta ao workspace sem alterar a moto (se houver uma selecionada). */
@@ -109,8 +111,15 @@ export function MotoProvider({ children }: { children: ReactNode }) {
   );
 
   const cancelarTroca = useCallback(() => {
-    if (moto) setView({ tipo: 'workspace' });
-  }, [moto]);
+    if (moto || section === 'fundamentos') {
+      setView({ tipo: 'workspace' });
+    }
+  }, [moto, section]);
+
+  const abrirFundamentos = useCallback(() => {
+    setSection('fundamentos');
+    setView({ tipo: 'workspace' });
+  }, []);
 
   const value = useMemo<MotoContextValue>(
     () => ({
@@ -120,6 +129,7 @@ export function MotoProvider({ children }: { children: ReactNode }) {
       selecionarMoto,
       selecionarGeracao,
       setSection,
+      abrirFundamentos,
       trocarMoto,
       cancelarTroca,
     }),
@@ -129,6 +139,7 @@ export function MotoProvider({ children }: { children: ReactNode }) {
       view,
       selecionarMoto,
       selecionarGeracao,
+      abrirFundamentos,
       trocarMoto,
       cancelarTroca,
     ],

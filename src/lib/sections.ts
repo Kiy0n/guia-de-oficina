@@ -4,6 +4,7 @@ import {
   Calculator,
   ClipboardList,
   Clapperboard,
+  GraduationCap,
   PlayCircle,
   Stethoscope,
   Wrench,
@@ -20,13 +21,18 @@ export type SectionId =
   | 'ferramentas'
   | 'eletrica'
   | 'diagnostico'
-  | 'torques-calculadoras';
+  | 'torques-calculadoras'
+  | 'fundamentos';
 
 export interface SectionDef {
   id: SectionId;
   titulo: string;
   descricao: string;
   icon: LucideIcon;
+  /** Badge translúcido opcional exibido na sidebar. */
+  badge?: string;
+  /** Quando false, pode ser acessada mesmo sem moto selecionada. */
+  requerMoto?: boolean;
   /** Conteúdo previsto para as próximas fases (exibido nos placeholders). */
   previsto: string[];
 }
@@ -94,6 +100,15 @@ export const SECTIONS: readonly SectionDef[] = [
     descricao: 'Tabela de torques específicos e universais e calculadoras de bancada.',
     icon: Calculator,
     previsto: ['Tabela de torques', 'Conversor de torque e calculadora 12V', 'Simulador de relação (coroa/pinhão)'],
+  },
+  {
+    id: 'fundamentos',
+    titulo: 'Fundamentos',
+    descricao: 'Guias visuais de instrumentos, glossário técnico e olho clínico de desgaste para qualquer moto.',
+    icon: GraduationCap,
+    badge: 'FVM',
+    requerMoto: false,
+    previsto: ['Guias de instrumentos', 'Glossário técnico', 'Olho clínico de desgaste'],
   },
 ];
 
