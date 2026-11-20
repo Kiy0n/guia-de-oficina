@@ -35,7 +35,7 @@ Aplicativo desktop **gratuito e 100% offline** para consulta técnica rápida de
 
 ## Download Pronto para Uso (Windows `.exe`)
 
-Para apenas instalar e usar (sem precisar compilar nada), baixe o instalador pronto **`Guia de Oficina_1.6.0_x64-setup.exe`** na aba **Releases** deste repositório:
+Para apenas instalar e usar (sem precisar compilar nada), baixe o instalador pronto **`Guia de Oficina_2.1.0_x64-setup.exe`** na aba **Releases** deste repositório:
 
 - **[Baixar última versão (Releases)](https://github.com/Kiy0n/guia-de-oficina/releases/latest)**
 
@@ -78,5 +78,5 @@ Para apenas instalar e usar (sem precisar compilar nada), baixe o instalador pro
 5. **Localizar o instalador gerado:**
    - O instalador NSIS final é gerado em:
      ```text
-     src-tauri/target/release/bundle/nsis/Guia de Oficina_1.6.0_x64-setup.exe
+     src-tauri/target/release/bundle/nsis/Guia de Oficina_2.1.0_x64-setup.exe
      ```
