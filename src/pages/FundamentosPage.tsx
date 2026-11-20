@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   BookOpen,
+  Calculator,
   Eye,
   Gauge,
   GraduationCap,
@@ -12,6 +13,8 @@ import {
   Wrench,
 } from 'lucide-react';
 
+import { CadernetaManutencao } from '@/components/fundamentos/CadernetaManutencao';
+import { ConversorBancada } from '@/components/fundamentos/ConversorBancada';
 import {
   CalibreLaminasSvg,
   FolgaCorrenteSvg,
@@ -73,7 +76,7 @@ export function FundamentosPage() {
   return (
     <div className="flex flex-col gap-6">
       {/* Cabeçalho independente (funciona com ou sem moto selecionada) */}
-      <div className="flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <div className="no-print flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex items-start gap-4">
           <span className="rounded-xl bg-primary/15 p-3 text-primary">
             <GraduationCap className="size-6" />
@@ -110,20 +113,24 @@ export function FundamentosPage() {
         )}
       </div>
 
-      {/* 3 Sub-abas internas limpas */}
+      {/* 4 Sub-abas internas limpas */}
       <Tabs value={abaAtiva} onValueChange={setAbaAtiva} className="space-y-5">
-        <TabsList className="grid h-auto w-full grid-cols-1 gap-1.5 bg-card/80 p-1.5 sm:grid-cols-3">
+        <TabsList className="no-print grid h-auto w-full grid-cols-1 gap-1.5 bg-card/80 p-1.5 sm:grid-cols-2 lg:grid-cols-4">
           <TabsTrigger value="instrumentos" className="gap-2 py-2.5 text-xs sm:text-sm">
             <Gauge className="size-4" />
             1. Guias de Instrumentos
           </TabsTrigger>
           <TabsTrigger value="glossario" className="gap-2 py-2.5 text-xs sm:text-sm">
             <BookOpen className="size-4" />
-            2. Glossário Técnico ({GLOSSARIO_TECNICO.length})
+            2. Glossário ({GLOSSARIO_TECNICO.length})
           </TabsTrigger>
           <TabsTrigger value="olho-clinico" className="gap-2 py-2.5 text-xs sm:text-sm">
             <Eye className="size-4" />
-            3. Olho Clínico (Desgaste Visual)
+            3. Olho Clínico
+          </TabsTrigger>
+          <TabsTrigger value="utilitarios" className="gap-2 py-2.5 text-xs sm:text-sm">
+            <Calculator className="size-4" />
+            4. Utilitários de Bancada
           </TabsTrigger>
         </TabsList>
 
@@ -525,6 +532,14 @@ export function FundamentosPage() {
               <PneuTwiFreiosSvg />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* ================================================================ */}
+        {/* SUB-ABA 4: UTILITÁRIOS RÁPIDOS DE BANCADA                        */}
+        {/* ================================================================ */}
+        <TabsContent value="utilitarios" className="space-y-8">
+          <ConversorBancada />
+          <CadernetaManutencao />
         </TabsContent>
       </Tabs>
     </div>
