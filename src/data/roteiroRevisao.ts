@@ -1,3 +1,8 @@
+import {
+  resolverArmadilhaOficina,
+  type ArmadilhaOficina,
+  type NivelDificuldade,
+} from '@/data/didaticaOficina';
 import type { Geracao, Modelo } from '@/types/moto';
 import { getArquiteturaMoto, type ArquiteturaMoto } from '@/utils/arquiteturaMoto';
 import { formatFaixa, formatNumero, nmParaKgfm } from '@/utils/format';
@@ -36,6 +41,7 @@ export interface PassoRevisao {
   id: string;
   ordem: number;
   titulo: string;
+  dificuldade: NivelDificuldade;
   zonaVisual: ZonaVisualMoto;
   acaoSugerida: AcaoSugeridaPasso;
   valorFicha: string;
@@ -45,6 +51,7 @@ export interface PassoRevisao {
     atencao: string;
     substituir: string;
   };
+  armadilha?: ArmadilhaOficina;
   procedimentoIdRelacionado?: string;
 }
 
@@ -327,6 +334,7 @@ export function gerarRoteiroRevisao(
       ? {
           id: 'alimentacao_tbi_carb',
           titulo: `Injeção Eletrônica (${arq.siglaInjecao}) — Corpo de Borboleta (TBI), Bico & Marcha Lenta`,
+          dificuldade: 'intermediario',
           zonaVisual: 'alimentacao',
           acaoSugerida: 'lubrificar_limpar',
           valorFicha: `Lenta: ${formatFaixa(f.motorDetalhes?.marchaLentaRpm)} · ${f.motorDetalhes?.alimentacaoDetalhe ?? `Injeção eletrônica ${arq.siglaInjecao}`}`,
@@ -345,6 +353,7 @@ export function gerarRoteiroRevisao(
         ? {
             id: 'alimentacao_tbi_carb',
             titulo: `Alimentação — ${arq.descricaoAlimentacao}`,
+            dificuldade: 'intermediario',
             zonaVisual: 'alimentacao',
             acaoSugerida: 'lubrificar_limpar',
             valorFicha: `Lenta: ${formatFaixa(f.motorDetalhes?.marchaLentaRpm)} · ${arq.descricaoAlimentacao}`,
@@ -362,6 +371,7 @@ export function gerarRoteiroRevisao(
         : {
             id: 'alimentacao_tbi_carb',
             titulo: 'Carburador — Cuba, Giclagem, Afogador & Marcha Lenta',
+            dificuldade: 'intermediario',
             zonaVisual: 'alimentacao',
             acaoSugerida: 'lubrificar_limpar',
             valorFicha: `Lenta: ${formatFaixa(f.motorDetalhes?.marchaLentaRpm)} · ${f.motorDetalhes?.alimentacaoDetalhe ?? 'Carburador'}`,
@@ -382,6 +392,7 @@ export function gerarRoteiroRevisao(
     ? {
         id: 'direcao_guidao_cabos',
         titulo: 'Caixa de Direção, Guidão, Cabo do Acelerador & Engate Semiautomático',
+        dificuldade: 'profissional',
         zonaVisual: 'direcao_guidao',
         acaoSugerida: 'regular',
         valorFicha: `Acelerador: ${formatFaixa(f.folgas?.folgaAceleradorMm)} | Câmbio semiautomático 4 marchas (embreagem centrífuga)`,
@@ -400,6 +411,7 @@ export function gerarRoteiroRevisao(
       ? {
           id: 'direcao_guidao_cabos',
           titulo: 'Caixa de Direção, Guidão & Cabo do Acelerador',
+          dificuldade: 'profissional',
           zonaVisual: 'direcao_guidao',
           acaoSugerida: 'regular',
           valorFicha: `Acelerador: ${formatFaixa(f.folgas?.folgaAceleradorMm)} | Transmissão automática CVT`,
@@ -417,6 +429,7 @@ export function gerarRoteiroRevisao(
       : {
           id: 'direcao_guidao_cabos',
           titulo: 'Caixa de Direção, Guidão & Folga dos Cabos (Acelerador / Embreagem)',
+          dificuldade: 'profissional',
           zonaVisual: 'direcao_guidao',
           acaoSugerida: 'regular',
           valorFicha: `Acelerador: ${formatFaixa(f.folgas?.folgaAceleradorMm)} | Embreagem: ${formatFaixa(f.folgas?.folgaManeteEmbreagemMm)}`,
@@ -437,6 +450,7 @@ export function gerarRoteiroRevisao(
     ? {
         id: 'filtro_oleo_sistema',
         titulo: 'Filtro Centrífugo & Peneira Metálica de Óleo (A cada 12.000 km)',
+        dificuldade: 'intermediario',
         zonaVisual: 'motor_oleo',
         acaoSugerida: 'lubrificar_limpar',
         valorFicha: f.motorDetalhes?.filtroOleo ?? 'Filtro centrífugo + tela metálica interna',
@@ -454,6 +468,7 @@ export function gerarRoteiroRevisao(
       ? {
           id: 'filtro_oleo_sistema',
           titulo: 'Filtro de Óleo em Elemento de Papel & Anéis O-ring',
+          dificuldade: 'basico',
           zonaVisual: 'motor_oleo',
           acaoSugerida: 'substituir',
           valorFicha: f.motorDetalhes?.filtroOleo ?? 'Elemento de papel descartável',
@@ -469,6 +484,7 @@ export function gerarRoteiroRevisao(
       : {
           id: 'filtro_oleo_sistema',
           titulo: 'Tela Filtrante Interna de Óleo',
+          dificuldade: 'intermediario',
           zonaVisual: 'motor_oleo',
           acaoSugerida: 'lubrificar_limpar',
           valorFicha: f.motorDetalhes?.filtroOleo ?? 'Tela metálica interna',
@@ -487,6 +503,7 @@ export function gerarRoteiroRevisao(
     pneus_calibragem: {
       id: 'pneus_calibragem',
       titulo: 'Pneus, Banda de Rodagem, Válvulas & Calibragem (PSI)',
+      dificuldade: 'basico',
       zonaVisual: 'frente_roda',
       acaoSugerida: 'regular',
       valorFicha: `Diant: ${pDiant?.medida ?? '—'} (${pDiant?.pressaoPsi ?? '—'} PSI) | Tras: ${pTras?.medida ?? '—'} (${pTras?.pressaoPsi ?? '—'} PSI solo / ${pTras?.pressaoComGarupaPsi ?? '—'} PSI garupa)`,
@@ -507,6 +524,7 @@ export function gerarRoteiroRevisao(
       titulo: isDiscoDiant
         ? `Freio Dianteiro a Disco (${f.freios.sistema}) — Pastilhas, Disco e Fluido`
         : 'Freio Dianteiro a Tambor — Lona, Cabo e Alavanca',
+      dificuldade: 'basico',
       zonaVisual: 'frente_roda',
       acaoSugerida: 'checar',
       valorFicha: isDiscoDiant
@@ -529,12 +547,16 @@ export function gerarRoteiroRevisao(
               'Curso longo no manete ou chiado: desmontar, lixar cubo/lona com lixa 160/180, soprar pó e regular cabo.',
             substituir: 'Seta atingiu o limite de desgaste ou cabo desfiando perto do manete.',
           },
+      armadilha: isDiscoDiant
+        ? (resolverArmadilhaOficina('freio_disco_dot4', arq) ?? undefined)
+        : undefined,
       procedimentoIdRelacionado: isDiscoDiant ? 'troca-pastilhas-freio-disco' : undefined,
     },
 
     bengala_suspensao: {
       id: 'bengala_suspensao',
       titulo: 'Suspensão Dianteira (Bengalas, Retentores e Guarda-Pós)',
+      dificuldade: 'profissional',
       zonaVisual: 'bengala',
       acaoSugerida: 'checar',
       valorFicha: bengala
@@ -549,6 +571,7 @@ export function gerarRoteiroRevisao(
         substituir:
           'Canela melada de óleo escorrendo (risco de contaminar o freio!) ou suspensão mole batendo fim de curso.',
       },
+      armadilha: resolverArmadilhaOficina('suspensao_bengalas', arq) ?? undefined,
       procedimentoIdRelacionado: 'troca-retentor-fluido-bengala',
     },
 
@@ -557,6 +580,7 @@ export function gerarRoteiroRevisao(
     eletrica_bateria_luzes: {
       id: 'eletrica_bateria_luzes',
       titulo: 'Bateria, Sistema de Carga (Multímetro), Fusíveis & Iluminação',
+      dificuldade: 'intermediario',
       zonaVisual: 'eletrica_bateria',
       acaoSugerida: 'checar',
       valorFicha: `Bateria: ${f.eletrica?.bateria?.modelo ?? '12V'} · Carga: ${f.eletrica?.bateria?.tensaoCargaV ?? '13,5–14,8V @ 5.000 rpm'} · Fusível: ${f.eletrica?.fusivelPrincipalA ?? 15}A`,
@@ -569,11 +593,13 @@ export function gerarRoteiroRevisao(
         substituir:
           'Tensão cai abaixo de 9,5V na partida (bateria morta), carga > 15V (retificador) ou lâmpada queimada.',
       },
+      armadilha: resolverArmadilhaOficina('bateria_eletrica', arq) ?? undefined,
     },
 
     vela_ignicao: {
       id: 'vela_ignicao',
       titulo: 'Vela de Ignição (Cor da Queima, Eletrodo & Folga) + Cachimbo',
+      dificuldade: 'basico',
       zonaVisual: 'motor_topo',
       acaoSugerida: 'checar',
       valorFicha: `Vela: ${f.eletrica?.vela?.modelo ?? 'NGK'} · Folga: ${formatFaixa(f.eletrica?.vela?.folgaEletrodoMm)}${f.eletrica?.vela?.iridiumAlternativa ? ` (Iridium: ${f.eletrica.vela.iridiumAlternativa})` : ''}`,
@@ -586,11 +612,13 @@ export function gerarRoteiroRevisao(
         substituir:
           'Eletrodo arredondado/gasto, porcelana trincada, vencida pela quilometragem ou cachimbo medindo OL.',
       },
+      armadilha: resolverArmadilhaOficina('vela_ignicao', arq) ?? undefined,
     },
 
     folga_valvulas: {
       id: 'folga_valvulas',
       titulo: 'Regulagem de Folga de Válvulas (Motor Totalmente Frio < 35 °C)',
+      dificuldade: 'intermediario',
       zonaVisual: 'motor_topo',
       acaoSugerida: 'regular',
       valorFicha: `Admissão: ${formatFaixa(f.folgas?.valvulaAdmissaoMm)} | Escape: ${formatFaixa(f.folgas?.valvulaEscapeMm)} (${f.motorDetalhes?.comando ?? f.motor})`,
@@ -603,12 +631,14 @@ export function gerarRoteiroRevisao(
         substituir:
           'Guarnição da tampa de válvulas ressecada vazando óleo ou parafuso regulador com ponta cavada.',
       },
+      armadilha: resolverArmadilhaOficina('regulagem_valvulas', arq) ?? undefined,
       procedimentoIdRelacionado: 'regulagem-valvulas',
     },
 
     arrefecimento_liquido: {
       id: 'arrefecimento_liquido',
       titulo: 'Sistema de Arrefecimento Líquido (Nível, Radiador e Mangueiras)',
+      dificuldade: 'basico',
       zonaVisual: 'motor_topo',
       acaoSugerida: 'checar',
       valorFicha: f.fluidos?.liquidoArrefecimento
@@ -628,6 +658,7 @@ export function gerarRoteiroRevisao(
     filtro_ar: {
       id: 'filtro_ar',
       titulo: 'Filtro de Ar & Dreno da Caixa de Ar',
+      dificuldade: 'basico',
       zonaVisual: 'alimentacao',
       acaoSugerida: 'checar',
       valorFicha:
@@ -641,6 +672,7 @@ export function gerarRoteiroRevisao(
         substituir:
           'Elemento de papel viscoso escurecido/saturado, rasgado ou encharcado de óleo do respiro.',
       },
+      armadilha: resolverArmadilhaOficina('filtro_ar_viscoso', arq) ?? undefined,
     },
 
     alimentacao_tbi_carb: passoAlimentacao,
@@ -648,6 +680,7 @@ export function gerarRoteiroRevisao(
     oleo_motor: {
       id: 'oleo_motor',
       titulo: 'Óleo do Motor — Nível, Aspecto, Drenagem & Torque do Bujão',
+      dificuldade: 'basico',
       zonaVisual: 'motor_oleo',
       acaoSugerida: 'substituir',
       valorFicha: oleo
@@ -662,6 +695,7 @@ export function gerarRoteiroRevisao(
         substituir:
           'Vencido por km/tempo, óleo muito escuro/queimado ou nível abaixo do mínimo: drenar quente e abastecer volume exato.',
       },
+      armadilha: resolverArmadilhaOficina('troca_oleo_bujao', arq) ?? undefined,
       procedimentoIdRelacionado: isFiltroPapel ? 'troca-oleo-filtro-papel' : undefined,
     },
 
@@ -672,6 +706,7 @@ export function gerarRoteiroRevisao(
       titulo: isScooter
         ? 'Transmissão CVT (Correia, Roletes, Campana & Óleo Final)'
         : 'Kit Relação (Pinhão, Coroa, Corrente & Ajuste de Folga)',
+      dificuldade: isScooter ? 'intermediario' : 'basico',
       zonaVisual: 'transmissao_balanca',
       acaoSugerida: isScooter ? 'checar' : 'regular',
       valorFicha: isScooter
@@ -695,12 +730,16 @@ export function gerarRoteiroRevisao(
             substituir:
               'Dentes afinados ("dente de tubarão"), corrente ovalizada ou esticador já no fim do curso.',
           },
+      armadilha: isScooter
+        ? undefined
+        : (resolverArmadilhaOficina('corrente_transmissao', arq) ?? undefined),
       procedimentoIdRelacionado: isScooter ? undefined : 'troca-kit-relacao',
     },
 
     balanca_amortecedores: {
       id: 'balanca_amortecedores',
       titulo: 'Bucha da Balança (Quadro Elástico) & Amortecedores Traseiros',
+      dificuldade: 'profissional',
       zonaVisual: 'transmissao_balanca',
       acaoSugerida: 'checar',
       valorFicha:
@@ -721,6 +760,7 @@ export function gerarRoteiroRevisao(
       titulo: isDiscoTras
         ? 'Freio Traseiro a Disco — Pastilhas, Disco e Fluido DOT 4'
         : 'Freio Traseiro a Tambor — Patins (Lona), Cubo, Came & Vareta',
+      dificuldade: 'basico',
       zonaVisual: 'traseira_freio',
       acaoSugerida: isDiscoTras ? 'checar' : 'regular',
       valorFicha: isDiscoTras
@@ -742,6 +782,9 @@ export function gerarRoteiroRevisao(
             substituir:
               'Seta indicadora atingiu o limite ou lona abaixo de 2 mm / vitrificada/contaminada com óleo.',
           },
+      armadilha: isDiscoTras
+        ? (resolverArmadilhaOficina('freio_disco_dot4', arq) ?? undefined)
+        : undefined,
       procedimentoIdRelacionado: isDiscoTras
         ? 'troca-pastilhas-freio-disco'
         : 'troca-lona-freio-traseiro',
@@ -750,6 +793,7 @@ export function gerarRoteiroRevisao(
     aperto_teste_final: {
       id: 'aperto_teste_final',
       titulo: 'Conferência Final de Apertos, Vazamentos & Teste de Rodagem',
+      dificuldade: 'basico',
       zonaVisual: 'geral',
       acaoSugerida: 'checar',
       valorFicha: arq.temAlgumFreioDisco

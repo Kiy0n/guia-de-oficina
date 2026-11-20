@@ -1,3 +1,8 @@
+import {
+  resolverArmadilhaOficina,
+  type ArmadilhaOficina,
+  type NivelDificuldade,
+} from '@/data/didaticaOficina';
 import type { CategoriaAcaoRevisao, Geracao, Marca, Modelo } from '@/types/moto';
 import { getArquiteturaMoto } from '@/utils/arquiteturaMoto';
 import { formatFaixa, formatNumero } from '@/utils/format';
@@ -6,10 +11,12 @@ export interface ItemChecklistRevisao {
   id: string;
   titulo: string;
   categoria: CategoriaAcaoRevisao;
+  dificuldade: NivelDificuldade;
   /** Especificação técnica real extraída da geração selecionada (volumes, folgas, códigos). */
   detalheTecnico: string;
   tempoEstimadoMin: number;
   criticidade: 'alta' | 'media' | 'rotina';
+  armadilha?: ArmadilhaOficina;
 }
 
 export interface MarcoRevisaoKm {
@@ -246,9 +253,11 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
       id: `${km}-oleo-motor`,
       titulo: 'Trocar óleo do motor',
       categoria: 'TROCAR',
+      dificuldade: 'basico',
       detalheTecnico: `${temFiltroPapel ? volOleoComFiltro : volOleoTroca} de ${specOleo} • Torque do bujão: ${torqueBujao} N·m${obsOleo}`,
       tempoEstimadoMin: 15,
       criticidade: 'alta',
+      armadilha: resolverArmadilhaOficina('troca_oleo_bujao', arq) ?? undefined,
     });
 
     // 2. Filtro de óleo (estritamente conforme tipoFiltroOleo da arquitetura)
@@ -260,6 +269,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
           ? 'Substituir filtro de óleo (elemento de papel)'
           : 'Inspecionar tampa do filtro de óleo',
         categoria: trocarPapel ? 'TROCAR' : 'CHECAR',
+        dificuldade: 'basico',
         detalheTecnico:
           marca === 'Suzuki'
             ? 'Elemento de papel HF131/HF132 — atenção ao anel O-ring interno do duto e à mola da tampa.'
@@ -277,6 +287,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
           id: `${km}-filtro-centrifugo`,
           titulo: 'Abrir tampa direita e limpar filtro centrífugo + tela do filtro de óleo',
           categoria: 'LIMPAR_LUBRIFICAR',
+          dificuldade: 'intermediario',
           detalheTecnico: `Limpeza obrigatória a cada 12.000 km nas tabelas Honda${notaCg2000} (${ficha.motorDetalhes?.filtroOleo ?? 'filtro centrífugo + tela'}). Após remontagem, volume de desmontagem: ${
             oleo?.capacidadeTotalL ? `${formatNumero(oleo.capacidadeTotalL)} L` : '1,2 L'
           }.`,
@@ -291,6 +302,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
             ? 'Remover bujão (15 N·m) e limpar tela do filtro de óleo'
             : 'Conferir estanqueidade do bujão e programação da tela filtrante',
           categoria: limparTela4000 ? 'LIMPAR_LUBRIFICAR' : 'CHECAR',
+          dificuldade: limparTela4000 ? 'intermediario' : 'basico',
           detalheTecnico: limparTela4000
             ? 'Manual 2008 (pág. 6-2/6-7): limpar a tela do filtro de óleo em 1.000 km e a cada 4.000 km (a cada 1.500 km no Manual 2000 pág. 36) • Torque da tampa/bujão: 15 N·m (1,5 kgf·m).'
             : `${ficha.motorDetalhes?.filtroOleo ?? 'Tela metálica interna + filtro centrífugo'} • Limpeza da tela e do rotor centrífugo programada a cada 12.000 km.`,
@@ -306,6 +318,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
           ? 'Limpar tela metálica interna de filtragem de óleo'
           : 'Conferir estanqueidade do bujão e tela filtrante de óleo',
         categoria: isRevisaoMedia ? 'LIMPAR_LUBRIFICAR' : 'CHECAR',
+        dificuldade: isRevisaoMedia ? 'intermediario' : 'basico',
         detalheTecnico: `${ficha.motorDetalhes?.filtroOleo ?? 'Tela metálica interna'} • Conferir ausência de limalhas e estado do anel de vedação do bujão.`,
         tempoEstimadoMin: isRevisaoMedia ? 15 : 5,
         criticidade: isRevisaoMedia ? 'media' : 'rotina',
@@ -330,9 +343,13 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
         ? 'Verificar e regular folga das válvulas (motor frio)'
         : 'Inspecionar ruído de comando e folga de válvulas',
       categoria: regularValvulas ? 'REGULAR' : 'CHECAR',
+      dificuldade: regularValvulas ? 'intermediario' : 'basico',
       detalheTecnico: `Admissão: ${admStr} | Escape: ${escStr} (motor frio no PMS de compressão • ${comandoStr}${notaValvulas})`,
       tempoEstimadoMin: 35,
       criticidade: 'alta',
+      armadilha: regularValvulas
+        ? (resolverArmadilhaOficina('regulagem_valvulas', arq) ?? undefined)
+        : undefined,
     });
 
     // 4. Vela de Ignição
@@ -348,6 +365,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
         ? `Substituir vela de ignição (${velaModelo})`
         : `Verificar e ajustar folga do eletrodo da vela (${velaModelo})`,
       categoria: trocarVela ? 'TROCAR' : 'REGULAR',
+      dificuldade: 'basico',
       detalheTecnico: `Vela ${velaModelo} • Folga do eletrodo: ${velaFolga}${
         ficha.eletrica?.vela?.alternativas?.length
           ? ` (Alternativa/Opcional: ${ficha.eletrica.vela.alternativas.join(', ')})`
@@ -359,6 +377,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
       }`,
       tempoEstimadoMin: 10,
       criticidade: trocarVela ? 'alta' : 'media',
+      armadilha: resolverArmadilhaOficina('vela_ignicao', arq) ?? undefined,
     });
 
     // 5. Alimentação (Injeção 100% vs Carburador 100% vs Geração Mista)
@@ -370,6 +389,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
           ? `Substituir filtro de combustível e inspecionar corpo de borboleta (TBI) / marcha lenta (${arq.siglaInjecao})`
           : `Verificar rotação de marcha lenta e linha de combustível (${arq.siglaInjecao})`,
         categoria: isRevisaoMedia ? 'TROCAR' : 'CHECAR',
+        dificuldade: isRevisaoMedia ? 'intermediario' : 'basico',
         detalheTecnico: `${ficha.motorDetalhes?.alimentacaoDetalhe ?? `Injeção eletrônica ${arq.siglaInjecao}`} • Marcha lenta: ${lentaStr}`,
         tempoEstimadoMin: isRevisaoMedia ? 35 : 10,
         criticidade: isRevisaoMedia ? 'alta' : 'media',
@@ -381,6 +401,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
           ? `Alimentação (${arq.descricaoAlimentacao}) — inspeção, limpeza/filtro e marcha lenta`
           : `Verificar marcha lenta e linha de combustível — ${arq.descricaoAlimentacao}`,
         categoria: isRevisaoMedia ? 'LIMPAR_LUBRIFICAR' : 'REGULAR',
+        dificuldade: 'intermediario',
         detalheTecnico: `${arq.descricaoAlimentacao} • Marcha lenta: ${lentaStr}`,
         tempoEstimadoMin: isRevisaoMedia ? 30 : 15,
         criticidade: 'alta',
@@ -393,6 +414,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
           ? 'Inspecionar linha de combustível, funcionamento do afogador e regular carburador/marcha lenta'
           : 'Verificar e ajustar rotação de marcha lenta do carburador',
         categoria: 'REGULAR',
+        dificuldade: 'intermediario',
         detalheTecnico: `${ficha.motorDetalhes?.alimentacaoDetalhe ?? 'Carburador'} • Marcha lenta: ${lentaStr}`,
         tempoEstimadoMin: isRevisaoMedia ? 30 : 15,
         criticidade: 'alta',
@@ -415,9 +437,11 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
             : 'Substituir elemento do filtro de ar'
           : 'Inspecionar elemento do filtro de ar e esgotar dreno da caixa de ar',
         categoria: trocarFiltroAr ? 'TROCAR' : 'LIMPAR_LUBRIFICAR',
+        dificuldade: 'basico',
         detalheTecnico: detalheFiltroAr,
         tempoEstimadoMin: 10,
         criticidade: trocarFiltroAr ? 'alta' : 'media',
+        armadilha: resolverArmadilhaOficina('filtro_ar_viscoso', arq) ?? undefined,
       });
     }
 
@@ -426,6 +450,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
         id: `${km}-filtro-pair`,
         titulo: 'Substituir filtro de ar secundário do sistema de suprimento de ar (PAIR)',
         categoria: 'TROCAR',
+        dificuldade: 'basico',
         detalheTecnico:
           'Tabela oficial Honda (modelos equipados com PAIR): substituir o filtro secundário a cada 24.000 km ou 3 anos.',
         tempoEstimadoMin: 15,
@@ -443,6 +468,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
           ? 'Substituir correia CVT, conferir roletes e limpar polias/embreagem centrífuga'
           : 'Limpar filtro de ar da caixa CVT e inspecionar correia/roletes',
         categoria: isRevisaoCompleta ? 'TROCAR' : 'LIMPAR_LUBRIFICAR',
+        dificuldade: isRevisaoCompleta ? 'profissional' : 'intermediario',
         detalheTecnico: `Correia: ${cvt?.correiaCodigo ?? 'V-Belt'} (limite largura: ${
           cvt?.larguraLimiteMm ? `${formatNumero(cvt.larguraLimiteMm)} mm` : 'manual'
         }) • Roletes: ${cvt?.roletesMedidaPeso ?? '6 roletes'}`,
@@ -455,6 +481,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
           id: `${km}-cvt-oleo-final`,
           titulo: 'Trocar óleo da transmissão final (redutor traseiro)',
           categoria: 'TROCAR',
+          dificuldade: 'basico',
           detalheTecnico: `Volume exato: ${
             oleoTransm
               ? `${formatNumero(oleoTransm.capacidadeL * 1000)} ml (${formatNumero(oleoTransm.capacidadeL)} L)`
@@ -471,11 +498,13 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
           ? 'Inspecionar desgaste crítico ou substituir kit relação (coroa, pinhão e corrente)'
           : 'Limpar, lubrificar e ajustar folga da corrente de transmissão',
         categoria: isRevisaoCompleta ? 'TROCAR' : 'REGULAR',
+        dificuldade: isRevisaoCompleta ? 'intermediario' : 'basico',
         detalheTecnico: `Relação ${relacao?.pinhaoDentes ?? 15}x${relacao?.coroaDentes ?? 44} (${
           relacao?.corrente ?? 'passo 428H'
         }) • Folga livre no meio da balança: ${folgaCorrenteStr}`,
         tempoEstimadoMin: 15,
         criticidade: 'alta',
+        armadilha: resolverArmadilhaOficina('corrente_transmissao', arq) ?? undefined,
       });
     }
 
@@ -488,6 +517,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
           ? 'Substituir líquido de arrefecimento e sangrar ar do radiador'
           : 'Conferir nível do líquido de arrefecimento no reservatório de expansão',
         categoria: isRevisaoCompleta ? 'TROCAR' : 'CHECAR',
+        dificuldade: isRevisaoCompleta ? 'intermediario' : 'basico',
         detalheTecnico: `${arref?.especificacao ?? 'Aditivo etilenoglicol 50/50'} • Capacidade total: ${
           arref ? `${formatNumero(arref.capacidadeL)} L` : '0,52 L'
         }`,
@@ -524,9 +554,11 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
           ? `Substituir fluido de freio DOT 4, sangrar linha e medir pastilhas/disco (${eixoDisco})`
           : `Inspecionar espessura das pastilhas e nível do fluido de freio (${eixoDisco})`,
         categoria: isRevisaoCompleta ? 'TROCAR' : 'CHECAR',
+        dificuldade: isRevisaoCompleta ? 'intermediario' : 'basico',
         detalheTecnico: obsSistema,
         tempoEstimadoMin: isRevisaoCompleta ? 25 : 10,
         criticidade: 'alta',
+        armadilha: resolverArmadilhaOficina('freio_disco_dot4', arq) ?? undefined,
       });
     }
 
@@ -548,6 +580,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
           ? `Abrir espelho do tambor (${eixoTambor}), limpar pó das lonas e lubrificar eixo came`
           : `Regular curso livre do freio a tambor (${eixoTambor}) e checar indicador de desgaste`,
         categoria: isRevisaoMedia ? 'LIMPAR_LUBRIFICAR' : 'REGULAR',
+        dificuldade: isRevisaoMedia ? 'intermediario' : 'basico',
         detalheTecnico: `${folgaTamborDetalhe} • Nunca engraxar excessivamente o came para não contaminar a lona.`,
         tempoEstimadoMin: isRevisaoMedia ? 20 : 5,
         criticidade: 'media',
@@ -565,6 +598,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
             ? 'Substituir fluido da suspensão dianteira e lubrificar rolamentos da coluna de direção'
             : `Lubrificar rolamentos da coluna de direção e inspecionar suspensão${arq.temLinkTraseiro ? ' e link traseiro' : ''}`,
         categoria: trocarFluidoBengala ? 'TROCAR' : 'LIMPAR_LUBRIFICAR',
+        dificuldade: 'profissional',
         detalheTecnico: bengala
           ? `Bengala: ${bengala.volumePorCanelaMl} cm³ (ml) por canela de ${bengala.especificacao}${
               bengala.observacao ? ` (${bengala.observacao})` : ''
@@ -574,6 +608,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
           : 'Inspecionar vazamentos nos retentores e pré-carga dos amortecedores.',
         tempoEstimadoMin: trocarFluidoBengala ? 50 : 25,
         criticidade: trocarFluidoBengala ? 'alta' : 'media',
+        armadilha: resolverArmadilhaOficina('suspensao_bengalas', arq) ?? undefined,
       });
     }
 
@@ -589,31 +624,37 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
         id: `${km}-cabos-bateria`,
         titulo: 'Lubrificar cabo do acelerador, verificar engate da embreagem centrífuga e testar bateria',
         categoria: 'CHECAR',
+        dificuldade: 'basico',
         detalheTecnico: `${bateriaTxt} • Folga acelerador: ${formatFaixa(
           ficha.folgas?.folgaAceleradorMm,
         )} • Câmbio semiautomático (embreagem centrífuga): conferir suavidade nas trocas de marcha.`,
         tempoEstimadoMin: 10,
         criticidade: 'rotina',
+        armadilha: resolverArmadilhaOficina('bateria_eletrica', arq) ?? undefined,
       });
     } else if (arq.isCvt) {
       itens.push({
         id: `${km}-cabos-bateria`,
         titulo: 'Lubrificar cabo do acelerador e testar tensão de carga da bateria',
         categoria: 'CHECAR',
+        dificuldade: 'basico',
         detalheTecnico: `${bateriaTxt} • Folga acelerador: ${formatFaixa(ficha.folgas?.folgaAceleradorMm)}`,
         tempoEstimadoMin: 10,
         criticidade: 'rotina',
+        armadilha: resolverArmadilhaOficina('bateria_eletrica', arq) ?? undefined,
       });
     } else {
       itens.push({
         id: `${km}-cabos-bateria`,
         titulo: 'Lubrificar cabos (acelerador e embreagem), conferir folgas e testar bateria',
         categoria: 'CHECAR',
+        dificuldade: 'basico',
         detalheTecnico: `${bateriaTxt} • Folga acelerador: ${formatFaixa(
           ficha.folgas?.folgaAceleradorMm,
         )} • Embreagem: ${formatFaixa(ficha.folgas?.folgaManeteEmbreagemMm)}`,
         tempoEstimadoMin: 10,
         criticidade: 'rotina',
+        armadilha: resolverArmadilhaOficina('bateria_eletrica', arq) ?? undefined,
       });
     }
 
@@ -622,6 +663,7 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
       id: `${km}-pneus-torques`,
       titulo: 'Calibrar pneus a frio e conferir aperto de eixos, motor e freios',
       categoria: 'CHECAR',
+      dificuldade: 'basico',
       detalheTecnico: calibragemStr,
       tempoEstimadoMin: 10,
       criticidade: 'rotina',

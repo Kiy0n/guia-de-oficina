@@ -19,6 +19,7 @@ import {
   Wrench,
 } from 'lucide-react';
 
+import { SeloDificuldade } from '@/components/DidaticaOficinaUi';
 import { SectionHeader } from '@/components/SectionHeader';
 import { SpotlightCard } from '@/components/SpotlightCard';
 import { Badge } from '@/components/ui/badge';
@@ -28,9 +29,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { useMoto, useMotoSelecionada } from '@/context/MotoContext';
+import { getDificuldadeProcedimento } from '@/data/didaticaOficina';
 import {
   CATEGORIA_PROCEDIMENTO_LABEL,
-  DIFICULDADE_BADGE_CLASS,
   PROCEDIMENTOS_OFICINA,
   verificarCompatibilidadeProcedimento,
   type CategoriaProcedimento,
@@ -371,9 +372,7 @@ export function ProcedimentosPage() {
           </Button>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className={DIFICULDADE_BADGE_CLASS[proc.dificuldade]}>
-              Dificuldade: {proc.dificuldade}
-            </Badge>
+            <SeloDificuldade nivel={getDificuldadeProcedimento(proc.id)} />
             <Badge variant="secondary" className="gap-1 font-mono">
               <Clock className="size-3.5" />
               {proc.tempoEstimado}
@@ -858,12 +857,7 @@ export function ProcedimentosPage() {
                       <Badge variant="secondary" className="text-[11px]">
                         {CATEGORIA_PROCEDIMENTO_LABEL[proc.categoria]}
                       </Badge>
-                      <Badge
-                        variant="outline"
-                        className={cn('text-[11px]', DIFICULDADE_BADGE_CLASS[proc.dificuldade])}
-                      >
-                        {proc.dificuldade}
-                      </Badge>
+                      <SeloDificuldade nivel={getDificuldadeProcedimento(proc.id)} compacto />
                     </div>
 
                     <h3 className="text-base font-bold leading-snug text-foreground">

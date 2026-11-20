@@ -13,6 +13,11 @@ import {
   Wrench,
 } from 'lucide-react';
 
+import {
+  AlertaArmadilha,
+  LegendaDificuldade,
+  SeloDificuldade,
+} from '@/components/DidaticaOficinaUi';
 import { SectionHeader } from '@/components/SectionHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -223,6 +228,8 @@ export function ManualRevisoesPage() {
       {/* ------------------------------------------------------------------ */}
       {/* Seletor de Quilometragem da Revisão                                */}
       {/* ------------------------------------------------------------------ */}
+      <LegendaDificuldade />
+
       <section aria-label="Intervalos de revisão por quilometragem" className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
@@ -445,6 +452,8 @@ export function ManualRevisoesPage() {
                         {item.titulo}
                       </h3>
 
+                      <SeloDificuldade nivel={item.dificuldade} compacto />
+
                       <div className="ml-auto flex items-center gap-2">
                         {item.criticidade === 'alta' && (
                           <Badge variant="outline" className="border-amber-500/40 text-[10px] text-amber-300">
@@ -459,6 +468,8 @@ export function ManualRevisoesPage() {
                       <Wrench className="mt-0.5 size-3.5 shrink-0 text-primary/80" />
                       <span>{item.detalheTecnico}</span>
                     </p>
+
+                    <AlertaArmadilha armadilha={item.armadilha} compacto className="mt-2.5" />
                   </div>
                 </motion.div>
               );

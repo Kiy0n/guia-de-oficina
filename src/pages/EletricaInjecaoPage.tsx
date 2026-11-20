@@ -18,6 +18,7 @@ import {
   Zap,
 } from 'lucide-react';
 
+import { AlertaArmadilha, SeloDificuldade } from '@/components/DidaticaOficinaUi';
 import { SectionHeader } from '@/components/SectionHeader';
 import { SpotlightCard } from '@/components/SpotlightCard';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +27,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMoto, useMotoSelecionada } from '@/context/MotoContext';
+import { resolverArmadilhaOficina } from '@/data/didaticaOficina';
 import {
   CODIGOS_FALHA_FI,
   GUIAS_LEITURA_FI,
@@ -541,7 +543,10 @@ export function EletricaInjecaoPage() {
                       </Badge>
                     )}
                   </div>
-                  <CardTitle className="mt-2 text-base">{teste.titulo}</CardTitle>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <CardTitle className="text-base">{teste.titulo}</CardTitle>
+                    <SeloDificuldade nivel={teste.dificuldade} compacto />
+                  </div>
                   <CardDescription className="text-xs">{teste.subtitulo}</CardDescription>
                 </CardHeader>
 
@@ -600,6 +605,14 @@ export function EletricaInjecaoPage() {
                       <strong>Macete de bancada:</strong> {teste.dicaBancada}
                     </p>
                   </div>
+
+                  {/* Alerta de Armadilha Comum (coerente com a arquitetura da moto) */}
+                  <AlertaArmadilha
+                    armadilha={
+                      teste.armadilhaId ? resolverArmadilhaOficina(teste.armadilhaId, arq) : null
+                    }
+                    compacto
+                  />
                 </CardContent>
               </Card>
             ))}

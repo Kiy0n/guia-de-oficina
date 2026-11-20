@@ -1,3 +1,4 @@
+import type { ArmadilhaOficinaId, NivelDificuldade } from '@/data/didaticaOficina';
 import type { Marca } from '@/types/moto';
 
 export interface CodigoFalhaFI {
@@ -22,12 +23,14 @@ export interface TesteMultimetroBancada {
   id: string;
   titulo: string;
   subtitulo: string;
+  dificuldade: NivelDificuldade;
   escalaMultimetro: string;
   valorNormal: string;
   valorDefeito: string;
   pontasDeProva: string;
   passoAPasso: string[];
   dicaBancada: string;
+  armadilhaId?: ArmadilhaOficinaId;
   /** Quando verdadeiro, o teste se aplica exclusivamente a motos com injeção eletrônica. */
   apenasInjecao?: boolean;
 }
@@ -366,6 +369,8 @@ export const TESTES_MULTIMETRO_BANCADA: readonly TesteMultimetroBancada[] = [
     id: 'teste-bateria-carga',
     titulo: '1. Bateria & Tensão de Carga em Funcionamento',
     subtitulo: 'O teste nº 1 da oficina: avalia saúde dos vasos da bateria, arranque e regulador.',
+    dificuldade: 'intermediario',
+    armadilhaId: 'bateria_eletrica',
     escalaMultimetro: 'DCV 20V (Tensão Contínua — V⎓)',
     valorNormal:
       'Repouso: 12,5V a 12,8V | Na partida: >= 10,5V | A 5.000 RPM (farol aceso): 13,5V a 14,8V',
@@ -385,6 +390,7 @@ export const TESTES_MULTIMETRO_BANCADA: readonly TesteMultimetroBancada[] = [
     id: 'teste-estator',
     titulo: '2. Estator (Bobinas de Carga e Iluminação)',
     subtitulo: 'Diagnóstico definitivo para saber se o defeito de carga está no estator ou no retificador.',
+    dificuldade: 'intermediario',
     escalaMultimetro: 'Ω 200 (Resistência) + Continuidade (Bip) + ACV 200V (Tensão Alternada — V~)',
     valorNormal:
       'Resistência das bobinas: 0,3 a 1,5 Ω | Isolamento c/ terra (chassi): OL (Infinito / Sem Bip) | Tensão AC a 5.000 RPM: 45V a 80V AC',
@@ -405,6 +411,8 @@ export const TESTES_MULTIMETRO_BANCADA: readonly TesteMultimetroBancada[] = [
     id: 'teste-retificador-regulador',
     titulo: '3. Retificador / Regulador de Voltagem',
     subtitulo: 'Verificação da ponte de diodos interna e da linha de referência pós-chave.',
+    dificuldade: 'intermediario',
+    armadilhaId: 'bateria_eletrica',
     escalaMultimetro: 'Escala de Diodo (→|—) e DCV 20V',
     valorNormal:
       'Queda de tensão direta nos diodos: 0,450V a 0,750V | Sentido inverso: OL (bloqueio) | Saída no fio Vermelho: 13,5V a 14,8V DC',
@@ -425,6 +433,7 @@ export const TESTES_MULTIMETRO_BANCADA: readonly TesteMultimetroBancada[] = [
     id: 'teste-bobina-pulso-ckp',
     titulo: '4. Bobina de Pulso (Sensor CKP de Rotação)',
     subtitulo: 'O sensor que avisa ao CDI/ECM o momento exato de soltar a faísca na vela.',
+    dificuldade: 'intermediario',
     escalaMultimetro: 'Ω 200 ou Ω 2k (Resistência) + ACV 2V (ou Adaptador de Pico de Voltagem)',
     valorNormal:
       'Honda: 180 a 280 Ω | Yamaha: 190 a 300 Ω | Suzuki: 130 a 220 Ω | Pulso na partida: >= 0,7V',
@@ -445,6 +454,7 @@ export const TESTES_MULTIMETRO_BANCADA: readonly TesteMultimetroBancada[] = [
     id: 'teste-bobina-ignicao-cachimbo',
     titulo: '5. Bobina de Ignição & Cachimbo Supressivo de Vela',
     subtitulo: 'Teste completo de alta tensão para falhas de centelha, engasgos na chuva e cortes em alta.',
+    dificuldade: 'intermediario',
     escalaMultimetro: 'Ω 200 (Enrolamento Primário) e Ω 20k (Secundário e Cachimbo)',
     valorNormal:
       'Primário: 0,4 a 2,8 Ω | Secundário (sem cachimbo): 3,5 a 9,5 kΩ | Cachimbo NGK isolado: ~5,0 kΩ (3,8 a 6,2 kΩ)',
@@ -466,6 +476,7 @@ export const TESTES_MULTIMETRO_BANCADA: readonly TesteMultimetroBancada[] = [
     id: 'teste-bomba-combustivel-fusivel',
     titulo: '6. Bomba de Combustível (Alimentação 12V & Pressão) e Fusíveis',
     subtitulo: 'Exclusivo para motos com injeção eletrônica: temporização de 3 segundos do ECM e pressão de linha.',
+    dificuldade: 'intermediario',
     escalaMultimetro: 'DCV 20V + Continuidade (Bip) + Manômetro de Linha (0–7 bar)',
     apenasInjecao: true,
     valorNormal:

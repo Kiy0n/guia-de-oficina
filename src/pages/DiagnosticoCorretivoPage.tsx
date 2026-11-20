@@ -12,6 +12,7 @@ import {
   XCircle,
 } from 'lucide-react';
 
+import { AlertaArmadilha, SeloDificuldade } from '@/components/DidaticaOficinaUi';
 import { SectionHeader } from '@/components/SectionHeader';
 import { SpotlightCard } from '@/components/SpotlightCard';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +29,10 @@ import {
   type CenarioDiagnosticoCorretivo,
   type SistemaDiagnostico,
 } from '@/data/diagnosticos';
+import {
+  getArmadilhaEtapaDiagnostico,
+  getDificuldadeEtapaDiagnostico,
+} from '@/data/didaticaOficina';
 import { SECTIONS } from '@/lib/sections';
 import { cn } from '@/lib/utils';
 import { getArquiteturaMoto } from '@/utils/arquiteturaMoto';
@@ -334,6 +339,10 @@ export function DiagnosticoCorretivoPage() {
                 {cenarioAtivo.etapas.map((etapa) => {
                   const status = statusEtapas[etapa.id] ?? 'pendente';
                   const destaque = etapaDestacadaParaMoto(etapa.focoArquitetura, moto);
+                  const dificuldadeEtapa = getDificuldadeEtapaDiagnostico(etapa.id);
+                  const armadilhaEtapa = destaque.aplicaDireto
+                    ? getArmadilhaEtapaDiagnostico(etapa.id, arq)
+                    : null;
 
                   return (
                     <div
@@ -374,9 +383,12 @@ export function DiagnosticoCorretivoPage() {
                             )}
                           </div>
 
-                          <h4 className="text-sm font-bold text-foreground sm:text-base">
-                            {etapa.titulo}
-                          </h4>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h4 className="text-sm font-bold text-foreground sm:text-base">
+                              {etapa.titulo}
+                            </h4>
+                            <SeloDificuldade nivel={dificuldadeEtapa} compacto />
+                          </div>
                         </div>
 
                         <div className="flex shrink-0 items-center gap-1.5">
@@ -430,6 +442,9 @@ export function DiagnosticoCorretivoPage() {
                           </p>
                         </div>
                       </div>
+
+                      {/* Alerta de Armadilha Comum (quando aplicável à etapa e arquitetura) */}
+                      <AlertaArmadilha armadilha={armadilhaEtapa} compacto className="mt-2.5" />
 
                       {/* Atalho direto para a aba técnica relacionada */}
                       {etapa.atalhoSecao && (

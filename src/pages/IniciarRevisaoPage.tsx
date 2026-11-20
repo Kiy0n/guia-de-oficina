@@ -23,6 +23,11 @@ import {
 } from 'lucide-react';
 
 import { BotaoDitadoVoz } from '@/components/BotaoDitadoVoz';
+import {
+  AlertaArmadilha,
+  LegendaDificuldade,
+  SeloDificuldade,
+} from '@/components/DidaticaOficinaUi';
 import { MotoBlueprintVisual } from '@/components/MotoBlueprintVisual';
 import { SectionHeader } from '@/components/SectionHeader';
 import { SpotlightCard } from '@/components/SpotlightCard';
@@ -509,6 +514,9 @@ export function IniciarRevisaoPage() {
               </Card>
             )}
 
+            {/* Legenda compacta FVM vs. Oficina */}
+            <LegendaDificuldade />
+
             {/* Escolha do Perfil de Revisão (3 Cards Clicáveis) */}
             <div className="space-y-3">
               <h2 className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
@@ -767,9 +775,12 @@ export function IniciarRevisaoPage() {
                           )}
                         </div>
 
-                        <CardTitle className="text-xl leading-snug sm:text-2xl">
-                          {passoAtual.ordem}. {passoAtual.titulo}
-                        </CardTitle>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <CardTitle className="text-xl leading-snug sm:text-2xl">
+                            {passoAtual.ordem}. {passoAtual.titulo}
+                          </CardTitle>
+                          <SeloDificuldade nivel={passoAtual.dificuldade} />
+                        </div>
 
                         {/* Valor dinâmico puxado da Ficha Técnica */}
                         <div className="rounded-xl border border-primary/35 bg-primary/10 p-3">
@@ -794,6 +805,9 @@ export function IniciarRevisaoPage() {
                             {passoAtual.comoInspecionar}
                           </p>
                         </div>
+
+                        {/* Alerta de Armadilha Comum (quando aplicável ao passo e à arquitetura) */}
+                        <AlertaArmadilha armadilha={passoAtual.armadilha} />
 
                         {/* Painel de Feedback do Mecânico (Botões Grandes) */}
                         <div className="space-y-2.5">
@@ -965,6 +979,8 @@ export function IniciarRevisaoPage() {
                   </div>
                 </div>
 
+                <LegendaDificuldade className="mt-3" />
+
                 {/* 5 Contadores Visuais */}
                 <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-5">
                   {(
@@ -1020,7 +1036,10 @@ export function IniciarRevisaoPage() {
                           key={passo.id}
                           className="rounded-xl border border-rose-500/25 bg-background/70 p-3"
                         >
-                          <p className="font-bold text-foreground">{passo.titulo}</p>
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <p className="font-bold text-foreground">{passo.titulo}</p>
+                            <SeloDificuldade nivel={passo.dificuldade} compacto />
+                          </div>
                           {reg.observacao && (
                             <p className="mt-1 text-muted-foreground">Obs.: {reg.observacao}</p>
                           )}
@@ -1053,7 +1072,10 @@ export function IniciarRevisaoPage() {
                             key={passo.id}
                             className="rounded-xl border bg-background/55 p-3 text-xs"
                           >
-                            <p className="font-bold text-foreground">{passo.titulo}</p>
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <p className="font-bold text-foreground">{passo.titulo}</p>
+                              <SeloDificuldade nivel={passo.dificuldade} compacto />
+                            </div>
                             {reg.pecaUsada && (
                               <p className="mt-1 font-mono text-purple-300">
                                 Peça usada: {reg.pecaUsada}
