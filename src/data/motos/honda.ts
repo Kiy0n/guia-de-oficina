@@ -245,6 +245,33 @@ const TORQUES_CG125_OHC: TorqueAperto[] = [
   ),
 ];
 
+const TORQUES_CG125I: TorqueAperto[] = [
+  torque(
+    'Parafuso de drenagem do óleo do motor',
+    30,
+    'motor',
+    '30 N·m (3,1 kgf·m) • Manuais CG 125i Fan/Cargo 2016 e 2018 pág. 104 (PDF pág. 122)',
+  ),
+  torque(
+    'Porca do eixo dianteiro',
+    59,
+    'chassi',
+    '59 N·m (6,0 kgf·m) • Manuais CG 125i Fan/Cargo 2016 e 2018 pág. 104 (PDF pág. 122)',
+  ),
+  torque(
+    'Porca do eixo traseiro',
+    88,
+    'chassi',
+    '88 N·m (9,0 kgf·m) • Manuais CG 125i Fan/Cargo 2016 e 2018 pág. 104 (PDF pág. 122)',
+  ),
+  torque(
+    'Porca do braço limitador do freio traseiro',
+    22,
+    'freios',
+    '22 N·m (2,2 kgf·m) + cupilha nova • Manuais CG 125i Fan/Cargo 2016 e 2018 pág. 104 (PDF pág. 122)',
+  ),
+];
+
 const TORQUES_BIZ_C100: TorqueAperto[] = [
   torque(
     'Bujão de drenagem do óleo do motor',
@@ -802,7 +829,7 @@ const biz125Base: FichaTecnica = {
     comando: 'OHC horizontal (corrente de comando, 2 válvulas)',
     filtroOleo: 'Filtro centrífugo + tela do filtro de óleo (limpar a cada 12.000 km)',
     alimentacaoDetalhe:
-      'Carburador (2006–2008) / Injeção PGM-FI Gasolina (2009–2010) • Marcha lenta: 1.400 ± 100 rpm • Giclagem e pressão da bomba: aguardam confirmação no Manual de Serviço',
+      'Carburador (gasolina comum) • Marcha lenta: 1.400 ± 100 rpm • Giclagem e regulagem interna: aguardam confirmação no Manual de Serviço',
   },
   fluidos: {
     oleoMotor: {
@@ -1248,7 +1275,7 @@ export const HONDA: Modelo[] = [
     marca: 'Honda',
     nome: 'CG 150',
     categoria: 'street',
-    aliases: ['Titan 150', 'Fan 150', 'Job', 'Sport', 'Mix', 'CG150'],
+    aliases: ['Titan 150', 'Fan 150', 'Cargo', 'Cargo 150', 'Job', 'Sport', 'Mix', 'CG150'],
     geracoes: [
       geracao('honda-cg-150', {
         anoInicio: 2004,
@@ -1398,7 +1425,7 @@ export const HONDA: Modelo[] = [
     marca: 'Honda',
     nome: 'CG 125',
     categoria: 'street',
-    aliases: ['Titan 125', 'Fan 125', 'Cargo 125', 'CG125', 'Vareta'],
+    aliases: ['Titan 125', 'Fan 125', 'Cargo 125', 'CG125', 'CG 125i', '125i', 'Fan 125i', 'Vareta'],
     geracoes: [
       geracao('honda-cg-125', {
         anoInicio: 2000,
@@ -1530,11 +1557,11 @@ export const HONDA: Modelo[] = [
       }),
       geracao('honda-cg-125', {
         anoInicio: 2009,
-        anoFim: 2018,
-        nomeGeracao: 'Fan / Cargo 125 OHC (KS / ES / ESD / i)',
-        versoes: ['Fan KS', 'Fan ES', 'Fan ESD', 'Cargo KS', 'Cargo ES', 'Fan 125i (2016–2018)'],
+        anoFim: 2015,
+        nomeGeracao: 'Fan / Cargo 125 OHC (Carburada)',
+        versoes: ['Fan KS', 'Fan ES', 'Fan ESD', 'Cargo KS', 'Cargo ES'],
         destaques: [
-          'Motor 124,7 cm³ OHC com corrente de comando (11,6 cv @ 8.250 rpm)',
+          'Motor 124,7 cm³ OHC carburado com corrente de comando (11,6 cv @ 8.250 rpm)',
           'Folga de válvulas OHC: Adm 0,08 mm / Esc 0,12 mm (motor frio)',
           'Óleo SAE 10W-30 API SJ (ou superior) JASO MA (1,0 L drenagem / 1,2 L desmontagem)',
         ],
@@ -1544,18 +1571,17 @@ export const HONDA: Modelo[] = [
           'Corrente de transmissão mudou de 116 elos (DID 428MX – 116RB no Manual 2011 pág. 6-16) para 118 elos (DID 428MX – 118LE no Manual 2014 págs. 67 e 115), mantendo pinhão 14 dentes e coroa 43 dentes (redução final 3,071) e folga de 10 – 20 mm.',
           'Diferenças de freio, roda e elétrica entre os manuais 2011 e 2014: torque do eixo dianteiro mudou de 62 N·m (2011 pág. 6-24) para 59 N·m (2014 págs. 80/81/118); folga do pedal do freio traseiro mudou de 15 – 25 mm (2011 pág. 6-19) para 20 – 30 mm (2014 pág. 61); bateria na ES era 12 V – 5 Ah em 2011 (4 Ah na KS) e foi unificada em 12 V – 4 Ah / DTZ5 para KS/ES/ESD em 2014 (pág. 117).',
           'Filtro de ar é do tipo viscoso (úmido com óleo) — NUNCA limpar com ar comprimido: substituir a cada 12.000 km (Manual 2011 pág. 6-2) ou a cada 16.000 km (Manual 2014 pág. 36).',
-          'Versão CG 125i Fan (2016–2018, injeção PGM-FI gasolina — Manuais 2016/2018 PDF págs. 118–122): 11,8 cv @ 8.500 rpm, 1,06 kgf·m @ 5.000 rpm, marcha lenta 1.500 ± 100 rpm, tanque 14,6 L (reserva 3,2 L), peso seco 107 kg, alternador 0,16 kW/5.000 rpm, mantendo válvulas 0,08 / 0,12 mm, vela NGK CPR8EA-9, corrente DID 428MX 118 elos (14x43, 10–20 mm) e torques 30 / 59 / 88 / 22 N·m.',
         ],
         auditoria: {
           status: 'verificado_manual',
           ultimaRevisao: '2026-11-19',
           fonte:
-            'CG 125 Fan e Cargo 2011.pdf (D2203-MAN-0734 — págs. 4-3, 5-8, 6-1 a 6-29 e 10-1 a 10-5 [PDF págs. 17, 28, 41–69, 85–89 e 164]), CG 125 Fan e Cargo 2014.pdf (D2203-MAN-0944 — págs. 34–89 e 112–118 [PDF págs. 46–101, 124–130 e 211]), CG 125i Fan 2016.pdf e CG 125i Fan 2018.pdf (PDF págs. 118–122)',
+            'CG 125 Fan e Cargo 2011.pdf (D2203-MAN-0734 — págs. 4-3, 5-8, 6-1 a 6-29 e 10-1 a 10-5 [PDF págs. 17, 28, 41–69, 85–89 e 164]) e CG 125 Fan e Cargo 2014.pdf (D2203-MAN-0944 — págs. 34–89 e 112–118 [PDF págs. 46–101, 124–130 e 211])',
           notas:
-            'Auditado 100% nos 4 PDFs locais (2011 e 2014 carburadas + 2016 e 2018 CG 125i injetadas): cilindrada 124,7 cm³; óleo Genuíno Honda SAE 10W-30 API SJ/SL JASO MA (1,0 L drenagem / 1,2 L desmontagem); parafuso de drenagem 30 N·m (3,1 kgf·m); válvulas OHC Adm 0,08 mm / Esc 0,12 mm; vela NGK CPR8EA-9 (opcional CPR9EA-9), folga 0,80–0,90 mm; marcha lenta 1.400 ± 100 rpm (carburada) / 1.500 ± 100 rpm (125i); relação 14x43 (3,071) com corrente DID 428MX-116RB (2011) / DID 428MX-118LE (2014–2018) e folga 10–20 mm; bengala 72 cm³ (2011) / 139,0 ± 2,5 cm³ (2014); eixo diant. 62 N·m (2011) / 59 N·m (2014–2018), eixo tras. 88 N·m e porca do braço limitador do freio tras. 22 N·m. Pendências que aguardam Manual de Serviço: modelo/giclagem do carburador 2009–2015, pressão da bomba PGM-FI da 125i, nível de óleo da bengala em mm e torques internos (vela em N·m, tampa do cabeçote, contraporca de válvula, filtro centrífugo, coroa, pinça de freio ESD e coluna de direção).',
+            'Auditado 100% nos 2 PDFs carburados (2011 e 2014): cilindrada 124,7 cm³; óleo Genuíno Honda SAE 10W-30 API SJ/SL JASO MA (1,0 L drenagem / 1,2 L desmontagem); parafuso de drenagem 30 N·m (3,1 kgf·m); válvulas OHC Adm 0,08 mm / Esc 0,12 mm; vela NGK CPR8EA-9 (opcional CPR9EA-9), folga 0,80–0,90 mm; marcha lenta 1.400 ± 100 rpm; relação 14x43 (3,071) com corrente DID 428MX-116RB (2011) / DID 428MX-118LE (2014) e folga 10–20 mm; bengala 72 cm³ (2011) / 139,0 ± 2,5 cm³ (2014); eixo diant. 62 N·m (2011) / 59 N·m (2014), eixo tras. 88 N·m e porca do braço limitador do freio tras. 22 N·m. Pendências que aguardam Manual de Serviço: modelo/giclagem do carburador, nível de óleo da bengala em mm e torques internos.',
         },
         fichaTecnica: {
-          versaoReferencia: 'Fan KS / ES / ESD • Cargo KS / ES (Manuais 2011 e 2014)',
+          versaoReferencia: 'Fan KS / ES / ESD • Cargo KS / ES (Carburada 2009–2015)',
           cilindradaCc: 124.7,
           motor: MOTOR_OHC_2V,
           alimentacao: 'carburador',
@@ -1574,7 +1600,7 @@ export const HONDA: Modelo[] = [
             comando: 'OHC (4 tempos, arrefecido a ar, monocilíndrico, acionado por corrente, 2 válvulas)',
             filtroOleo: 'Filtro centrífugo de óleo + tela do filtro de óleo (limpar a cada 12.000 km)',
             alimentacaoDetalhe:
-              'Carburador (gasolina comum nos manuais 2011 e 2014) • Marcha lenta: 1.400 ± 100 rpm • Giclagem do carburador e dados de injeção da versão 125i (2016–2018): aguardam confirmação no Manual de Serviço',
+              'Carburador (gasolina comum nos manuais 2011 e 2014) • Marcha lenta: 1.400 ± 100 rpm • Giclagem do carburador: aguarda confirmação no Manual de Serviço',
           },
           fluidos: {
             oleoMotor: {
@@ -1652,6 +1678,118 @@ export const HONDA: Modelo[] = [
             coroaDentes: 43,
           },
           torques: TORQUES_CG125_OHC,
+        },
+      }),
+      geracao('honda-cg-125', {
+        anoInicio: 2016,
+        anoFim: 2018,
+        nomeGeracao: 'CG 125i Fan / Cargo (PGM-FI)',
+        versoes: ['Fan 125i', 'Cargo 125i'],
+        destaques: [
+          'Injeção eletrônica PGM-FI exclusivamente a gasolina (11,8 cv @ 8.500 rpm)',
+          'Folga de válvulas OHC: Adm 0,08 mm / Esc 0,12 mm • Marcha lenta 1.500 ± 100 rpm',
+          'Tanque 14,6 L (reserva 3,2 L) • Peso seco 107 kg (Fan) / 111 kg (Cargo) • Partida a pedal',
+        ],
+        alertasBancada: [
+          'A CG 125i (2016–2018) utiliza injeção eletrônica PGM-FI exclusivamente a GASOLINA (sem torneirinha de combustível e com luz FI no painel; NÃO é Flex).',
+          'Marcha lenta específica da 125i: 1.500 ± 100 rpm (Manuais CG 125i Fan/Cargo 2016 e 2018 PDF pág. 119).',
+          'Freios dianteiro e traseiro a tambor mecânico na Fan 125i e na Cargo 125i (sem sistema hidráulico e sem fluido DOT 4); partida exclusivamente a pedal.',
+          'Tabela oficial de manutenção (PDF págs. 48–50 e 82): ciclo de 4.000 km (óleo e válvulas); vela a cada 8.000 km; tela e filtro centrífugo a cada 12.000 km; filtro de ar úmido (viscoso) e fluido da suspensão dianteira a cada 16.000 km.',
+          'Óleo SAE 10W-30 API SJ (2016) / API SL (2018) JASO MA (1,0 L drenagem / 1,2 L desmontagem); válvulas 0,08 / 0,12 mm; vela NGK CPR8EA-9 (0,80–0,90 mm); corrente DID 428MX 118 elos (14x43, folga 10–20 mm); torques oficiais 30 / 59 / 88 / 22 N·m.',
+        ],
+        auditoria: {
+          status: 'verificado_manual',
+          ultimaRevisao: '2026-11-19',
+          fonte:
+            'CG 125i Fan 2016.pdf, CG 125i Cargo 2016.pdf, CG 125i FAN 2018.pdf e CG 125i Cargo 2018.pdf (págs. 30–33, 64 e 100–104 [PDF págs. 48–51, 82 e 118–122])',
+          notas:
+            'Auditado 100% nos Manuais CG 125i 2016 e 2018: injeção PGM-FI gasolina; 124,7 cm³ (52,4 x 57,8 mm, 9,2:1); 11,8 cv @ 8.500 rpm; 1,06 kgf·m @ 5.000 rpm; marcha lenta 1.500 ± 100 rpm; tanque 14,6 L (reserva 3,2 L); peso seco 107 kg; óleo SAE 10W-30 API SJ/SL JASO MA (1,0 / 1,2 L); válvulas 0,08 / 0,12 mm; vela NGK CPR8EA-9 (0,80–0,90 mm); tambor dianteiro e traseiro sem DOT 4; corrente DID 428MX 118 elos (14x43, folga 10–20 mm); alternador 0,16 kW/5.000 rpm; torques 30 / 59 / 88 / 22 N·m. Pendências que aguardam Manual de Serviço: pressão da bomba PGM-FI, volume/nível de óleo da bengala e torques internos.',
+        },
+        fichaTecnica: {
+          versaoReferencia: 'CG 125i Fan / Cargo (PGM-FI 2016–2018)',
+          cilindradaCc: 124.7,
+          motor: MOTOR_OHC_2V,
+          alimentacao: 'injecao',
+          combustivel: 'gasolina',
+          arrefecimento: 'ar',
+          partida: 'pedal',
+          cambio: { tipo: 'manual', marchas: 5 },
+          freios: { dianteiro: 'tambor', traseiro: 'tambor', sistema: 'convencional' },
+          pesoSecoKg: 107,
+          motorDetalhes: {
+            diametroCursoMm: { diametro: 52.4, curso: 57.8 },
+            taxaCompressao: '9,2:1',
+            potencia: '11,8 cv @ 8.500 rpm (Manuais CG 125i 2016/2018 PDF pág. 119)',
+            torque: '1,06 kgf·m @ 5.000 rpm (Manuais CG 125i 2016/2018 PDF pág. 119)',
+            marchaLentaRpm: faixaRpm(1400, 1600, '1.500 ± 100 rpm'),
+            comando: 'OHC (4 tempos, arrefecido a ar, monocilíndrico, acionado por corrente, 2 válvulas)',
+            filtroOleo: 'Filtro centrífugo de óleo + tela do filtro de óleo (limpar a cada 12.000 km)',
+            alimentacaoDetalhe:
+              'Injeção eletrônica PGM-FI (somente gasolina comum) • Marcha lenta: 1.500 ± 100 rpm • Pressão da bomba de combustível: aguarda Manual de Serviço',
+          },
+          fluidos: {
+            oleoMotor: {
+              especificacao:
+                'ÓLEO GENUÍNO HONDA SAE 10W-30 API SJ (2016) / API SL (2018) JASO MA (sem aditivos)',
+              capacidadeTrocaL: 1.0,
+              capacidadeTotalL: 1.2,
+              observacao:
+                '1,0 L após drenagem | 1,2 L após desmontagem do motor (Manuais CG 125i 2016/2018 PDF pág. 118)',
+            },
+            tanqueL: 14.6,
+            reservaL: 3.2,
+            fluidoFreio: undefined,
+            fluidoBengala: undefined,
+          },
+          folgas: {
+            valvulaAdmissaoMm: faixaMm(0.08, 0.08, '0,08 mm (motor frio)'),
+            valvulaEscapeMm: faixaMm(0.12, 0.12, '0,12 mm (motor frio)'),
+            folgaCorrenteMm: faixaMm(10, 20, '10 – 20 mm (não pilotar se exceder 50 mm)'),
+            folgaManeteEmbreagemMm: faixaMm(
+              10,
+              20,
+              '10 – 20 mm (alavanca do freio dianteiro a tambor também 10 – 20 mm)',
+            ),
+            folgaPedalFreioMm: faixaMm(20, 30, '20 – 30 mm'),
+            folgaAceleradorMm: faixaMm(2, 6, '2 – 6 mm (medida no flange da manopla)'),
+          },
+          eletrica: {
+            vela: {
+              modelo: 'NGK CPR8EA-9',
+              folgaEletrodoMm: faixaMm(0.8, 0.9, '0,80 – 0,90 mm'),
+            },
+            bateria: {
+              modelo: '12 V – 4 Ah / DTZ5 (selada)',
+              tensaoV: 12,
+              capacidadeAh: 4,
+              tensaoCargaV: 'Alternador: 0,16 kW / 5.000 rpm • Ignição eletrônica',
+            },
+            fusivelPrincipalA: 15,
+            fusiveisSecundarios: '10 A',
+            lampadaFarol:
+              '12 V – 35/35 W (Lanterna/freio: 12 V – 21/5 W • Sinaleiras: 12 V – 10 W x 4 • Placa: 12 V – 5 W)',
+          },
+          pneus: {
+            dianteiro: {
+              medida: '80/100 – 18M/C 47P',
+              pressaoPsi: 25,
+              pressaoComGarupaPsi: 25,
+              tipo: 'Com câmara (Pirelli City Dragon / Levorin Matrix) • 25 psi (175 kPa)',
+            },
+            traseiro: {
+              medida: '90/90 – 18M/C REINF 57P',
+              pressaoPsi: 29,
+              pressaoComGarupaPsi: 33,
+              tipo: 'Com câmara (Pirelli City Dragon / Levorin Matrix) • 29 psi só piloto / 33 psi piloto + passageiro',
+            },
+          },
+          transmissaoFinal: {
+            tipo: 'corrente',
+            corrente: 'DID 428MX — 118 elos (lubrificante: óleo SAE 80 ou 90)',
+            pinhaoDentes: 14,
+            coroaDentes: 43,
+          },
+          torques: TORQUES_CG125I,
         },
       }),
     ],
@@ -1820,27 +1958,77 @@ export const HONDA: Modelo[] = [
     geracoes: [
       geracao('honda-biz-125', {
         anoInicio: 2006,
-        anoFim: 2010,
-        nomeGeracao: 'Carburada / Injeção Gasolina (2009–2010)',
+        anoFim: 2008,
+        nomeGeracao: 'Carburada (KS / ES / +)',
         versoes: ['KS', 'ES', '+'],
         destaques: [
-          'Motor 124,9 cm³ OHC horizontal • Tanque 4,0 L',
-          'Folga de válvulas oficial (Manual 2009): Adm 0,10 mm / Esc 0,10 mm (motor frio)',
+          'Motor 124,9 cm³ OHC horizontal carburado • Tanque 4,0 L',
+          'Folga de válvulas: Adm 0,10 mm / Esc 0,10 mm (motor frio)',
           'Óleo 0,7 L drenagem / 0,9 L desmontagem • Vela NGK CPR6EA-9 (opc. CPR7EA-9)',
         ],
         alertasBancada: [
-          'Folga de válvulas confirmada no Manual Biz 125 2009: Adm 0,10 mm / Esc 0,10 mm (motor frio) — atenção para não confundir com os 0,05 mm da antiga C100 Biz!',
+          'Primeira geração da Biz 125 (2006–2008) com carburador a gasolina; atenção para não confundir a folga de válvulas (0,10 / 0,10 mm) com os 0,05 mm da antiga C100 Biz!',
           'Volume de óleo na troca: apenas 0,7 L após drenagem (0,9 L após desmontagem) • Torques: bujão 24 N·m, eixos 49 N·m, braço do freio traseiro 22 N·m.',
-          'Bateria varia conforme versão/ano: 12 V – 4 Ah (KS) | 6 Ah (ES/+ em 2006) | 5 Ah (ES/+ em 2009); fusível principal 15 A (sec. 5 A, 10 A em 2006 / 10 A em 2009).',
+          'Bateria 2006–2008: 12 V – 4 Ah (KS) | 12 V – 6 Ah (ES/+); fusível principal 15 A e secundários 5 A e 10 A (Manual Biz 125 2006).',
         ],
         auditoria: {
           status: 'verificado_manual',
           ultimaRevisao: '2026-11-19',
-          fonte: 'Biz 125 2006.pdf e Biz 125 2009.pdf (seções de Manutenção e Especificações Técnicas)',
+          fonte: 'Biz 125 2006.pdf (seções de Manutenção e Especificações Técnicas)',
           notas:
-            'Auditado 100% nos Manuais 2006 e 2009: cilindrada 124,9 cm³; tanque 4,0 L; óleo 0,7 L drenagem / 0,9 L desmontagem; válvulas 0,10 / 0,10 mm (2009); vela NGK CPR6EA-9 (opcional CPR7EA-9), folga 0,80–0,90 mm; bateria 4Ah (KS) / 6Ah (ES/+ 2006) / 5Ah (ES/+ 2009); fusíveis 15A + 5A/10A (2006) / 10A (2009); torques 24 / 49 / 49 / 22 N·m. Pendências que aguardam Manual de Serviço: giclagem do carburador (2006–2008), pressão da bomba PGM-FI (2009–2010), volume/nível de óleo da bengala e torques internos.',
+            'Auditado 100% no Manual Biz 125 2006: carburador gasolina; 124,9 cm³; tanque 4,0 L; óleo 0,7 L drenagem / 0,9 L desmontagem; válvulas 0,10 / 0,10 mm; vela NGK CPR6EA-9 (opcional CPR7EA-9), folga 0,80–0,90 mm; bateria 4Ah (KS) / 6Ah (ES/+); fusíveis 15A + 5A/10A; torques 24 / 49 / 49 / 22 N·m. Pendências que aguardam Manual de Serviço: giclagem do carburador, volume/nível de óleo da bengala e torques internos.',
         },
         fichaTecnica: biz125Base,
+      }),
+      geracao('honda-biz-125', {
+        anoInicio: 2009,
+        anoFim: 2010,
+        nomeGeracao: 'PGM-FI Gasolina (KS / ES / +)',
+        versoes: ['KS', 'ES', '+'],
+        destaques: [
+          'Estreia injeção eletrônica PGM-FI somente gasolina (9,1 cv @ 7.500 rpm / 1,06 kgf·m @ 3.500 rpm)',
+          'Folga de válvulas oficial (Manual 2009): Adm 0,10 mm / Esc 0,10 mm (motor frio)',
+          'Óleo 0,7 L drenagem / 0,9 L desmontagem • Vela NGK CPR6EA-9 (opc. CPR7EA-9)',
+        ],
+        alertasBancada: [
+          'A Biz 125 2009–2010 é injetada (PGM-FI, com luz indicadora no painel), mas EXCLUSIVAMENTE a GASOLINA (a versão Flex só chegou em 2011).',
+          'Folga de válvulas confirmada no Manual Biz 125 2009 (PDF pág. 86): Adm 0,10 mm / Esc 0,10 mm (motor frio); marcha lenta 1.400 ± 100 rpm.',
+          'Bateria 2009–2010: 12 V – 4 Ah (KS) | 12 V – 5 Ah (ES/+); alternador 0,126 kW / 5.000 rpm; fusível principal 15 A e secundário 10 A (PDF pág. 89).',
+        ],
+        auditoria: {
+          status: 'verificado_manual',
+          ultimaRevisao: '2026-11-19',
+          fonte: 'Biz 125 2009.pdf (seções de Manutenção e Especificações Técnicas — págs. 10-1 a 10-5 [PDF págs. 85–89])',
+          notas:
+            'Auditado 100% no Manual Biz 125 2009: injeção eletrônica PGM-FI gasolina; 124,9 cm³ (52,4 x 57,9 mm, 9,3:1); 9,1 cv @ 7.500 rpm; 1,06 kgf·m @ 3.500 rpm; marcha lenta 1.400 ± 100 rpm; tanque 4,0 L; óleo 0,7 L drenagem / 0,9 L desmontagem; válvulas 0,10 / 0,10 mm; vela NGK CPR6EA-9 (opcional CPR7EA-9), folga 0,8–0,9 mm; bateria 4Ah (KS) / 5Ah (ES/+); fusíveis 15A + 10A; torques 24 / 49 / 49 / 22 N·m.',
+        },
+        fichaTecnica: {
+          ...biz125Base,
+          versaoReferencia: 'KS / ES / + (PGM-FI Gasolina 2009–2010)',
+          alimentacao: 'injecao',
+          combustivel: 'gasolina',
+          motorDetalhes: {
+            ...biz125Base.motorDetalhes,
+            taxaCompressao: '9,3:1',
+            potencia: '9,1 cv @ 7.500 rpm (Manual Biz 125 2009 PDF pág. 86)',
+            torque: '1,06 kgf·m @ 3.500 rpm (Manual Biz 125 2009 PDF pág. 86)',
+            marchaLentaRpm: faixaRpm(1300, 1500, '1.400 ± 100 rpm'),
+            alimentacaoDetalhe:
+              'Injeção eletrônica PGM-FI (somente gasolina) • Marcha lenta: 1.400 ± 100 rpm • Pressão da bomba de combustível: aguarda Manual de Serviço',
+          },
+          eletrica: {
+            ...biz125Base.eletrica!,
+            bateria: {
+              modelo: '12 V – 4 Ah (KS) | 12 V – 5 Ah (ES / +)',
+              tensaoV: 12,
+              capacidadeAh: 5,
+              tensaoCargaV: 'Alternador 0,126 kW / 5.000 rpm • Ignição eletrônica',
+            },
+            fusivelPrincipalA: 15,
+            fusiveisSecundarios: '10 A',
+            lampadaFarol: '12 V – 32/32 W (Lanterna/freio: 12 V – 5/21 W • Sinaleiras: 12 V – 10 W x 4)',
+          },
+        },
       }),
       geracao('honda-biz-125', {
         anoInicio: 2011,

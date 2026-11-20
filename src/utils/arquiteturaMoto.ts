@@ -37,12 +37,9 @@ export interface ArquiteturaMoto {
 
 /**
  * Gerações do catálogo que englobam anos carburados e anos com injeção eletrônica.
- * Mapeadas explicitamente por ID (sem depender de `.includes()` em textos livres).
+ * Todas as gerações do catálogo estão separadas entre carburadas e injetadas.
  */
-const GERACOES_ALIMENTACAO_MISTA: Readonly<Record<string, string>> = {
-  'honda-cg-125-2009-2018': 'Carburador (2009–2015) / Bico e TBI (apenas 125i 2016–2018)',
-  'honda-biz-125-2006-2010': 'Carburador (2006–2008) / Bico e TBI (apenas PGM-FI 2009–2010)',
-};
+const GERACOES_ALIMENTACAO_MISTA: Readonly<Record<string, string>> = {};
 
 /**
  * Gerações Yamaha 125 carburadas que usam apenas tela metálica interna (sem filtro de óleo de papel).

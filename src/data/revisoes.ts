@@ -75,10 +75,12 @@ const GERACOES_HONDA_3000_KM = new Set<string>([
 
 const GERACOES_HONDA_4000_KM = new Set<string>([
   'honda-biz-100-2013-2015',
-  'honda-biz-125-2006-2010',
+  'honda-biz-125-2006-2008',
+  'honda-biz-125-2009-2010',
   'honda-biz-125-2011-2017',
   'honda-cg-125-2000-2008',
-  'honda-cg-125-2009-2018',
+  'honda-cg-125-2009-2015',
+  'honda-cg-125-2016-2018',
   'honda-cg-150-2004-2008',
   'honda-cg-150-2009-2015',
   'honda-nxr-125-bros-2013-2015',
@@ -95,7 +97,7 @@ const GERACOES_YAMAHA_3000_KM = new Set<string>([
 /** Gerações Honda com filtro secundário do sistema PAIR (troca a cada 24.000 km nos manuais 2008–2014). */
 const GERACOES_HONDA_PAIR = new Set<string>([
   'honda-cg-125-2000-2008',
-  'honda-cg-125-2009-2018',
+  'honda-cg-125-2009-2015',
   'honda-cg-150-2004-2008',
   'honda-cg-150-2009-2015',
 ]);
@@ -223,7 +225,9 @@ export function gerarPlanoRevisoes(modelo: Modelo, geracao: Geracao): MarcoRevis
       (marca === 'Yamaha' && (isYamaha3000 ? km >= 18000 : km >= 20000)) ||
       (marca === 'Suzuki' && km >= 12000);
     const isMarco16000Honda =
-      (geracao.id === 'honda-cg-125-2009-2018' || geracao.id === 'honda-cg-150-2009-2015') &&
+      (geracao.id === 'honda-cg-125-2009-2015' ||
+        geracao.id === 'honda-cg-125-2016-2018' ||
+        geracao.id === 'honda-cg-150-2009-2015') &&
       km === 16000;
 
     const itens: ItemChecklistRevisao[] = [];

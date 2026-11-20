@@ -33,16 +33,54 @@ import {
   getModelosPorMarca,
   resolverSelecao,
 } from '@/utils/catalog';
+import {
+  getFamiliaCg,
+  MODELOS_OCULTOS_NO_GRID_DE_MODELOS,
+  resolverContextoCgInicial,
+  resolverGeracoesVersaoCg,
+  type FamiliaCgConfig,
+  type VersaoFamiliaCg,
+} from '@/utils/cgFamilias';
 import { ALIMENTACAO_LABEL, CATEGORIA_LABEL, SISTEMA_FREIO_LABEL } from '@/utils/format';
+import { getCandidatosImagemMoto } from '@/utils/imagensMoto';
 
-type Step = 1 | 2 | 3;
+type StepId = 'fabricante' | 'modelo' | 'versao' | 'geracao';
 type Direction = 1 | -1;
 
-const STEPS: { step: Step; label: string }[] = [
-  { step: 1, label: 'Fabricante' },
-  { step: 2, label: 'Modelo' },
-  { step: 3, label: 'Ano / Geração' },
-];
+interface StepDef {
+  id: StepId;
+  num: number;
+  label: string;
+}
+
+function buildSteps(hasVersaoStep: boolean): StepDef[] {
+  if (hasVersaoStep) {
+    return [
+      { id: 'fabricante', num: 1, label: 'Fabricante' },
+      { id: 'modelo', num: 2, label: 'Modelo' },
+      { id: 'versao', num: 3, label: 'Versão' },
+      { id: 'geracao', num: 4, label: 'Ano / Geração' },
+    ];
+  }
+  return [
+    { id: 'fabricante', num: 1, label: 'Fabricante' },
+    { id: 'modelo', num: 2, label: 'Modelo' },
+    { id: 'geracao', num: 3, label: 'Ano / Geração' },
+  ];
+}
+
+function stepOrder(step: StepId): number {
+  switch (step) {
+    case 'fabricante':
+      return 1;
+    case 'modelo':
+      return 2;
+    case 'versao':
+      return 3;
+    case 'geracao':
+      return 4;
+  }
+}
 
 // Curva cubic-bezier cinematográfica estilo Canva
 const CANVA_EASE = [0.22, 1, 0.36, 1] as const;
@@ -88,19 +126,29 @@ const STAGGER_GRID_VARIANTS: Variants = {
 // Stepper com indicador ativo animado via layoutId
 // ---------------------------------------------------------------------------
 
-function Stepper({ current, onGoTo }: { current: Step; onGoTo: (step: Step) => void }) {
+function Stepper({
+  steps,
+  current,
+  onGoTo,
+}: {
+  steps: readonly StepDef[];
+  current: StepId;
+  onGoTo: (step: StepId) => void;
+}) {
+  const currentOrd = stepOrder(current);
+
   return (
     <nav aria-label="Progresso da seleção" className="w-full">
       <ol className="flex items-center gap-2 sm:gap-3">
-        {STEPS.map(({ step, label }, i) => {
-          const done = step < current;
-          const active = step === current;
+        {steps.map(({ id, num, label }, i) => {
+          const done = stepOrder(id) < currentOrd;
+          const active = id === current;
           return (
-            <li key={step} className="flex flex-1 items-center gap-2 sm:gap-3">
+            <li key={id} className="flex flex-1 items-center gap-2 sm:gap-3">
               <button
                 type="button"
                 disabled={!done}
-                onClick={() => onGoTo(step)}
+                onClick={() => onGoTo(id)}
                 aria-current={active ? 'step' : undefined}
                 className={cn(
                   'relative flex min-w-0 items-center gap-2 rounded-xl px-2.5 py-1.5 text-sm transition-colors',
@@ -130,11 +178,11 @@ function Stepper({ current, onGoTo }: { current: Step; onGoTo: (step: Step) => v
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
-                  {done ? <Check className="size-4" /> : step}
+                  {done ? <Check className="size-4" /> : num}
                 </span>
                 <span className="relative z-10 truncate">{label}</span>
               </button>
-              {i < STEPS.length - 1 && (
+              {i < steps.length - 1 && (
                 <span className="relative h-px flex-1 overflow-hidden bg-border" aria-hidden>
                   <motion.span
                     initial={false}
@@ -223,6 +271,8 @@ function derivarPistaIdentificacao(modelo: Modelo, g: Geracao): string {
 
   if (f.alimentacao === 'carburador') {
     pistas.push('Tem torneirinha de gasolina no tanque (carburador)');
+  } else if (modelo.id === 'honda-cg-125') {
+    pistas.push('Sem torneirinha · Luz FI no painel · Emblema 125i');
   } else {
     pistas.push('Luz da injeção no painel (sem torneirinha de gasolina)');
   }
@@ -481,9 +531,13 @@ function StepModelo({
 }) {
   const [filtro, setFiltro] = useState('');
   const todos = useMemo(() => getModelosPorMarca(marca), [marca]);
+  const todosVisiveis = useMemo(
+    () => todos.filter((m) => !MODELOS_OCULTOS_NO_GRID_DE_MODELOS.has(m.id)),
+    [todos],
+  );
   const modelos = useMemo(
-    () => (filtro.trim() ? buscarModelos(filtro, todos).map((r) => r.modelo) : todos),
-    [filtro, todos],
+    () => (filtro.trim() ? buscarModelos(filtro, todos).map((r) => r.modelo) : todosVisiveis),
+    [filtro, todos, todosVisiveis],
   );
   const theme = BRAND_THEME[marca];
 
@@ -498,7 +552,7 @@ function StepModelo({
         </Badge>
       </div>
 
-      <StepHeader title="Escolha o modelo" subtitle={`${todos.length} modelos ${marca} cadastrados.`}>
+      <StepHeader title="Escolha o modelo" subtitle={`${todosVisiveis.length} modelos ${marca} cadastrados.`}>
         <div className="w-full sm:w-80">
           <SearchField
             label={`Filtrar modelos ${marca}`}
@@ -524,34 +578,180 @@ function StepModelo({
           animate="visible"
           className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {modelos.map((modelo) => (
+          {modelos.map((modelo) => {
+            const familiaCg = getFamiliaCg(modelo.id);
+            return (
+              <SpotlightCard
+                key={modelo.id}
+                marca={marca}
+                intensity="subtle"
+                onClick={() => onModelo(modelo)}
+                className="py-5"
+              >
+                <div className="flex flex-1 flex-col gap-4">
+                  <CardHeader className="pb-0">
+                    <CardTitle className="text-xl transition-colors group-hover:text-foreground">
+                      {modelo.nome}
+                    </CardTitle>
+                    <CardDescription>{faixaAnosModelo(modelo)}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="mt-auto flex flex-wrap items-center gap-2">
+                    <Badge variant="secondary">
+                      <CircleGauge /> {cilindradaModelo(modelo)}
+                    </Badge>
+                    <Badge variant="outline">{CATEGORIA_LABEL[modelo.categoria]}</Badge>
+                    <span className="ml-auto text-xs text-muted-foreground">
+                      {familiaCg
+                        ? `${familiaCg.versoes.length} versões`
+                        : `${modelo.geracoes.length} ${modelo.geracoes.length === 1 ? 'geração' : 'gerações'}`}
+                    </span>
+                  </CardContent>
+                </div>
+              </SpotlightCard>
+            );
+          })}
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Passo Intermediário Condicional — Versão da Família CG (125 / 150 / 160)
+// ---------------------------------------------------------------------------
+
+function StepVersaoCg({
+  familia,
+  onMarca,
+  onModelos,
+  onVersao,
+}: {
+  familia: FamiliaCgConfig;
+  onMarca: () => void;
+  onModelos: () => void;
+  onVersao: (versao: VersaoFamiliaCg) => void;
+}) {
+  const theme = BRAND_THEME.Honda;
+
+  return (
+    <div className="flex flex-col gap-6">
+      <nav aria-label="Seleção atual" className="flex flex-wrap items-center gap-2 text-sm">
+        <button type="button" onClick={onMarca} className="rounded-md hover:opacity-80">
+          <Badge variant={theme.badge} className="px-3 py-1 text-sm">
+            Honda
+          </Badge>
+        </button>
+        <ChevronRight className="size-4 text-muted-foreground" />
+        <button type="button" onClick={onModelos} className="font-medium hover:underline">
+          Modelos Honda
+        </button>
+        <ChevronRight className="size-4 text-muted-foreground" />
+        <span className="font-medium text-foreground">{familia.nomeFamilia}</span>
+        <ChevronRight className="size-4 text-muted-foreground" />
+        <span className="text-muted-foreground">Versão</span>
+      </nav>
+
+      <StepHeader title={`${familia.nomeFamilia}: qual versão?`} subtitle={familia.subtitulo} />
+
+      <motion.div
+        variants={STAGGER_GRID_VARIANTS}
+        initial="hidden"
+        animate="visible"
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      >
+        {familia.versoes.map((versao) => {
+          const qtdGeracoes = versao.geracaoIds.length;
+          return (
             <SpotlightCard
-              key={modelo.id}
-              marca={marca}
+              key={versao.slug}
+              marca="Honda"
               intensity="subtle"
-              onClick={() => onModelo(modelo)}
+              onClick={() => onVersao(versao)}
               className="py-5"
             >
-              <div className="flex flex-1 flex-col gap-4">
+              <div className="flex flex-1 flex-col gap-3">
                 <CardHeader className="pb-0">
-                  <CardTitle className="text-xl transition-colors group-hover:text-foreground">
-                    {modelo.nome}
-                  </CardTitle>
-                  <CardDescription>{faixaAnosModelo(modelo)}</CardDescription>
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-2xl tracking-tight">
+                      {familia.nomeFamilia} {versao.nome}
+                    </CardTitle>
+                  </div>
+                  <CardDescription className="font-mono text-sm font-medium text-foreground/80">
+                    {versao.anosLabel}
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="mt-auto flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary">
-                    <CircleGauge /> {cilindradaModelo(modelo)}
-                  </Badge>
-                  <Badge variant="outline">{CATEGORIA_LABEL[modelo.categoria]}</Badge>
-                  <span className="ml-auto text-xs text-muted-foreground">
-                    {modelo.geracoes.length} {modelo.geracoes.length === 1 ? 'geração' : 'gerações'}
-                  </span>
+                <CardContent className="flex flex-1 flex-col gap-3">
+                  <p className="text-sm leading-relaxed text-muted-foreground">{versao.resumo}</p>
+                  <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <Badge variant="secondary" className="text-[11px]">
+                      {versao.destaqueBadge}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {qtdGeracoes} {qtdGeracoes === 1 ? 'geração' : 'gerações'}
+                    </span>
+                  </div>
                 </CardContent>
               </div>
             </SpotlightCard>
-          ))}
-        </motion.div>
+          );
+        })}
+      </motion.div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Foto de Referência Silenciosa (public/motos/<slug>.webp)
+// ---------------------------------------------------------------------------
+
+function MotoFotoReferencia({
+  geracaoId,
+  versaoSlug,
+  alt,
+  legenda,
+}: {
+  geracaoId: string;
+  versaoSlug?: string;
+  alt: string;
+  legenda?: string;
+}) {
+  const candidatos = useMemo(
+    () => getCandidatosImagemMoto(geracaoId, versaoSlug),
+    [geracaoId, versaoSlug],
+  );
+  const [indice, setIndice] = useState(0);
+  const [carregada, setCarregada] = useState(false);
+
+  const src = candidatos[indice];
+  if (!src) {
+    return null;
+  }
+
+  return (
+    <div
+      className={cn(
+        'mx-6 overflow-hidden rounded-xl border border-border/60 bg-muted/40 dark:bg-zinc-900/60',
+        !carregada && 'hidden',
+      )}
+    >
+      <div className="relative aspect-[16/10] w-full">
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setCarregada(true)}
+          onError={() => {
+            setCarregada(false);
+            setIndice((prev) => prev + 1);
+          }}
+          className="h-full w-full object-contain p-2"
+        />
+      </div>
+      {legenda && (
+        <p className="border-t border-border/50 bg-background/60 px-2.5 py-1 text-center text-[11px] font-medium text-muted-foreground">
+          {legenda}
+        </p>
       )}
     </div>
   );
@@ -563,22 +763,32 @@ function StepModelo({
 
 function StepGeracao({
   modelo,
+  geracoesExibidas,
+  familiaCg,
+  versaoCg,
   geracaoAtualId,
   onMarca,
   onModelos,
+  onVersoes,
   onGeracao,
 }: {
   modelo: Modelo;
+  geracoesExibidas: readonly Geracao[];
+  familiaCg?: FamiliaCgConfig;
+  versaoCg?: VersaoFamiliaCg;
   geracaoAtualId?: string;
   onMarca: () => void;
   onModelos: () => void;
+  onVersoes?: () => void;
   onGeracao: (geracao: Geracao) => void;
 }) {
   const theme = BRAND_THEME[modelo.marca];
   // Ordem cronológica: do ano mais antigo para o mais recente.
-  const geracoes = [...modelo.geracoes].sort(
+  const geracoes = [...geracoesExibidas].sort(
     (a, b) => a.anoInicio - b.anoInicio || a.anoFim - b.anoFim,
   );
+  const tituloContexto =
+    familiaCg && versaoCg ? `${familiaCg.nomeFamilia} ${versaoCg.nome}` : modelo.nome;
 
   return (
     <div className="flex flex-col gap-6">
@@ -590,14 +800,22 @@ function StepGeracao({
         </button>
         <ChevronRight className="size-4 text-muted-foreground" />
         <button type="button" onClick={onModelos} className="font-medium hover:underline">
-          {modelo.nome}
+          {familiaCg ? familiaCg.nomeFamilia : modelo.nome}
         </button>
+        {familiaCg && versaoCg && onVersoes && (
+          <>
+            <ChevronRight className="size-4 text-muted-foreground" />
+            <button type="button" onClick={onVersoes} className="font-medium hover:underline">
+              {versaoCg.nome}
+            </button>
+          </>
+        )}
         <ChevronRight className="size-4 text-muted-foreground" />
         <span className="text-muted-foreground">Ano / Geração</span>
       </nav>
 
       <StepHeader
-        title={`${modelo.nome}: qual ano?`}
+        title={`${tituloContexto}: qual ano?`}
         subtitle="Cada geração tem diferenças mecânicas que mudam peças, torques e procedimentos."
       />
 
@@ -620,6 +838,12 @@ function StepGeracao({
               className="py-5"
             >
               <div className="flex flex-1 flex-col gap-4">
+                <MotoFotoReferencia
+                  geracaoId={g.id}
+                  versaoSlug={versaoCg?.slug}
+                  alt={`${tituloContexto} ${g.anosLabel}`}
+                  legenda={`${tituloContexto} · ${g.anosLabel}`}
+                />
                 <CardHeader className="pb-0">
                   <div className="flex items-start justify-between gap-2">
                     <CardTitle className="font-mono text-3xl tracking-tight">{g.anosLabel}</CardTitle>
@@ -646,10 +870,24 @@ function StepGeracao({
                     <span className="text-foreground/90">{derivarPistaIdentificacao(modelo, g)}</span>
                   </div>
 
-                  <div className="mt-auto flex flex-wrap gap-2">
-                    <Badge variant="secondary">{ALIMENTACAO_LABEL[ficha.alimentacao]}</Badge>
-                    <Badge variant="secondary">Freio {SISTEMA_FREIO_LABEL[ficha.freios.sistema]}</Badge>
-                    {g.versoes && <Badge variant="outline">{g.versoes.join(' · ')}</Badge>}
+                  <div className="mt-auto flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-1.5">
+                      <Badge variant="secondary">{ALIMENTACAO_LABEL[ficha.alimentacao]}</Badge>
+                      <Badge variant="secondary">Freio {SISTEMA_FREIO_LABEL[ficha.freios.sistema]}</Badge>
+                    </div>
+                    {g.versoes && g.versoes.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {g.versoes.map((versao) => (
+                          <Badge
+                            key={versao}
+                            variant="outline"
+                            className="px-2 py-0.5 text-[11px] font-medium"
+                          >
+                            {versao}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </div>
@@ -669,44 +907,98 @@ export function MotoSelectorWizard({ start }: { start: WizardStart }) {
   const { moto, selecionarMoto, cancelarTroca } = useMoto();
 
   const startModelo = start.modeloId ? findModelo(start.modeloId) : undefined;
+  const startCg = startModelo ? resolverContextoCgInicial(startModelo.id) : null;
+
   const [marca, setMarca] = useState<Marca | null>(startModelo?.marca ?? start.marca ?? null);
-  const [modeloId, setModeloId] = useState<string | null>(startModelo?.id ?? null);
-  const [stepState, setStepState] = useState<{ step: Step; direction: Direction }>(() => {
-    if (startModelo) return { step: start.step, direction: 1 };
-    if (start.marca) return { step: start.step === 1 ? 1 : 2, direction: 1 };
-    return { step: 1, direction: 1 };
+  const [modeloId, setModeloId] = useState<string | null>(
+    startCg ? startCg.familia.familiaModeloId : (startModelo?.id ?? null),
+  );
+  const [versaoCgSlug, setVersaoCgSlug] = useState<string | null>(startCg?.versao?.slug ?? null);
+  const [stepState, setStepState] = useState<{ step: StepId; direction: Direction }>(() => {
+    if (startModelo) {
+      if (start.step === 1) return { step: 'fabricante', direction: 1 };
+      if (start.step === 2) return { step: 'modelo', direction: 1 };
+      if (startCg) {
+        return { step: startCg.versao ? 'geracao' : 'versao', direction: 1 };
+      }
+      return { step: 'geracao', direction: 1 };
+    }
+    if (start.marca) {
+      return { step: start.step === 1 ? 'fabricante' : 'modelo', direction: 1 };
+    }
+    return { step: 'fabricante', direction: 1 };
   });
 
   const { step, direction } = stepState;
-  const modelo = modeloId ? findModelo(modeloId) : undefined;
+  const familiaCg = modeloId ? getFamiliaCg(modeloId) : undefined;
+  const versaoCg = familiaCg?.versoes.find((v) => v.slug === versaoCgSlug);
 
-  const transitionToStep = (nextStep: Step) => {
+  const modeloResolvido = useMemo(() => {
+    if (versaoCg) {
+      return resolverGeracoesVersaoCg(versaoCg);
+    }
+    const base = modeloId ? findModelo(modeloId) : undefined;
+    if (!base) return null;
+    return { modelo: base, geracoes: base.geracoes };
+  }, [modeloId, versaoCg]);
+
+  const stepsVisiveis = useMemo(
+    () => buildSteps(Boolean(familiaCg) && (step === 'versao' || step === 'geracao')),
+    [familiaCg, step],
+  );
+
+  const transitionToStep = (nextStep: StepId) => {
     setStepState((prev) => ({
       step: nextStep,
-      direction: nextStep >= prev.step ? 1 : -1,
+      direction: stepOrder(nextStep) >= stepOrder(prev.step) ? 1 : -1,
     }));
   };
 
-  const irPara = (s: Step) => {
-    if (s === 1) {
-      transitionToStep(1);
-    } else if (s === 2 && marca) {
-      transitionToStep(2);
-    } else if (s === 3 && modelo) {
-      transitionToStep(3);
+  const irPara = (s: StepId) => {
+    if (s === 'fabricante') {
+      transitionToStep('fabricante');
+    } else if (s === 'modelo' && marca) {
+      transitionToStep('modelo');
+    } else if (s === 'versao' && familiaCg) {
+      transitionToStep('versao');
+    } else if (s === 'geracao' && modeloResolvido) {
+      transitionToStep('geracao');
     }
   };
 
   const escolherMarca = (m: Marca) => {
-    if (m !== marca) setModeloId(null);
+    if (m !== marca) {
+      setModeloId(null);
+      setVersaoCgSlug(null);
+    }
     setMarca(m);
-    transitionToStep(2);
+    transitionToStep('modelo');
   };
 
   const escolherModelo = (m: Modelo) => {
     setMarca(m.marca);
+    const ctxCg = resolverContextoCgInicial(m.id);
+    if (ctxCg) {
+      setModeloId(ctxCg.familia.familiaModeloId);
+      if (ctxCg.versao) {
+        // Ex.: usuário buscou direto "CG 160 Start" -> vai direto para os anos da Start
+        setVersaoCgSlug(ctxCg.versao.slug);
+        transitionToStep('geracao');
+      } else {
+        setVersaoCgSlug(null);
+        transitionToStep('versao');
+      }
+      return;
+    }
+
     setModeloId(m.id);
-    transitionToStep(3);
+    setVersaoCgSlug(null);
+    transitionToStep('geracao');
+  };
+
+  const escolherVersaoCg = (versao: VersaoFamiliaCg) => {
+    setVersaoCgSlug(versao.slug);
+    transitionToStep('geracao');
   };
 
   return (
@@ -732,12 +1024,12 @@ export function MotoSelectorWizard({ start }: { start: WizardStart }) {
       </header>
 
       <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-10">
-        <Stepper current={step} onGoTo={irPara} />
+        <Stepper steps={stepsVisiveis} current={step} onGoTo={irPara} />
 
         <AnimatePresence mode="wait" custom={direction}>
-          {step === 1 && (
+          {step === 'fabricante' && (
             <motion.div
-              key="step-1"
+              key="step-fabricante"
               custom={direction}
               variants={STEP_SLIDE_VARIANTS}
               initial="enter"
@@ -752,22 +1044,44 @@ export function MotoSelectorWizard({ start }: { start: WizardStart }) {
             </motion.div>
           )}
 
-          {step === 2 && marca && (
+          {step === 'modelo' && marca && (
             <motion.div
-              key={`step-2-${marca}`}
+              key={`step-modelo-${marca}`}
               custom={direction}
               variants={STEP_SLIDE_VARIANTS}
               initial="enter"
               animate="center"
               exit="exit"
             >
-              <StepModelo marca={marca} onVoltar={() => transitionToStep(1)} onModelo={escolherModelo} />
+              <StepModelo
+                marca={marca}
+                onVoltar={() => transitionToStep('fabricante')}
+                onModelo={escolherModelo}
+              />
             </motion.div>
           )}
 
-          {step === 3 && modelo && (
+          {step === 'versao' && familiaCg && (
             <motion.div
-              key={`step-3-${modelo.id}`}
+              key={`step-versao-${familiaCg.familiaModeloId}`}
+              custom={direction}
+              variants={STEP_SLIDE_VARIANTS}
+              initial="enter"
+              animate="center"
+              exit="exit"
+            >
+              <StepVersaoCg
+                familia={familiaCg}
+                onMarca={() => transitionToStep('fabricante')}
+                onModelos={() => transitionToStep('modelo')}
+                onVersao={escolherVersaoCg}
+              />
+            </motion.div>
+          )}
+
+          {step === 'geracao' && modeloResolvido && (
+            <motion.div
+              key={`step-geracao-${modeloResolvido.modelo.id}-${versaoCg?.slug ?? 'all'}`}
               custom={direction}
               variants={STEP_SLIDE_VARIANTS}
               initial="enter"
@@ -775,11 +1089,17 @@ export function MotoSelectorWizard({ start }: { start: WizardStart }) {
               exit="exit"
             >
               <StepGeracao
-                modelo={modelo}
-                geracaoAtualId={moto?.modelo.id === modelo.id ? moto.geracao.id : undefined}
-                onMarca={() => transitionToStep(1)}
-                onModelos={() => transitionToStep(2)}
-                onGeracao={(g) => selecionarMoto(modelo.id, g.id)}
+                modelo={modeloResolvido.modelo}
+                geracoesExibidas={modeloResolvido.geracoes}
+                familiaCg={familiaCg}
+                versaoCg={versaoCg}
+                geracaoAtualId={
+                  moto?.modelo.id === modeloResolvido.modelo.id ? moto.geracao.id : undefined
+                }
+                onMarca={() => transitionToStep('fabricante')}
+                onModelos={() => transitionToStep('modelo')}
+                onVersoes={familiaCg ? () => transitionToStep('versao') : undefined}
+                onGeracao={(g) => selecionarMoto(modeloResolvido.modelo.id, g.id)}
               />
             </motion.div>
           )}
