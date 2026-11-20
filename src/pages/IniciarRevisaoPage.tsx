@@ -26,6 +26,7 @@ import { BotaoDitadoVoz } from '@/components/BotaoDitadoVoz';
 import {
   AlertaArmadilha,
   LegendaDificuldade,
+  ListaFerramentasTarefa,
   SeloDificuldade,
 } from '@/components/DidaticaOficinaUi';
 import { MotoBlueprintVisual } from '@/components/MotoBlueprintVisual';
@@ -45,6 +46,7 @@ import {
 } from '@/components/ui/sheet';
 import { useMotoSelecionada } from '@/context/MotoContext';
 import { useToast } from '@/context/ToastContext';
+import { consolidarFerramentasRevisao } from '@/data/didaticaOficina';
 import { PROCEDIMENTOS_OFICINA } from '@/data/procedimentos';
 import {
   ACAO_SUGERIDA_LABEL,
@@ -167,6 +169,10 @@ export function IniciarRevisaoPage() {
   const passos = useMemo(
     () => gerarRoteiroRevisao(moto.modelo, moto.geracao, tipoRevisao),
     [moto.modelo, moto.geracao, tipoRevisao],
+  );
+  const ferramentasConsolidadas = useMemo(
+    () => consolidarFerramentasRevisao(passos),
+    [passos],
   );
 
   const passoAtual: PassoRevisao | undefined = passos[passoIndex] ?? passos[0];
@@ -573,6 +579,13 @@ export function IniciarRevisaoPage() {
               </div>
             </div>
 
+            {/* Ferramentas consolidadas para o perfil escolhido (sem duplicatas) */}
+            <ListaFerramentasTarefa
+              ferramentas={ferramentasConsolidadas}
+              titulo="Ferramentas para esta revisão"
+              subtitulo={`Separe na bancada antes de começar — consolidado dos ${passos.length} passos para ${moto.marca} ${moto.modelo.nome} (${moto.geracao.anosLabel}).`}
+            />
+
             {/* Dados Rápidos da Bancada + Botão Grande de Início */}
             <Card className="border-border/80 bg-card/85">
               <CardHeader className="pb-3">
@@ -809,6 +822,13 @@ export function IniciarRevisaoPage() {
                         {/* Alerta de Armadilha Comum (quando aplicável ao passo e à arquitetura) */}
                         <AlertaArmadilha armadilha={passoAtual.armadilha} />
 
+                        {/* Lista de ferramentas para este passo */}
+                        <ListaFerramentasTarefa
+                          ferramentas={passoAtual.ferramentas}
+                          titulo="Ferramentas para este passo"
+                          compacto
+                        />
+
                         {/* Painel de Feedback do Mecânico (Botões Grandes) */}
                         <div className="space-y-2.5">
                           <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
@@ -980,6 +1000,13 @@ export function IniciarRevisaoPage() {
                 </div>
 
                 <LegendaDificuldade className="mt-3" />
+
+                <ListaFerramentasTarefa
+                  ferramentas={ferramentasConsolidadas}
+                  titulo="Ferramentas de referência para esta revisão"
+                  compacto
+                  className="mt-3"
+                />
 
                 {/* 5 Contadores Visuais */}
                 <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-5">

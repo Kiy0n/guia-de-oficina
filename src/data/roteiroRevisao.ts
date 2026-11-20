@@ -1,6 +1,8 @@
 import {
   resolverArmadilhaOficina,
+  resolverFerramentasPassoRevisao,
   type ArmadilhaOficina,
+  type FerramentaBancada,
   type NivelDificuldade,
 } from '@/data/didaticaOficina';
 import type { Geracao, Modelo } from '@/types/moto';
@@ -52,6 +54,7 @@ export interface PassoRevisao {
     substituir: string;
   };
   armadilha?: ArmadilhaOficina;
+  ferramentas: readonly FerramentaBancada[];
   procedimentoIdRelacionado?: string;
 }
 
@@ -329,7 +332,7 @@ export function gerarRoteiroRevisao(
   const rel = f.transmissaoFinal;
 
   // Bloco de Alimentação 100% coerente com a arquitetura (injetada vs carburada vs mista)
-  const passoAlimentacao: Omit<PassoRevisao, 'ordem'> =
+  const passoAlimentacao: Omit<PassoRevisao, 'ordem' | 'ferramentas'> =
     arq.tipoAlimentacao === 'injetada'
       ? {
           id: 'alimentacao_tbi_carb',
@@ -388,7 +391,7 @@ export function gerarRoteiroRevisao(
           };
 
   // Bloco de Direção / Guidão / Cabos adaptado a Semiautomáticas vs CVT vs Embreagem Manual
-  const passoDirecaoCabos: Omit<PassoRevisao, 'ordem'> = arq.isSemiautomatica
+  const passoDirecaoCabos: Omit<PassoRevisao, 'ordem' | 'ferramentas'> = arq.isSemiautomatica
     ? {
         id: 'direcao_guidao_cabos',
         titulo: 'Caixa de Direção, Guidão, Cabo do Acelerador & Engate Semiautomático',
@@ -446,7 +449,7 @@ export function gerarRoteiroRevisao(
         };
 
   // Bloco de Filtro de Óleo adaptado rigorosamente ao tipoFiltroOleo
-  const passoFiltroOleo: Omit<PassoRevisao, 'ordem'> = isHondaCentrifugo
+  const passoFiltroOleo: Omit<PassoRevisao, 'ordem' | 'ferramentas'> = isHondaCentrifugo
     ? {
         id: 'filtro_oleo_sistema',
         titulo: 'Filtro Centrífugo & Peneira Metálica de Óleo (A cada 12.000 km)',
@@ -499,7 +502,7 @@ export function gerarRoteiroRevisao(
         };
 
   // Catálogo mestre de blocos adaptados à geração selecionada
-  const passosMestre: Record<string, Omit<PassoRevisao, 'ordem'>> = {
+  const passosMestre: Record<string, Omit<PassoRevisao, 'ordem' | 'ferramentas'>> = {
     pneus_calibragem: {
       id: 'pneus_calibragem',
       titulo: 'Pneus, Banda de Rodagem, Válvulas & Calibragem (PSI)',
@@ -863,9 +866,10 @@ export function gerarRoteiroRevisao(
 
   return idsSelecionados
     .map((id) => passosMestre[id])
-    .filter((p): p is Omit<PassoRevisao, 'ordem'> => Boolean(p))
+    .filter((p): p is Omit<PassoRevisao, 'ordem' | 'ferramentas'> => Boolean(p))
     .map((p, index) => ({
       ...p,
       ordem: index + 1,
+      ferramentas: resolverFerramentasPassoRevisao(p.id, arq),
     }));
 }

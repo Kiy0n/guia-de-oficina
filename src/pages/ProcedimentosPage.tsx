@@ -19,7 +19,7 @@ import {
   Wrench,
 } from 'lucide-react';
 
-import { SeloDificuldade } from '@/components/DidaticaOficinaUi';
+import { ListaFerramentasTarefa, SeloDificuldade } from '@/components/DidaticaOficinaUi';
 import { SectionHeader } from '@/components/SectionHeader';
 import { SpotlightCard } from '@/components/SpotlightCard';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { useMoto, useMotoSelecionada } from '@/context/MotoContext';
-import { getDificuldadeProcedimento } from '@/data/didaticaOficina';
+import {
+  getDificuldadeProcedimento,
+  resolverFerramentasProcedimento,
+} from '@/data/didaticaOficina';
 import {
   CATEGORIA_PROCEDIMENTO_LABEL,
   PROCEDIMENTOS_OFICINA,
@@ -40,6 +43,7 @@ import {
 import { SECTIONS } from '@/lib/sections';
 import { cn } from '@/lib/utils';
 import type { MotoSelecionada } from '@/types/moto';
+import { getArquiteturaMoto } from '@/utils/arquiteturaMoto';
 import { formatFaixa, formatNumero, nmParaKgfm } from '@/utils/format';
 
 interface DadoContextualMoto {
@@ -341,6 +345,8 @@ export function ProcedimentosPage() {
   // =========================================================================
   if (itemDetalhe) {
     const { proc, compat } = itemDetalhe;
+    const arq = getArquiteturaMoto(moto.modelo, moto.geracao);
+    const ferramentasResumo = resolverFerramentasProcedimento(proc.id, arq);
     const dadosMoto = extrairDadosContextuaisMoto(proc, moto);
     const concluidos = passosConcluidos[proc.id] ?? [];
     const progressoPassos =
@@ -398,6 +404,13 @@ export function ProcedimentosPage() {
           <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">{proc.titulo}</h1>
           <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{proc.resumo}</p>
         </div>
+
+        {/* Lista rápida de ferramentas para esta tarefa (somente leitura) */}
+        <ListaFerramentasTarefa
+          ferramentas={ferramentasResumo}
+          titulo="Ferramentas para separar na bancada"
+          subtitulo="Referência rápida (somente leitura) — confira as medidas exatas no bloco de ferramentas abaixo."
+        />
 
         {/* ------------------------------------------------------------------ */}
         {/* Banner Contextual da Moto Selecionada (Injeção da Ficha Técnica)   */}

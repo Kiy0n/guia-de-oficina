@@ -266,3 +266,483 @@ export function getArmadilhaEtapaDiagnostico(
   if (!armadilhaId) return null;
   return resolverArmadilhaOficina(armadilhaId, arq);
 }
+
+// ---------------------------------------------------------------------------
+// Catálogo Canônico de Ferramentas por Tarefa (Somente Leitura)
+// ---------------------------------------------------------------------------
+
+export type CategoriaFerramentaBancada = 'basica' | 'medicao' | 'especial' | 'apoio';
+
+export type FerramentaBancadaId =
+  | 'chave_bujao_oleo'
+  | 'jogo_soquetes_tampa'
+  | 'chave_eixo_esticadores'
+  | 'chave_phillips_fenda'
+  | 'chave_allen'
+  | 'chave_vela'
+  | 'chave_sangrador'
+  | 'chave_freio_tambor'
+  | 'alicate_bico'
+  | 'calibre_laminas'
+  | 'multimetro_digital'
+  | 'torquimetro'
+  | 'calibrador_pneu'
+  | 'regua_trena'
+  | 'proveta_graduada'
+  | 'chave_ajuste_valvula'
+  | 'chave_castelo_centrifugo'
+  | 'chave_impacto_manual'
+  | 'instalador_retentor_bengala'
+  | 'saca_buchas_prensa'
+  | 'chave_gancho_direcao'
+  | 'mangueira_sangria'
+  | 'bandeja_coletora'
+  | 'pano_limpo'
+  | 'pano_umido'
+  | 'escova_pincel'
+  | 'ar_comprimido_pincel'
+  | 'espatula_plastica'
+  | 'cavalete_apoio_frente'
+  | 'lanterna';
+
+export interface FerramentaBancada {
+  id: FerramentaBancadaId;
+  nome: string;
+  categoria: CategoriaFerramentaBancada;
+}
+
+export const FERRAMENTAS_BANCADA: Record<FerramentaBancadaId, FerramentaBancada> = {
+  // Básicas
+  chave_bujao_oleo: {
+    id: 'chave_bujao_oleo',
+    nome: 'Chave combinada ou soquete (bujão de óleo)',
+    categoria: 'basica',
+  },
+  jogo_soquetes_tampa: {
+    id: 'jogo_soquetes_tampa',
+    nome: 'Jogo de soquetes e chaves combinadas',
+    categoria: 'basica',
+  },
+  chave_eixo_esticadores: {
+    id: 'chave_eixo_esticadores',
+    nome: 'Chaves combinadas/soquetes (eixo traseiro e esticadores)',
+    categoria: 'basica',
+  },
+  chave_phillips_fenda: {
+    id: 'chave_phillips_fenda',
+    nome: 'Chave Phillips e fenda',
+    categoria: 'basica',
+  },
+  chave_allen: {
+    id: 'chave_allen',
+    nome: 'Jogo de chaves Allen',
+    categoria: 'basica',
+  },
+  chave_vela: {
+    id: 'chave_vela',
+    nome: 'Chave de vela compatível com a ficha',
+    categoria: 'basica',
+  },
+  chave_sangrador: {
+    id: 'chave_sangrador',
+    nome: 'Chave combinada (bico sangrador)',
+    categoria: 'basica',
+  },
+  chave_freio_tambor: {
+    id: 'chave_freio_tambor',
+    nome: 'Chave combinada (porca de ajuste/eixo)',
+    categoria: 'basica',
+  },
+  alicate_bico: {
+    id: 'alicate_bico',
+    nome: 'Alicate de bico fino',
+    categoria: 'basica',
+  },
+
+  // Medição
+  calibre_laminas: {
+    id: 'calibre_laminas',
+    nome: 'Calibre de lâminas',
+    categoria: 'medicao',
+  },
+  multimetro_digital: {
+    id: 'multimetro_digital',
+    nome: 'Multímetro digital',
+    categoria: 'medicao',
+  },
+  torquimetro: {
+    id: 'torquimetro',
+    nome: 'Torquímetro (recomendado)',
+    categoria: 'medicao',
+  },
+  calibrador_pneu: {
+    id: 'calibrador_pneu',
+    nome: 'Manômetro / calibrador de pneus',
+    categoria: 'medicao',
+  },
+  regua_trena: {
+    id: 'regua_trena',
+    nome: 'Régua ou trena (folga da corrente)',
+    categoria: 'medicao',
+  },
+  proveta_graduada: {
+    id: 'proveta_graduada',
+    nome: 'Proveta graduada em ml',
+    categoria: 'medicao',
+  },
+
+  // Especiais / Oficina
+  chave_ajuste_valvula: {
+    id: 'chave_ajuste_valvula',
+    nome: 'Chave de ajuste de válvula (ou alicate + combinada)',
+    categoria: 'especial',
+  },
+  chave_castelo_centrifugo: {
+    id: 'chave_castelo_centrifugo',
+    nome: 'Chave castelo (porca do centrífugo)',
+    categoria: 'especial',
+  },
+  chave_impacto_manual: {
+    id: 'chave_impacto_manual',
+    nome: 'Chave de impacto manual',
+    categoria: 'especial',
+  },
+  instalador_retentor_bengala: {
+    id: 'instalador_retentor_bengala',
+    nome: 'Sacador/instalador de retentor (oficina)',
+    categoria: 'especial',
+  },
+  saca_buchas_prensa: {
+    id: 'saca_buchas_prensa',
+    nome: 'Saca-buchas ou prensa de fuso (oficina)',
+    categoria: 'especial',
+  },
+  chave_gancho_direcao: {
+    id: 'chave_gancho_direcao',
+    nome: 'Chave gancho e saca-pistas de direção (oficina)',
+    categoria: 'especial',
+  },
+  mangueira_sangria: {
+    id: 'mangueira_sangria',
+    nome: 'Mangueira transparente de sangria + frasco coletor',
+    categoria: 'especial',
+  },
+
+  // Apoio
+  bandeja_coletora: {
+    id: 'bandeja_coletora',
+    nome: 'Bandeja coletora (≥ 1,5 L) e funil limpo',
+    categoria: 'apoio',
+  },
+  pano_limpo: {
+    id: 'pano_limpo',
+    nome: 'Pano limpo sem fiapos',
+    categoria: 'apoio',
+  },
+  pano_umido: {
+    id: 'pano_umido',
+    nome: 'Pano úmido (proteger pintura do DOT 4)',
+    categoria: 'apoio',
+  },
+  escova_pincel: {
+    id: 'escova_pincel',
+    nome: 'Escova macia / pincel de limpeza',
+    categoria: 'apoio',
+  },
+  ar_comprimido_pincel: {
+    id: 'ar_comprimido_pincel',
+    nome: 'Ar comprimido ou pincel (limpar alojamento)',
+    categoria: 'apoio',
+  },
+  espatula_plastica: {
+    id: 'espatula_plastica',
+    nome: 'Espátula plástica (limpeza de junta)',
+    categoria: 'apoio',
+  },
+  cavalete_apoio_frente: {
+    id: 'cavalete_apoio_frente',
+    nome: 'Cavalete / apoio para suspender a frente',
+    categoria: 'apoio',
+  },
+  lanterna: {
+    id: 'lanterna',
+    nome: 'Lanterna de inspeção',
+    categoria: 'apoio',
+  },
+};
+
+export const TOTAL_FERRAMENTAS_CANONICAS = Object.keys(FERRAMENTAS_BANCADA).length;
+
+const ORDEM_CATEGORIA_FERRAMENTA: Record<CategoriaFerramentaBancada, number> = {
+  basica: 0,
+  medicao: 1,
+  especial: 2,
+  apoio: 3,
+};
+
+function mapearIdsFerramentas(ids: readonly FerramentaBancadaId[]): FerramentaBancada[] {
+  const vistas = new Set<FerramentaBancadaId>();
+  const lista: FerramentaBancada[] = [];
+  for (const id of ids) {
+    if (vistas.has(id)) continue;
+    vistas.add(id);
+    lista.push(FERRAMENTAS_BANCADA[id]);
+  }
+  return lista.sort(
+    (a, b) => ORDEM_CATEGORIA_FERRAMENTA[a.categoria] - ORDEM_CATEGORIA_FERRAMENTA[b.categoria],
+  );
+}
+
+/**
+ * Resolve as ferramentas de bancada de cada um dos 16 passos mestre de `roteiroRevisao.ts`,
+ * filtrando automaticamente conforme a arquitetura real da moto (`arquiteturaMoto.ts`).
+ */
+export function resolverFerramentasPassoRevisao(
+  passoId: string,
+  arq: ArquiteturaMoto,
+): FerramentaBancada[] {
+  switch (passoId) {
+    case 'pneus_calibragem':
+      return mapearIdsFerramentas(['calibrador_pneu', 'lanterna']);
+
+    case 'freio_dianteiro':
+      return arq.temFreioDiscoDianteiro
+        ? mapearIdsFerramentas([
+            'chave_phillips_fenda',
+            'chave_sangrador',
+            'mangueira_sangria',
+            'pano_umido',
+            'lanterna',
+          ])
+        : mapearIdsFerramentas(['chave_freio_tambor', 'escova_pincel', 'lanterna']);
+
+    case 'bengala_suspensao':
+      return mapearIdsFerramentas([
+        'cavalete_apoio_frente',
+        'chave_allen',
+        'jogo_soquetes_tampa',
+        'proveta_graduada',
+        'instalador_retentor_bengala',
+        'pano_limpo',
+      ]);
+
+    case 'direcao_guidao_cabos':
+      return mapearIdsFerramentas([
+        'cavalete_apoio_frente',
+        'jogo_soquetes_tampa',
+        'chave_allen',
+        'chave_gancho_direcao',
+      ]);
+
+    case 'eletrica_bateria_luzes':
+      return mapearIdsFerramentas([
+        'multimetro_digital',
+        'chave_phillips_fenda',
+        'jogo_soquetes_tampa',
+      ]);
+
+    case 'vela_ignicao':
+      return mapearIdsFerramentas(['chave_vela', 'calibre_laminas', 'ar_comprimido_pincel']);
+
+    case 'folga_valvulas':
+      return mapearIdsFerramentas([
+        'calibre_laminas',
+        'chave_ajuste_valvula',
+        'jogo_soquetes_tampa',
+        'torquimetro',
+        'lanterna',
+      ]);
+
+    case 'arrefecimento_liquido':
+      return mapearIdsFerramentas(['bandeja_coletora', 'jogo_soquetes_tampa', 'pano_limpo', 'lanterna']);
+
+    case 'filtro_ar':
+      return mapearIdsFerramentas(['chave_phillips_fenda', 'jogo_soquetes_tampa', 'pano_limpo']);
+
+    case 'alimentacao_tbi_carb':
+      return arq.tipoAlimentacao === 'injetada'
+        ? mapearIdsFerramentas(['jogo_soquetes_tampa', 'chave_phillips_fenda', 'chave_allen', 'pano_limpo'])
+        : mapearIdsFerramentas(['chave_phillips_fenda', 'jogo_soquetes_tampa', 'escova_pincel', 'pano_limpo']);
+
+    case 'oleo_motor':
+      return mapearIdsFerramentas(['bandeja_coletora', 'chave_bujao_oleo', 'torquimetro', 'pano_limpo']);
+
+    case 'filtro_oleo_sistema':
+      if (arq.tipoFiltroOleo === 'centrifugo_honda') {
+        return mapearIdsFerramentas([
+          'jogo_soquetes_tampa',
+          'chave_castelo_centrifugo',
+          'chave_impacto_manual',
+          'alicate_bico',
+          'espatula_plastica',
+          'torquimetro',
+        ]);
+      }
+      if (arq.tipoFiltroOleo === 'papel_externo') {
+        return mapearIdsFerramentas(['jogo_soquetes_tampa', 'bandeja_coletora', 'torquimetro', 'pano_limpo']);
+      }
+      return mapearIdsFerramentas(['chave_bujao_oleo', 'alicate_bico', 'escova_pincel', 'pano_limpo']);
+
+    case 'transmissao_final':
+      return arq.isCvt
+        ? mapearIdsFerramentas(['jogo_soquetes_tampa', 'bandeja_coletora', 'ar_comprimido_pincel', 'pano_limpo'])
+        : mapearIdsFerramentas([
+            'chave_eixo_esticadores',
+            'regua_trena',
+            'escova_pincel',
+            'pano_limpo',
+            'torquimetro',
+          ]);
+
+    case 'balanca_amortecedores':
+      return mapearIdsFerramentas(['jogo_soquetes_tampa', 'saca_buchas_prensa', 'torquimetro', 'lanterna']);
+
+    case 'freio_traseiro':
+      return arq.temFreioDiscoTraseiro
+        ? mapearIdsFerramentas([
+            'chave_phillips_fenda',
+            'chave_sangrador',
+            'mangueira_sangria',
+            'pano_umido',
+          ])
+        : mapearIdsFerramentas(['chave_freio_tambor', 'alicate_bico', 'escova_pincel', 'pano_limpo']);
+
+    case 'aperto_teste_final':
+      return mapearIdsFerramentas(['torquimetro', 'jogo_soquetes_tampa', 'lanterna']);
+
+    default:
+      return mapearIdsFerramentas(['jogo_soquetes_tampa', 'pano_limpo']);
+  }
+}
+
+/**
+ * Consolida e remove duplicatas das ferramentas de uma lista de passos de revisão.
+ */
+export function consolidarFerramentasRevisao(
+  passos: readonly { ferramentas: readonly FerramentaBancada[] }[],
+): FerramentaBancada[] {
+  const ids: FerramentaBancadaId[] = [];
+  for (const passo of passos) {
+    for (const ferr of passo.ferramentas) {
+      ids.push(ferr.id);
+    }
+  }
+  return mapearIdsFerramentas(ids);
+}
+
+const FERRAMENTAS_PROCEDIMENTOS_MAP: Readonly<Record<string, readonly FerramentaBancadaId[]>> = {
+  'troca-lona-freio-traseiro': [
+    'chave_freio_tambor',
+    'chave_eixo_esticadores',
+    'alicate_bico',
+    'escova_pincel',
+    'pano_limpo',
+    'torquimetro',
+  ],
+  'troca-bucha-balanca': [
+    'jogo_soquetes_tampa',
+    'chave_eixo_esticadores',
+    'saca_buchas_prensa',
+    'torquimetro',
+    'pano_limpo',
+  ],
+  'troca-kit-relacao': [
+    'chave_eixo_esticadores',
+    'jogo_soquetes_tampa',
+    'alicate_bico',
+    'regua_trena',
+    'escova_pincel',
+    'torquimetro',
+  ],
+  'regulagem-valvulas': [
+    'calibre_laminas',
+    'chave_ajuste_valvula',
+    'jogo_soquetes_tampa',
+    'chave_phillips_fenda',
+    'torquimetro',
+    'lanterna',
+  ],
+  'limpeza-filtro-centrifugo-honda': [
+    'bandeja_coletora',
+    'chave_bujao_oleo',
+    'jogo_soquetes_tampa',
+    'chave_castelo_centrifugo',
+    'chave_impacto_manual',
+    'alicate_bico',
+    'espatula_plastica',
+    'torquimetro',
+  ],
+  'troca-retentor-fluido-bengala': [
+    'cavalete_apoio_frente',
+    'jogo_soquetes_tampa',
+    'chave_allen',
+    'proveta_graduada',
+    'instalador_retentor_bengala',
+    'bandeja_coletora',
+    'pano_limpo',
+  ],
+  'troca-pastilhas-freio-disco': [
+    'chave_allen',
+    'jogo_soquetes_tampa',
+    'escova_pincel',
+    'pano_limpo',
+    'torquimetro',
+  ],
+  'limpeza-bico-injetor-tbi': [
+    'jogo_soquetes_tampa',
+    'chave_phillips_fenda',
+    'chave_allen',
+    'escova_pincel',
+    'pano_limpo',
+  ],
+  'troca-caixa-direcao': [
+    'cavalete_apoio_frente',
+    'jogo_soquetes_tampa',
+    'chave_allen',
+    'chave_gancho_direcao',
+    'torquimetro',
+  ],
+  'troca-oleo-filtro-papel': [
+    'bandeja_coletora',
+    'chave_bujao_oleo',
+    'jogo_soquetes_tampa',
+    'torquimetro',
+    'pano_limpo',
+  ],
+  'sangria-freio-hidraulico': [
+    'chave_phillips_fenda',
+    'chave_sangrador',
+    'mangueira_sangria',
+    'pano_umido',
+  ],
+};
+
+/**
+ * Resolve a lista canônica de ferramentas para os 11 procedimentos de `procedimentos.ts`,
+ * filtrando itens incompatíveis com a arquitetura da moto atual.
+ */
+export function resolverFerramentasProcedimento(
+  procedimentoId: string,
+  arq: ArquiteturaMoto,
+): FerramentaBancada[] {
+  const base = FERRAMENTAS_PROCEDIMENTOS_MAP[procedimentoId];
+  if (!base) return [];
+
+  const filtrados = base.filter((id) => {
+    if (
+      arq.isSomenteTambor &&
+      (id === 'chave_sangrador' || id === 'mangueira_sangria' || id === 'pano_umido')
+    ) {
+      return false;
+    }
+    if (arq.isCvt && id === 'regua_trena') {
+      return false;
+    }
+    if (arq.tipoFiltroOleo !== 'centrifugo_honda' && id === 'chave_castelo_centrifugo') {
+      return false;
+    }
+    return true;
+  });
+
+  return mapearIdsFerramentas(filtrados);
+}
